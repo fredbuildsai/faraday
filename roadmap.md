@@ -6,6 +6,7 @@
 - [x] Profile analysis (AI, verified evidence, edits, daily limit)
 - [x] compute-matches server function, method synonyms, Matches page, double opt-in
 - [x] Opportunities, feedback, notices, empty/loading states
+- [x] Opportunity modes, review filter, likely PIs, whitespace check, save/dismiss + manage page with notes
 - [ ] Monthly refresh cron
 - [ ] Seed test researchers Johan Foster (UBC email) & Raphaell Moreira (Bremen email), check their match
 - [x] Test researchers Gasteiger, Dahn, Lucht (scripts/test-seed, rollback ready)
