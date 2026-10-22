@@ -1,4 +1,5 @@
 import { OaBadge } from "@/components/OaBadge";
+import { PaperDialog } from "@/components/PaperDialog";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -286,7 +287,7 @@ function ProfilePage() {
                 {paged.items.map((w) => (
                   <li key={w.id} className="flex items-start justify-between gap-4 py-3">
                     <div className="min-w-0">
-                      <div className="font-medium">{w.doi ? <a href={w.doi} target="_blank" rel="noreferrer" className="hover:underline">{w.title}</a> : w.title}</div>
+                      <div className="font-medium"><PaperDialog href={w.doi ?? w.openalex_id} title={w.title} /></div>
                       <div className="text-sm text-muted-foreground">{[w.venue, w.year].filter(Boolean).join(" · ")}</div>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
