@@ -79,6 +79,7 @@ export type Database = {
           updated_at: string
           user_id: string
           via: string | null
+          vias: string[]
           works_count: number
         }
         Insert: {
@@ -98,6 +99,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           via?: string | null
+          vias?: string[]
           works_count?: number
         }
         Update: {
@@ -117,6 +119,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           via?: string | null
+          vias?: string[]
           works_count?: number
         }
         Relationships: [
@@ -270,6 +273,7 @@ export type Database = {
           user_a: string
           user_b: string
           via: string | null
+          vias: string[]
         }
         Insert: {
           a_only?: string[]
@@ -287,6 +291,7 @@ export type Database = {
           user_a: string
           user_b: string
           via?: string | null
+          vias?: string[]
         }
         Update: {
           a_only?: string[]
@@ -304,6 +309,7 @@ export type Database = {
           user_a?: string
           user_b?: string
           via?: string | null
+          vias?: string[]
         }
         Relationships: [
           {

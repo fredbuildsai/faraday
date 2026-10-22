@@ -35,17 +35,17 @@ const cardsQuery = queryOptions({
 const layersQuery = queryOptions({
   queryKey: ["match-layers"],
   queryFn: async () => {
-    const { data, error } = await supabase.from("matches").select("id, layer, via");
+    const { data, error } = await supabase.from("matches").select("id, layer, vias");
     if (error) throw error;
-    return Object.fromEntries((data ?? []).map((r) => [r.id, r])) as Record<string, { layer: string; via: string | null }>;
+    return Object.fromEntries((data ?? []).map((r) => [r.id, r])) as Record<string, { layer: string; vias: string[] | null }>;
   },
 });
 
-type External = { id: string; openalex_id: string; name: string; institution: string | null; score: number; t: number; layer: string; via: string | null; shared_topics: string[]; h_index: number; citations: number; works_count: number; recent_works: number | null; state: string };
+type External = { id: string; openalex_id: string; name: string; institution: string | null; score: number; t: number; layer: string; vias: string[] | null; shared_topics: string[]; h_index: number; citations: number; works_count: number; recent_works: number | null; state: string };
 const externalQuery = queryOptions({
   queryKey: ["external-suggestions"],
   queryFn: async () => {
-    const { data, error } = await supabase.from("external_suggestions").select("id, openalex_id, name, institution, score, t, layer, via, shared_topics, h_index, citations, works_count, recent_works, state").order("score", { ascending: false });
+    const { data, error } = await supabase.from("external_suggestions").select("id, openalex_id, name, institution, score, t, layer, vias, shared_topics, h_index, citations, works_count, recent_works, state").order("score", { ascending: false });
     if (error) throw error;
     return (data ?? []) as External[];
   },
@@ -112,8 +112,8 @@ function MatchesPage() {
   const { data: cardInfo } = useSuspenseQuery(cardsQuery);
   const { data: layers } = useSuspenseQuery(layersQuery);
   const { data: external } = useSuspenseQuery(externalQuery);
-  const layerLabel = (layer: string, via: string | null, topic?: string) => layer === "second_degree"
-    ? (via ? `2nd-degree · Common connection: ${via}` : "2nd-degree · Collaborator of a collaborator")
+  const layerLabel = (layer: string, vias: string[] | null, topic?: string) => layer === "second_degree"
+    ? (vias?.length ? `2nd-degree · Common connection: ${vias.join(", ")}` : "2nd-degree · Collaborator of a collaborator")
     : `Beyond your network · Shared focus${topic ? ` · ${topic}` : ""}`;
   async function setExternal(id: string, state: string) {
     const { error } = await supabase.from("external_suggestions").update({ state, updated_at: new Date().toISOString() }).eq("id", id);
@@ -128,7 +128,7 @@ function MatchesPage() {
     return {
       id: m.id, name: m.other_name || "A researcher", institution: m.other_institution, score: m.score, t: m.t,
       layer: layers[m.id]?.layer === "second_degree" ? "2nd-degree connection" : "Beyond your network · shared focus",
-      connection: layers[m.id]?.layer === "second_degree" ? layers[m.id]?.via ?? null : null,
+      connection: layers[m.id]?.layer === "second_degree" ? layers[m.id]?.vias ?? [] : [],
       sharedTopics: m.shared_topics, interests: c?.interests ?? null,
       hIndex: c?.h_index ?? 0, citations: Number(c?.citations ?? 0), worksCount: c?.works_count ?? 0, recentWorks: c?.recent_works ?? 0,
       methods: c?.methods ?? [], directions: c?.directions ?? [], openalexId: c?.openalex_ids?.[0] ?? null,
@@ -137,7 +137,7 @@ function MatchesPage() {
   }).concat(external.filter((e) => e.state === "active").map((e) => ({
     id: EXT + e.id, name: e.name, institution: e.institution, score: e.score, t: e.t,
     layer: `Not on Lattice Scout · ${e.layer === "second_degree" ? "2nd-degree connection" : "Beyond your network · shared focus"}`,
-    connection: e.layer === "second_degree" ? e.via : null,
+    connection: e.layer === "second_degree" ? e.vias ?? [] : [],
     sharedTopics: e.shared_topics, interests: null, hIndex: e.h_index, citations: Number(e.citations), worksCount: e.works_count, recentWorks: e.recent_works ?? 0, openalexId: e.openalex_id,
     methods: [], directions: [],
     member: false,
@@ -358,7 +358,7 @@ function MatchesPage() {
               <Section key={e.id} title={e.name} subtitle={e.institution || "Institution not given"}
                 aside={<span className="rounded-full bg-accent px-3 py-1 font-mono text-sm text-accent-foreground">{Math.round(e.score * 100)}%</span>}>
                 <div className="space-y-3 text-sm">
-                  <p className="text-muted-foreground">{layerLabel(e.layer, e.via, e.shared_topics[0])}</p>
+                  <p className="text-muted-foreground">{layerLabel(e.layer, e.vias, e.shared_topics[0])}</p>
                   <p><span className="font-medium">Shared research area:</span> {e.shared_topics.join(", ") || "—"}</p>
                   <p className="text-muted-foreground">h-index {e.h_index} · {Number(e.citations).toLocaleString()} citations · {e.works_count} works</p>
                   <div className="flex flex-wrap gap-2">
