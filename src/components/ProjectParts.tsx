@@ -35,7 +35,13 @@ function MentionInput({ value, onChange, people, placeholder }: { value: string;
   const [caret, setCaret] = useState(0);
   const before = value.slice(0, caret);
   const m = before.match(/@([^@\n]{0,30})$/);
-  const options = m ? people.filter((p) => p.name.toLowerCase().startsWith(m[1]!.toLowerCase())).slice(0, 6) : [];
+  const raw = m?.[1]?.toLowerCase() ?? "";
+  // Once a full name was picked (or typed) and followed by text, the suggestion box closes.
+  const done = people.some((p) => raw.startsWith(p.name.toLowerCase() + " ") || raw === p.name.toLowerCase());
+  const open = !!m && !done && !/\s{2}|\s\S+\s/.test(raw);
+  const term = raw;
+  const options = open ? people.filter((p) => p.name.toLowerCase().split(/\s+/).some((w) => w.startsWith(term)) || p.name.toLowerCase().startsWith(term)).slice(0, 6) : [];
+  const [active, setActive] = useState(0);
   function pick(name: string) {
     const start = caret - (m?.[0].length ?? 0);
     const next = `${value.slice(0, start)}@${name} ${value.slice(caret)}`;
@@ -48,12 +54,19 @@ function MentionInput({ value, onChange, people, placeholder }: { value: string;
     <div className="relative">
       <Textarea ref={ref} value={value} rows={2} placeholder={placeholder ?? "Write a comment. Type @ to tag someone."}
         onChange={(e) => { onChange(e.target.value); setCaret(e.target.selectionStart); }}
-        onKeyUp={(e) => setCaret(e.currentTarget.selectionStart)} onClick={(e) => setCaret(e.currentTarget.selectionStart)} />
+        onKeyDown={(e) => {
+          if (!options.length) return;
+          if (e.key === "ArrowDown") { e.preventDefault(); setActive((a) => (a + 1) % options.length); }
+          else if (e.key === "ArrowUp") { e.preventDefault(); setActive((a) => (a - 1 + options.length) % options.length); }
+          else if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); pick(options[Math.min(active, options.length - 1)]!.name); setActive(0); }
+        }}
+        onKeyUp={(e) => { if (!["ArrowDown", "ArrowUp", "Enter", "Tab"].includes(e.key)) setCaret(e.currentTarget.selectionStart); }} onClick={(e) => setCaret(e.currentTarget.selectionStart)} />
       {!!options.length && (
         <ul className="absolute z-20 mt-1 w-64 rounded-md border bg-popover p-1 text-sm shadow-md" role="listbox" aria-label="Tag a collaborator">
-          {options.map((p) => <li key={p.user_id}><button type="button" className="w-full rounded px-2 py-1 text-left hover:bg-accent" onMouseDown={(e) => { e.preventDefault(); pick(p.name); }}>@{p.name}</button></li>)}
+          {options.map((p, i) => <li key={p.user_id}><button type="button" className={`w-full rounded px-2 py-1 text-left hover:bg-accent ${i === active ? "bg-accent" : ""}`} onMouseDown={(e) => { e.preventDefault(); pick(p.name); }}>@{p.name}</button></li>)}
         </ul>
       )}
+      {open && !raw.includes(" ") && !options.length && <p className="absolute z-20 mt-1 rounded-md border bg-popover px-3 py-2 text-xs text-muted-foreground shadow-md">{people.length ? "No collaborator with that name." : "Invite people to this opportunity to tag them."}</p>}
     </div>
   );
 }
@@ -63,7 +76,8 @@ export function Comments({ data, id, target, nameOf, me, onSaved }: { data: Proj
   const [showResolved, setShowResolved] = useState(false);
   const [filter, setFilter] = useState("all");
   const general = !target.section_id && !target.paper_id && !target.item_id && !target.reference_id;
-  const members = data.people.filter((p) => p.state === "accepted");
+  // Invited people can be tagged too: they get the notification and see it once they join.
+  const members = data.people.filter((p) => p.state === "accepted" || p.state === "invited");
   const lookup = { sections: data.sections, papers: data.papers, items: data.items, references: data.references };
   const list = data.comments.filter((c: any) => general ? true : target.section_id ? c.section_id === target.section_id : target.paper_id ? c.paper_id === target.paper_id : target.item_id ? c.item_id === target.item_id : c.reference_id === target.reference_id);
   const shown = list.filter((c) => (showResolved || !c.resolved) && (filter === "all" || commentSource(c, lookup).kind === filter));

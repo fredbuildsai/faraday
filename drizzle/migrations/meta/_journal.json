@@ -162,6 +162,13 @@
       "when": 1792708892093,
       "tag": "0022_manuscript_workspace",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792709776804,
+      "tag": "0023_mentions_include_invited",
+      "breakpoints": true
     }
   ]
 }
