@@ -30,7 +30,7 @@ for (const p of PEOPLE.filter((x) => !only.length || only.includes(x.last.toLowe
 
   const rows: any[] = [];
   for (const aid of p.ids) {
-    const page: any = await openalexGet(`/works?filter=author.id:${aid}&sort=publication_year:desc&per_page=${MAX_WORKS}&select=id,doi,title,publication_year,type,cited_by_count,topics,keywords,primary_location`);
+    const page: any = await openalexGet(`/works?filter=author.id:${aid}&sort=publication_year:desc&per_page=${MAX_WORKS}&select=id,doi,title,publication_year,type,cited_by_count,topics,keywords,primary_location,authorships`);
     for (const w of page.results ?? []) {
       if (!w.title || rows.some((r) => r.openalex_id === shortId(w.id))) continue;
       rows.push({

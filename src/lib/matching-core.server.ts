@@ -5,6 +5,17 @@ import { tidyMethod } from "@/lib/method-synonyms";
 
 const topicKey = (id: unknown) => String(id ?? "").split("/").pop() ?? "";
 
+/** Read every works row in pages (the API returns at most 1000 rows per request). */
+async function allRows(db: any, cols: string) {
+  const out: any[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await db.from("works").select(cols).order("id").range(from, from + 999);
+    if (error) throw new Error("Could not read publications");
+    out.push(...(data ?? []));
+    if (!data || data.length < 1000) return { data: out };
+  }
+}
+
 /** Find up to 10 new researchers for one user (recorded for both people). */
 export async function computeMatchesFor(uid: string) {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -15,7 +26,7 @@ export async function computeMatchesFor(uid: string) {
       supabaseAdmin.from("profile_analysis").select("user_id, methods").eq("status", "done"),
       supabaseAdmin.from("profile_analysis_edits").select("user_id, value, action").eq("kind", "method"),
       supabaseAdmin.from("matches").select("id, user_a, user_b, created_at, formula").or(`user_a.eq.${uid},user_b.eq.${uid}`),
-      supabaseAdmin.from("works").select("user_id, topics, authors").limit(50000),
+      allRows(supabaseAdmin, "user_id, topics, authors"),
     ]);
 
     const methodsBy = new Map<string, Set<string>>();
