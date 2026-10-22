@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Pure business logic (matching maths, ORCID checks) lives in `src/lib/*.ts` with Vitest tests in `src/test/`; why: deterministic rules must stay testable without the backend.
-- `src/lib/matching.ts` is the user's verbatim reference implementation; only type-level tweaks allowed, never change the maths.
+- `src/lib/matching.ts` is the user's original reference implementation (helpers + legacy c2 formula); live scoring is `src/lib/match-score.ts` (topic gate, weighted topic+activity, methods descriptive only) with weights from `profiles.match_weights` falling back to `DEFAULT_WEIGHTS`; why: weighting must become user-selectable.
 - Signed-in pages live under `src/routes/_authenticated/`; `/` redirects to `/auth` or `/profile`.
 - AI provider/model choice lives in `src/lib/ai-config.ts` (code defaults, env overrides `AI_PROVIDER`, `<PROVIDER>_MODEL`); why: model names are not secret, only keys go in Secrets.
 - Test data lives in `scripts/test-seed/` (seed.ts + rollback.ts, accounts tagged `user_metadata.seed`); why: test people must be removable cleanly with all linked rows.
