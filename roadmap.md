@@ -23,7 +23,7 @@
 ## Swipe discovery
 - [x] Discover deck on Matches: swipe right = interested + saved, left = dismissed, undo, keyboard arrows; cards show h-index, citations, recent papers, shared topics, methods, interests (platform members only)
 - [x] Discovery layer: "Find new matches" returns up to 10 new platform members; excludes self, anyone already matched/saved/dismissed and direct co-authors; collaborators of collaborators first (card names the shared co-author), then shared-topic matches; topic gate applies to both
-- [x] Wider OpenAlex fill when fewer than 10 platform members qualify: co-authors of your 5 most frequent co-authors (last 3 years) first, then last authors of recent work in your top 3 topics; same topic gate and score; shown as "Not on Lattice Scout" cards, save/dismiss/restore, link to OpenAlex
+- [x] Wider OpenAlex fill when fewer than 10 platform members qualify: co-authors of your 5 most frequent co-authors (last 3 years) first, then last authors of recent work in your top 3 topics; same topic gate and score; shown as "Not on Lattice Scout" cards, save/dismiss/restore, link to OpenAlex; "Principal investigators only" switch (on by default) limits outside suggestions to last authors
 - [ ] Further-afield layer (3–5 degrees / exploratory cross-disciplinary)
 
 ## Technical debt & scaling: matching concurrency and performance

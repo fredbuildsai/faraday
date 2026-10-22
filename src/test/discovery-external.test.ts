@@ -15,7 +15,7 @@ describe("wider OpenAlex discovery", () => {
   });
   it("excludes known people and puts collaborators of collaborators first", () => {
     const r = collectCandidates(
-      [{ via: "Bo", works: [{ authorships: [au("B", "Bo"), au("X", "Xi")] }] }],
+      [{ via: "Bo", works: [{ authorships: [au("B", "Bo"), au("X", "Xi", "last")] }] }],
       [{ authorships: [au("Y", "Yo", "first"), au("Z", "Zed", "last")] }],
       new Set(["B"]),
     );
