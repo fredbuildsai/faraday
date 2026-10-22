@@ -7,8 +7,8 @@ describe("openalex math", () => {
       { year: 2024, topics: [{ id: "T1", name: "a", score: 0.6 }, { id: "T2", name: "b", score: 0.2 }] },
       { year: 2020, topics: [{ id: "T1", name: "a", score: 0.2 }] },
     ]);
-    expect(w.T1).toBeCloseTo(0.8);
-    expect(w.T2).toBeCloseTo(0.2);
+    expect(w['T1']).toBeCloseTo(0.8);
+    expect(w['T2']).toBeCloseTo(0.2);
   });
   it("keeps only the top 25 topics", () => {
     const topics = Array.from({ length: 30 }, (_, i) => ({ id: `T${i}`, name: "", score: 30 - i }));
