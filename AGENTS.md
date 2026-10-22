@@ -17,3 +17,6 @@
 - Signed-in navigation is one `AppHeader` (logo → /profile, burger drawer with grouped items) rendered by `src/routes/_authenticated/route.tsx`; why: pages must not duplicate their own headers or nav.
 - Open-access status is stored per work (`works.is_oa`, from OpenAlex `open_access.is_oa`) and shown via `OaBadge` only when true; why: one source of truth for every paper list.
 - Profile analysis runs in batches (`CHUNK_SIZE` works each): each batch is validated against its own titles, findings merged with `mergeClaims`, each successful batch result is saved and reused on retry while its input is unchanged, then one AI synthesis over compact findings with a deterministic-merge fallback; saved only if `enoughChunks`. Why: large publication lists time out or exceed provider limits in one request.
+
+- Discovery (`src/lib/discovery.ts`, batch of `BATCH_SIZE`) picks new matches: excludes already matched pairs and direct co-authors (`works.authors`), ranks collaborators-of-collaborators first; matches carry `layer`/`via`; why: one pure, tested rule for who may be suggested.
+- Match pairs are unique regardless of order (DB index); inserts tolerate duplicate-pair errors; why: concurrent searches must not duplicate matches.

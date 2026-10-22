@@ -14,7 +14,7 @@ export async function importWorksFor(userId: string, requested?: string[]) {
     }
     if (!authorIds.length) throw new Error("No author selected");
 
-    const select = "id,doi,title,publication_year,type,cited_by_count,topics,keywords,primary_location,open_access";
+    const select = "id,doi,title,publication_year,type,cited_by_count,topics,keywords,primary_location,open_access,authorships";
     // Works shared by several selected profiles are kept once (keyed by OpenAlex work id).
     const byId = new Map<string, any>();
     let truncated = false;
@@ -42,6 +42,7 @@ export async function importWorksFor(userId: string, requested?: string[]) {
             type: w.type ?? null,
             cited_by_count: w.cited_by_count ?? 0,
             is_oa: !!w.open_access?.is_oa,
+            authors: (w.authorships ?? []).filter((a: any) => a?.author?.id).slice(0, 100).map((a: any) => ({ id: shortId(a.author.id), name: a.author.display_name ?? "" })),
             topics,
             keywords: (w.keywords ?? []).map((k: any) => k.display_name),
             venue: w.primary_location?.source?.display_name ?? null,

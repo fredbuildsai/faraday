@@ -30,7 +30,7 @@ for (const p of PEOPLE.filter((x) => !only.length || only.includes(x.last.toLowe
 
   const rows: any[] = [];
   for (const aid of p.ids) {
-    const page: any = await openalexGet(`/works?filter=author.id:${aid}&sort=publication_year:desc&per_page=${MAX_WORKS}&select=id,doi,title,publication_year,type,cited_by_count,topics,keywords,primary_location`);
+    const page: any = await openalexGet(`/works?filter=author.id:${aid}&sort=publication_year:desc&per_page=${MAX_WORKS}&select=id,doi,title,publication_year,type,cited_by_count,topics,keywords,primary_location,authorships`);
     for (const w of page.results ?? []) {
       if (!w.title || rows.some((r) => r.openalex_id === shortId(w.id))) continue;
       rows.push({
@@ -38,6 +38,7 @@ for (const p of PEOPLE.filter((x) => !only.length || only.includes(x.last.toLowe
         type: w.type ?? null, cited_by_count: w.cited_by_count ?? 0,
         topics: (w.topics ?? []).map((t: any) => ({ id: shortId(t.id), name: t.display_name, score: t.score ?? 0 })),
         keywords: (w.keywords ?? []).map((k: any) => k.display_name), venue: w.primary_location?.source?.display_name ?? null,
+        authors: (w.authorships ?? []).filter((a: any) => a?.author?.id).slice(0, 100).map((a: any) => ({ id: shortId(a.author.id), name: a.author.display_name ?? "" })),
       });
     }
   }
