@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { aiChat, parseJson } from "@/lib/ai-call.server";
 import {
-  MAX_SUGGESTIONS, assessWhitespace, isFresh, principalInvestigators, sameSettings, searchTerms, verifySuggestions, workKey,
+  MAX_SUGGESTIONS, assessWhitespace, isFresh, principalInvestigators, sameSettings, searchTerms, threeYearsAgo, byFewestRecent, verifySuggestions, workKey,
   type OaWork, type OppSettings,
 } from "@/lib/opportunities";
 
@@ -52,12 +52,13 @@ export const findOpportunities = createServerFn({ method: "POST" })
     const methods = labels(a.methods).slice(0, 3);
     if (!terms.length) return { status: "error" as const, reason: "Your analysis has no interests yet." };
 
-    const since = new Date().getFullYear() - 3;
+    const sinceDate = threeYearsAgo(new Date());
+    const since = Number(sinceDate.slice(0, 4));
     let works: OaWork[] = [];
     try {
       if (data.mode === "broad") {
         const search = encodeURIComponent(terms.join(" "));
-        const filter = `publication_year:>${since - 1}${data.excludeReviews ? ",type:!review" : ""}`;
+        const filter = `from_publication_date:${sinceDate}${data.excludeReviews ? ",type:!review" : ""}`;
         const res: any = await openalexGet(`/works?search=${search}&filter=${filter}&per_page=25&select=id,display_name,doi,publication_year`);
         works = (res?.results ?? []).map((w: any) => ({ id: workKey(w.id), title: String(w.display_name ?? ""), url: w.doi || w.id })).filter((w: OaWork) => w.id && w.title);
       } else {
@@ -103,13 +104,13 @@ export const findOpportunities = createServerFn({ method: "POST" })
         const all: any = await openalexGet(`/works?search=${q}&per_page=5&select=id,display_name,doi${rv ? `&filter=${rv.slice(1)}` : ""}`);
         totalCount = Number(all?.meta?.count ?? 0);
         closest = (all?.results ?? []).map((w: any) => ({ id: workKey(w.id), title: String(w.display_name ?? ""), url: w.doi || w.id })).filter((w: OaWork) => w.title);
-        const recent: any = await openalexGet(`/works?search=${q}&filter=publication_year:>${since - 1}${rv}&per_page=1&select=id`);
+        const recent: any = await openalexGet(`/works?search=${q}&filter=from_publication_date:${sinceDate}${rv}&per_page=1&select=id`);
         recentCount = Number(recent?.meta?.count ?? 0);
       } catch (e) { console.error("whitespace count", terms, e); }
       s.novelty = totalCount;
-      s.whitespace = assessWhitespace({ query: terms, sinceYear: since, totalCount, recentCount, closest });
+      s.whitespace = assessWhitespace({ query: terms, sinceYear: since, sinceDate, totalCount, recentCount, closest });
     }
-    await supabaseAdmin.from("opportunities").upsert({ user_id: uid, suggestions: kept as any, dropped_claims: dropped as any, settings: settings as any, created_at: new Date().toISOString() });
+    await supabaseAdmin.from("opportunities").upsert({ user_id: uid, suggestions: byFewestRecent(kept) as any, dropped_claims: dropped as any, settings: settings as any, created_at: new Date().toISOString() });
     return { status: "done" as const };
   });
 

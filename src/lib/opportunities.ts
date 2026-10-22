@@ -14,6 +14,8 @@ export type Person = { id: string; name: string; institution: string | null; rol
 export type Whitespace = {
   query: string;
   sinceYear: number;
+  /** Start of the rolling window (YYYY-MM-DD), exactly 3 years before the search. */
+  sinceDate?: string | undefined;
   totalCount: number | null;
   recentCount: number | null;
   closest: { id: string; title: string; url: string; similarity: number }[];
@@ -111,21 +113,35 @@ export function titleSimilarity(a: string, b: string): number {
 
 /** Auditable whitespace verdict from literature counts and the closest existing papers. */
 export function assessWhitespace(input: {
-  query: string; sinceYear: number; totalCount: number | null; recentCount: number | null;
+  query: string; sinceYear: number; sinceDate?: string; totalCount: number | null; recentCount: number | null;
   closest: { id: string; title: string; url: string }[];
 }): Whitespace {
   const closest = input.closest.map((c) => ({ ...c, similarity: Math.round(titleSimilarity(input.query, c.title) * 100) / 100 }))
     .sort((x, y) => y.similarity - x.similarity);
   const reasons: string[] = [];
   const dup = closest.find((c) => c.similarity >= DUPLICATE_SIMILARITY);
+  const span = "in the last 3 years";
   let level: Whitespace["level"];
   if (input.recentCount == null) { level = "unknown"; reasons.push("Literature count unavailable."); }
   else {
-    if (input.recentCount < WHITESPACE_LOW) { level = "underexplored"; reasons.push(`Only ${input.recentCount} papers since ${input.sinceYear}.`); }
-    else if (input.recentCount < WHITESPACE_HIGH) { level = "moderate"; reasons.push(`${input.recentCount} papers since ${input.sinceYear}.`); }
-    else { level = "crowded"; reasons.push(`${input.recentCount} papers since ${input.sinceYear}.`); }
+    if (input.recentCount < WHITESPACE_LOW) { level = "underexplored"; reasons.push(`Only ${input.recentCount} papers ${span}.`); }
+    else if (input.recentCount < WHITESPACE_HIGH) { level = "moderate"; reasons.push(`${input.recentCount} papers ${span}.`); }
+    else { level = "crowded"; reasons.push(`${input.recentCount} papers ${span}.`); }
   }
   if (dup) { level = "crowded"; reasons.push(`An existing paper already frames this closely: "${dup.title}".`); }
   else if (closest.length) reasons.push("No existing paper title closely matches this question.");
-  return { query: input.query, sinceYear: input.sinceYear, totalCount: input.totalCount, recentCount: input.recentCount, closest, level, reasons };
+  return { query: input.query, sinceYear: input.sinceYear, sinceDate: input.sinceDate, totalCount: input.totalCount, recentCount: input.recentCount, closest, level, reasons };
+}
+
+/** Date exactly 3 years before `now`, as YYYY-MM-DD. */
+export function threeYearsAgo(now: Date): string {
+  const d = new Date(now);
+  d.setUTCFullYear(d.getUTCFullYear() - 3);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Fewest papers in the last 3 years first; unknown counts go last. */
+export function byFewestRecent<T extends { whitespace?: { recentCount: number | null } | null }>(list: T[]): T[] {
+  const n = (s: T) => s.whitespace?.recentCount ?? Number.POSITIVE_INFINITY;
+  return [...list].sort((a, b) => n(a) - n(b));
 }

@@ -90,3 +90,14 @@ describe("likely PIs", () => {
     expect(r.map((p) => p.name)).toEqual(["Last"]);
   });
 });
+
+import { threeYearsAgo, byFewestRecent } from "@/lib/opportunities";
+describe("last 3 years window and order", () => {
+  it("window starts exactly 3 years before today", () => {
+    expect(threeYearsAgo(new Date("2026-10-22T12:00:00Z"))).toBe("2023-10-22");
+  });
+  it("fewest recent papers first, unknown last", () => {
+    const s = (n: number | null) => ({ whitespace: { recentCount: n } });
+    expect(byFewestRecent([s(50), s(null), s(3), s(12)]).map((x) => x.whitespace.recentCount)).toEqual([3, 12, 50, null]);
+  });
+});
