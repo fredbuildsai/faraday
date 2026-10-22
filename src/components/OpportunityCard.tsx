@@ -56,7 +56,7 @@ export function OpportunityCard({ s, actions, children }: { s: Suggestion; actio
           <CollapsibleTrigger className="text-sm font-medium text-primary">How the whitespace was checked</CollapsibleTrigger>
           <CollapsibleContent className="mt-2 space-y-2 rounded-lg bg-muted/50 p-4 text-sm">
             <p className="font-mono text-xs text-muted-foreground">
-              Search: “{ws.query}” · all years: {ws.totalCount?.toLocaleString() ?? "?"} papers · since {ws.sinceYear}: {ws.recentCount?.toLocaleString() ?? "?"} papers (OpenAlex)
+              Search: “{ws.query}” · all years: {ws.totalCount?.toLocaleString() ?? "?"} papers · last 3 years{ws.sinceDate ? ` (since ${ws.sinceDate})` : ""}: {ws.recentCount?.toLocaleString() ?? "?"} papers (OpenAlex)
             </p>
             <ul className="list-disc pl-5">{ws.reasons.map((r) => <li key={r}>{r}</li>)}</ul>
             {!!ws.closest.length && (
