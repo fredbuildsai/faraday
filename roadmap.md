@@ -8,3 +8,5 @@
 - [x] Opportunities, feedback, notices, empty/loading states
 - [ ] Monthly refresh cron
 - [ ] Seed test researchers Johan Foster (UBC email) & Raphaell Moreira (Bremen email), check their match
+- [x] Test researchers Gasteiger, Dahn, Lucht (scripts/test-seed, rollback ready)
+- [ ] Remove test researchers when testing is done (run rollback)

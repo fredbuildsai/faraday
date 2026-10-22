@@ -13,3 +13,4 @@
 - `src/lib/matching.ts` is the user's verbatim reference implementation; only type-level tweaks allowed, never change the maths.
 - Signed-in pages live under `src/routes/_authenticated/`; `/` redirects to `/auth` or `/profile`.
 - AI provider/model choice lives in `src/lib/ai-config.ts` (code defaults, env overrides `AI_PROVIDER`, `<PROVIDER>_MODEL`); why: model names are not secret, only keys go in Secrets.
+- Test data lives in `scripts/test-seed/` (seed.ts + rollback.ts, accounts tagged `user_metadata.seed`); why: test people must be removable cleanly with all linked rows.
