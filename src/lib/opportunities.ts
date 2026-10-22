@@ -87,7 +87,7 @@ export function principalInvestigators(papers: { authorships?: any[] }[]): Perso
       const id = String(a?.author?.id ?? a?.author?.display_name ?? "").trim();
       const name = String(a?.author?.display_name ?? a?.raw_author_name ?? "").trim();
       if (!id || !name) continue;
-      const cur = out.get(id) ?? { id, name, institution: a?.institutions?.[0]?.display_name ?? null, roles: [] };
+      const cur: Person = out.get(id) ?? { id, name, institution: a?.institutions?.[0]?.display_name ?? null, roles: [] };
       for (const r of roles) if (!cur.roles.includes(r)) cur.roles.push(r);
       out.set(id, cur);
     }

@@ -49,14 +49,14 @@ function ManagePage() {
 
   async function setState(r: (typeof data)[number], state: "saved" | "dismissed") {
     const { error } = await supabase.from("saved_opportunities").update({ state, updated_at: new Date().toISOString() }).eq("id", r.id);
-    if (error) return toast.error("Could not update.");
+    if (error) { toast.error("Could not update."); return; }
     await supabase.from("feedback").update({ value: state === "saved" ? 1 : -1 }).eq("target_type", "opportunity").eq("target_id", r.source_key);
     toast.success(state === "saved" ? "Restored to saved" : "Dismissed");
     await refresh();
   }
   async function remove(r: (typeof data)[number]) {
     const { error } = await supabase.from("saved_opportunities").delete().eq("id", r.id);
-    if (error) return toast.error("Could not delete.");
+    if (error) { toast.error("Could not delete."); return; }
     await supabase.from("feedback").delete().eq("target_type", "opportunity").eq("target_id", r.source_key);
     toast.success("Deleted permanently");
     await refresh();
