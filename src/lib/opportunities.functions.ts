@@ -52,7 +52,8 @@ export const findOpportunities = createServerFn({ method: "POST" })
     const methods = labels(a.methods).slice(0, 3);
     if (!terms.length) return { status: "error" as const, reason: "Your analysis has no interests yet." };
 
-    const since = new Date().getFullYear() - 3;
+    const sinceDate = threeYearsAgo(new Date());
+    const since = Number(sinceDate.slice(0, 4));
     let works: OaWork[] = [];
     try {
       if (data.mode === "broad") {
