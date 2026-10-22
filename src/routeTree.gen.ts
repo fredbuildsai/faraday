@@ -16,6 +16,7 @@ import { Route as AuthenticatedConfirmRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedMatchesRouteImport } from './routes/_authenticated/matches'
 import { Route as AuthenticatedOpportunitiesRouteImport } from './routes/_authenticated/opportunities'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedOpportunitiesManageRouteImport } from './routes/_authenticated/opportunities_.manage'
 import { Route as ApiPublicCronRefreshRouteImport } from './routes/api/public/cron/refresh'
 
@@ -54,6 +55,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOpportunitiesManageRoute =
   AuthenticatedOpportunitiesManageRouteImport.update({
     id: '/opportunities_/manage',
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/matches': typeof AuthenticatedMatchesRoute
   '/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/opportunities/manage': typeof AuthenticatedOpportunitiesManageRoute
   '/api/public/cron/refresh': typeof ApiPublicCronRefreshRoute
 }
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/matches': typeof AuthenticatedMatchesRoute
   '/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/opportunities/manage': typeof AuthenticatedOpportunitiesManageRoute
   '/api/public/cron/refresh': typeof ApiPublicCronRefreshRoute
 }
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/_authenticated/matches': typeof AuthenticatedMatchesRoute
   '/_authenticated/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/opportunities_/manage': typeof AuthenticatedOpportunitiesManageRoute
   '/api/public/cron/refresh': typeof ApiPublicCronRefreshRoute
 }
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/matches'
     | '/opportunities'
     | '/profile'
+    | '/settings'
     | '/opportunities/manage'
     | '/api/public/cron/refresh'
   fileRoutesByTo: FileRoutesByTo
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/matches'
     | '/opportunities'
     | '/profile'
+    | '/settings'
     | '/opportunities/manage'
     | '/api/public/cron/refresh'
   id:
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/_authenticated/matches'
     | '/_authenticated/opportunities'
     | '/_authenticated/profile'
+    | '/_authenticated/settings'
     | '/_authenticated/opportunities_/manage'
     | '/api/public/cron/refresh'
   fileRoutesById: FileRoutesById
@@ -190,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/opportunities_/manage': {
       id: '/_authenticated/opportunities_/manage'
       path: '/opportunities/manage'
@@ -212,6 +231,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMatchesRoute: typeof AuthenticatedMatchesRoute
   AuthenticatedOpportunitiesRoute: typeof AuthenticatedOpportunitiesRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedOpportunitiesManageRoute: typeof AuthenticatedOpportunitiesManageRoute
 }
 
@@ -220,6 +240,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMatchesRoute: AuthenticatedMatchesRoute,
   AuthenticatedOpportunitiesRoute: AuthenticatedOpportunitiesRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedOpportunitiesManageRoute: AuthenticatedOpportunitiesManageRoute,
 }
 
