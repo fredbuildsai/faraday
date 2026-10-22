@@ -51,6 +51,12 @@
 - Novelty comes from an OpenAlex count of works matching the combined topic terms, never from the AI.
 - Results cached per user for 7 days.
 
+## Trust and polish
+- Notice on the profile and sign-up / confirm pages (the pages with no uploads): "Only published information is used. Do not enter confidential data."
+- Thumbs up / down on every match card and opportunity; clicking again changes the vote.
+- Simple empty state for every list (works, topics, interests, methods, matches, opportunities).
+- Loading state (skeletons + "Analysing your profile…") while the analysis runs.
+
 ## Seed data
 - Invites: 3 example researchers (example.edu) plus your email (please send it).
 - 3 example profiles with synthetic works, topic weights and activity.
@@ -66,4 +72,5 @@
 - Matching: TypeScript server function `computeMatches(userId)` (pure scoring module with unit tests for T, M, act, score, complementarity skip, threshold, 7-day cap) run after analysis reaches done. Setting table `app_settings(match_threshold default 0.11)`. Table `matches(user_a, user_b, score, t, m, act, shared_topics, a_only, b_only, formula 'c2', explanation jsonb, created_at)`; RLS readable only by its two users; no email column. `explainMatch` server function calls Mistral (JSON schema, max 60-word summary, max 2 ideas) with only topics, methods and up to 5 titles each; result cached in `matches.explanation`; logged in `llm_calls`.
 - Double opt-in: table `interests(from_user, to_user)` (insert own only). View `match_reveal_v` (security barrier, filtered to auth.uid()) returns the other user's email only when both interest rows exist; email is never readable any other way.
 - Opportunities: server function `findOpportunities` (the brief's Edge Function) reusing the cached, rate-limited OpenAlex client. Table `opportunities(user_id pk, suggestions jsonb, dropped_claims jsonb, created_at)`; RLS own row; `dropped_claims` not exposed to clients. Evidence-id verification and novelty query building in the pure module with unit tests.
+- Feedback: table `feedback(user_id, target_type 'match'|'opportunity', target_id, value -1|1, created_at, unique(user_id, target_type, target_id))`; RLS own rows; upsert on click.
 - Seed via migration INSERTs (synthetic auth users for the 3 examples).
