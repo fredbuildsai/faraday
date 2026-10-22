@@ -103,7 +103,7 @@ function AuthPage() {
         <p className="hidden font-mono text-xs text-muted-foreground lg:block">Open science · Published data only</p>
       </section>
       <section className="flex items-start justify-center p-4 lg:items-center lg:p-16">
-        <div className="w-full max-w-md space-y-6 rounded-2xl border bg-card p-8 shadow-sm">
+        <div className="w-full max-w-md space-y-6 rounded-2xl border bg-card p-6 shadow-sm sm:p-8">
           {sent ? (
             <div className="space-y-3 text-center">
               <h2 className="font-serif text-2xl">Check your email</h2>
