@@ -23,6 +23,7 @@ const GROUPS = [
       { to: "/opportunities/manage", label: "Saved opportunities", sub: true },
     ],
   },
+  { label: "Account", items: [{ to: "/settings", label: "Settings" }] },
 ] as const;
 
 /** Single signed-in header: logo goes to profile, everything else lives in the burger menu. */

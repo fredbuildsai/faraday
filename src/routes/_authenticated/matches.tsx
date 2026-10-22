@@ -22,6 +22,7 @@ import { SwipeDeck, type ScientistCard } from "@/components/SwipeDeck";
 import { inDeck } from "@/lib/swipe";
 import { OpenAlexDialog } from "@/components/OpenAlexDialog";
 import { LogoMark } from "@/components/Logo";
+import { researchSettingsQuery } from "@/lib/research-settings.functions";
 
 const cardsQuery = queryOptions({
   queryKey: ["match-cards"],
@@ -92,12 +93,13 @@ export const Route = createFileRoute("/_authenticated/matches")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(matchesQuery), context.queryClient.ensureQueryData(feedbackQuery), context.queryClient.ensureQueryData(statesQuery), context.queryClient.ensureQueryData(cardsQuery), context.queryClient.ensureQueryData(layersQuery), context.queryClient.ensureQueryData(externalQuery)]),
+  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(matchesQuery), context.queryClient.ensureQueryData(feedbackQuery), context.queryClient.ensureQueryData(statesQuery), context.queryClient.ensureQueryData(cardsQuery), context.queryClient.ensureQueryData(layersQuery), context.queryClient.ensureQueryData(externalQuery), context.queryClient.ensureQueryData(researchSettingsQuery)]),
   component: MatchesPage,
 });
 
 function MatchesPage() {
   const { data } = useSuspenseQuery(matchesQuery);
+  const { data: preferences } = useSuspenseQuery(researchSettingsQuery);
   const { data: fb } = useSuspenseQuery(feedbackQuery);
   const qc = useQueryClient();
   const compute = useServerFn(computeMatches);
@@ -106,7 +108,7 @@ function MatchesPage() {
   const changeState = useServerFn(setMatchState);
   const removeMatchFn = useServerFn(removeMatch);
   const [busy, setBusy] = useState(false);
-  const [piOnly, setPiOnly] = useState(true);
+  const [piOnly, setPiOnly] = useState(preferences.piOnly);
   const [tab, setTab] = useState<Tab>("discover");
   const stateOf = (id: string) => states[id]?.state ?? "active";
   const { data: cardInfo } = useSuspenseQuery(cardsQuery);

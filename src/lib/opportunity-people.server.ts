@@ -2,10 +2,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { opportunityPeople } from "@/lib/opportunity-people";
 import { resolveOpportunityConfig } from "@/lib/opportunity-config";
+import { DEFAULT_RESEARCH_SETTINGS, resolveResearchSettings } from "@/lib/research-settings";
 
 export async function loadOpportunityPeople(sb: SupabaseClient<Database>, uid: string) {
   const [{ data: profile, error: profileError }, { data: matches, error: matchError }] = await Promise.all([
-    sb.from("profiles").select("openalex_author_id, openalex_author_ids").eq("id", uid).single(),
+    sb.from("profiles").select("openalex_author_id, openalex_author_ids, research_settings").eq("id", uid).single(),
     sb.rpc("my_matches"),
   ]);
   if (profileError || matchError) throw new Error("Could not load your collaborators.");
@@ -23,5 +24,6 @@ export async function loadOpportunityPeople(sb: SupabaseClient<Database>, uid: s
     : { data: [], error: null };
   if (error) throw new Error("Could not load your collaborators.");
   const ids = (p: { openalex_author_id: string | null; openalex_author_ids: string[] | null }) => p.openalex_author_ids?.length ? p.openalex_author_ids : p.openalex_author_id ? [p.openalex_author_id] : [];
-  return opportunityPeople((matches ?? []).map((m) => ({ id: m.other_id, name: m.other_name, mutual: !!(m.i_am_interested && m.they_are_interested), authorIds: ids(members?.find((p) => p.id === m.other_id) ?? { openalex_author_id: null, openalex_author_ids: [] }) })), works, ids(profile), resolveOpportunityConfig({ OPPORTUNITY_COLLABORATOR_LIMIT: process.env["OPPORTUNITY_COLLABORATOR_LIMIT"] }));
+  const config = resolveResearchSettings(profile.research_settings, { ...DEFAULT_RESEARCH_SETTINGS, ...resolveOpportunityConfig({ OPPORTUNITY_COLLABORATOR_LIMIT: process.env["OPPORTUNITY_COLLABORATOR_LIMIT"] }) });
+  return opportunityPeople((matches ?? []).map((m) => ({ id: m.other_id, name: m.other_name, mutual: !!(m.i_am_interested && m.they_are_interested), authorIds: ids(members?.find((p) => p.id === m.other_id) ?? { openalex_author_id: null, openalex_author_ids: [] }) })), works, ids(profile), config);
 }

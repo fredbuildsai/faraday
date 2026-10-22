@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { OpportunityCard } from "@/components/OpportunityCard";
 import { findOpportunities, getOpportunityPeople } from "@/lib/opportunities.functions";
 import { eligibleOpportunityPeople } from "@/lib/opportunity-people";
+import { researchSettingsQuery } from "@/lib/research-settings.functions";
 import { markOpportunity, type SavedState } from "@/lib/saved-opportunities";
 import type { OppSettings, Suggestion } from "@/lib/opportunities";
 
@@ -58,6 +59,7 @@ export const Route = createFileRoute("/_authenticated/opportunities")({
     context.queryClient.ensureQueryData(oppQuery),
     context.queryClient.ensureQueryData(savedStatesQuery),
     context.queryClient.ensureQueryData(matchesQuery),
+    context.queryClient.ensureQueryData(researchSettingsQuery),
   ]),
   component: OpportunitiesPage,
 });
@@ -66,13 +68,14 @@ function OpportunitiesPage() {
   const { data } = useSuspenseQuery(oppQuery);
   const { data: states } = useSuspenseQuery(savedStatesQuery);
   const { data: matches } = useSuspenseQuery(matchesQuery);
+  const { data: preferences } = useSuspenseQuery(researchSettingsQuery);
   const qc = useQueryClient();
   const find = useServerFn(findOpportunities);
   const [busy, setBusy] = useState(false);
   const saved = (data?.settings ?? {}) as Partial<OppSettings>;
-  const [mode, setMode] = useState<"network" | "broad">(saved.mode ?? "broad");
-  const [excludeReviews, setExcludeReviews] = useState(!!saved.excludeReviews);
-  const [mutualOnly, setMutualOnly] = useState(!!saved.mutualOnly);
+  const [mode, setMode] = useState<"network" | "broad">(preferences.opportunityMode);
+  const [excludeReviews, setExcludeReviews] = useState(preferences.excludeReviews);
+  const [mutualOnly, setMutualOnly] = useState(preferences.mutualOnly);
   const [picked, setPicked] = useState<Set<string>>(new Set([...(saved.matchIds ?? []), ...(saved.collaboratorIds ?? [])]));
   const list = (data?.suggestions as unknown as Suggestion[]) ?? [];
   const shownMatches = eligibleOpportunityPeople(matches, mutualOnly);

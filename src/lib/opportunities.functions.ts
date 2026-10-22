@@ -21,7 +21,7 @@ const Input = z.object({
   excludeReviews: z.boolean().default(false),
   mutualOnly: z.boolean().default(false),
   matchIds: z.array(z.string().uuid()).max(20).default([]),
-  collaboratorIds: z.array(z.string().regex(/^A\d+$/)).max(20).default([]),
+  collaboratorIds: z.array(z.string().regex(/^A\d+$/)).default([]),
 });
 
 export const getOpportunityPeople = createServerFn({ method: "GET" })
