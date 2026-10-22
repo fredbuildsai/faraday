@@ -9,9 +9,7 @@ export const Route = createFileRoute("/_authenticated")({
     if (!data.user) throw redirect({ to: "/auth" });
     // Remember the person's time zone so the nightly refresh runs during their night.
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (tz) void supabase.from("profiles").update({ timezone: tz }).eq("id", data.user.id).neq("timezone", tz).then(async (r) => {
-      if (!r.error) await supabase.from("profiles").update({ timezone: tz }).eq("id", data.user.id).is("timezone", null);
-    });
+    if (tz) void supabase.from("profiles").update({ timezone: tz }).eq("id", data.user.id);
     return { user: data.user };
   },
   component: () => (
