@@ -128,6 +128,7 @@ function OpportunitiesPage() {
                   ))}
                 </div>
               ) : <p className="text-sm text-muted-foreground">{mutualOnly ? "No collaborators or mutual-interest matches yet." : "No collaborators or matches found yet."}</p>}
+              {shownMatches.length > 0 && picked.size === 0 && <p className="text-xs text-muted-foreground">None selected — opportunities will come from your own publications only.</p>}
           </section>
         )}
 

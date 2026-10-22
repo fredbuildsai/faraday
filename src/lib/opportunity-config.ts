@@ -1,5 +1,5 @@
 /** Application defaults; runtime overrides do not belong in selection logic. */
-export const DEFAULT_OPPORTUNITY_CONFIG = { collaboratorLimit: 10 };
+export const DEFAULT_OPPORTUNITY_CONFIG = { collaboratorLimit: 10, paperLimit: 30 };
 
 export function resolveOpportunityConfig(env: { OPPORTUNITY_COLLABORATOR_LIMIT?: string | undefined } = {}) {
   const limit = Number(env.OPPORTUNITY_COLLABORATOR_LIMIT);
