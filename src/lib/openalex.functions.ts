@@ -130,7 +130,7 @@ export const importWorks = createServerFn({ method: "POST" })
     const { error: upErr } = await supabaseAdmin
       .from("profiles")
       .update({
-        openalex_author_id: authorIds[0],
+        openalex_author_id: authorIds[0]!,
         openalex_author_ids: authorIds,
         topic_weights: computeTopicWeights(works),
         activity: computeActivity(works, new Date().getUTCFullYear()),
