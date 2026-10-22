@@ -134,6 +134,13 @@
       "when": 1792706187657,
       "tag": "0018_personal_research_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792707415337,
+      "tag": "0019_collaborative_projects",
+      "breakpoints": true
     }
   ]
 }

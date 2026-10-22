@@ -328,6 +328,51 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          project_id: string | null
+          read: boolean
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          kind: string
+          project_id?: string | null
+          read?: boolean
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          project_id?: string | null
+          read?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       openalex_cache: {
         Row: {
           body: Json
@@ -518,6 +563,362 @@ export type Database = {
         }
         Relationships: []
       }
+      project_activity: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          detail: Json
+          id: string
+          project_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          project_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: Json
+          id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_activity_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          paper_id: string | null
+          project_id: string
+          resolved: boolean
+          section_id: string | null
+        }
+        Insert: {
+          author_id?: string
+          body: string
+          created_at?: string
+          id?: string
+          paper_id?: string | null
+          project_id: string
+          resolved?: boolean
+          section_id?: string | null
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          paper_id?: string | null
+          project_id?: string
+          resolved?: boolean
+          section_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_comments_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "project_papers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_comments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_comments_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "project_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_members: {
+        Row: {
+          created_at: string
+          invited_by: string | null
+          project_id: string
+          role: string
+          state: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          invited_by?: string | null
+          project_id: string
+          role?: string
+          state?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          invited_by?: string | null
+          project_id?: string
+          role?: string
+          state?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_papers: {
+        Row: {
+          added_by: string
+          created_at: string
+          id: string
+          is_oa: boolean
+          openalex_id: string
+          origin: string
+          project_id: string
+          title: string
+          url: string | null
+        }
+        Insert: {
+          added_by?: string
+          created_at?: string
+          id?: string
+          is_oa?: boolean
+          openalex_id: string
+          origin?: string
+          project_id: string
+          title: string
+          url?: string | null
+        }
+        Update: {
+          added_by?: string
+          created_at?: string
+          id?: string
+          is_oa?: boolean
+          openalex_id?: string
+          origin?: string
+          project_id?: string
+          title?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_papers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_section_versions: {
+        Row: {
+          body: string
+          created_at: string
+          edited_by: string | null
+          id: string
+          project_id: string
+          section_id: string
+          version: number
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          edited_by?: string | null
+          id?: string
+          project_id: string
+          section_id: string
+          version: number
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          edited_by?: string | null
+          id?: string
+          project_id?: string
+          section_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_section_versions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_section_versions_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "project_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_sections: {
+        Row: {
+          body: string
+          id: string
+          key: string
+          position: number
+          project_id: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          version: number
+        }
+        Insert: {
+          body?: string
+          id?: string
+          key: string
+          position?: number
+          project_id: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Update: {
+          body?: string
+          id?: string
+          key?: string
+          position?: number
+          project_id?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_sections_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_tasks: {
+        Row: {
+          assignee_id: string | null
+          created_at: string
+          created_by: string
+          done: boolean
+          due_date: string | null
+          id: string
+          project_id: string
+          title: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          created_at?: string
+          created_by?: string
+          done?: boolean
+          due_date?: string | null
+          id?: string
+          project_id: string
+          title: string
+        }
+        Update: {
+          assignee_id?: string | null
+          created_at?: string
+          created_by?: string
+          done?: boolean
+          due_date?: string | null
+          id?: string
+          project_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          archived: boolean
+          created_at: string
+          description: string
+          id: string
+          owner_id: string
+          source: Json
+          status: string
+          suggested_people: Json
+          title: string
+          updated_at: string
+          whitespace: Json | null
+        }
+        Insert: {
+          archived?: boolean
+          created_at?: string
+          description?: string
+          id?: string
+          owner_id: string
+          source?: Json
+          status?: string
+          suggested_people?: Json
+          title: string
+          updated_at?: string
+          whitespace?: Json | null
+        }
+        Update: {
+          archived?: boolean
+          created_at?: string
+          description?: string
+          id?: string
+          owner_id?: string
+          source?: Json
+          status?: string
+          suggested_people?: Json
+          title?: string
+          updated_at?: string
+          whitespace?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_opportunities: {
         Row: {
           created_at: string
@@ -618,6 +1019,31 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      actor_name: { Args: { _user: string }; Returns: string }
+      delete_project: { Args: { _project: string }; Returns: undefined }
+      is_project_invitee: {
+        Args: { _project: string; _user: string }
+        Returns: boolean
+      }
+      is_project_member: {
+        Args: { _project: string; _user: string }
+        Returns: boolean
+      }
+      is_project_owner: {
+        Args: { _project: string; _user: string }
+        Returns: boolean
+      }
+      leave_project: { Args: { _project: string }; Returns: undefined }
+      log_project: {
+        Args: {
+          _action: string
+          _actor: string
+          _detail: Json
+          _notify: string
+          _project: string
+        }
+        Returns: undefined
+      }
       match_cards: {
         Args: never
         Returns: {
@@ -653,6 +1079,32 @@ export type Database = {
           they_bring: string[]
           you_bring: string[]
         }[]
+      }
+      project_people: {
+        Args: { _project: string }
+        Returns: {
+          institution: string
+          name: string
+          role: string
+          state: string
+          user_id: string
+        }[]
+      }
+      remove_project_member: {
+        Args: { _project: string; _user: string }
+        Returns: undefined
+      }
+      respond_project_invite: {
+        Args: { _accept: boolean; _project: string }
+        Returns: undefined
+      }
+      save_project_section: {
+        Args: { _body: string; _expected_version: number; _section: string }
+        Returns: number
+      }
+      transfer_project_ownership: {
+        Args: { _project: string; _user: string }
+        Returns: undefined
       }
     }
     Enums: {
