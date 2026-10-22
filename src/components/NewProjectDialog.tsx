@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -14,13 +14,15 @@ import { OaBadge } from "@/components/OaBadge";
 import { getOpportunityPeople } from "@/lib/opportunities.functions";
 import { createProject, searchMemberPapers } from "@/lib/projects.functions";
 
-export type DraftPaper = { openalexId: string; title: string; url: string | null; isOa: boolean };
+export type DraftPaper = { openalexId: string; title: string; url: string | null; isOa: boolean; origin?: "member" | "evidence" | "prior_art" | "similar" };
+type Initial = { title?: string; description?: string; papers?: DraftPaper[]; source?: Record<string, unknown>; notes?: string; whitespace?: Record<string, unknown> | null; people?: { id: string; name: string }[] };
 
 /** Create a shared opportunity: invite matches, note outside collaborators, pick evidence papers. */
-export function NewProjectDialog({ trigger, initial }: { trigger: ReactNode; initial?: { title?: string; description?: string; papers?: DraftPaper[]; source?: Record<string, unknown> } }) {
+export function NewProjectDialog({ trigger, initial }: { trigger: ReactNode; initial?: Initial }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
+  const [notes, setNotes] = useState(initial?.notes ?? "");
   const [members, setMembers] = useState<Set<string>>(new Set());
   const [suggested, setSuggested] = useState<Set<string>>(new Set());
   const [papers, setPapers] = useState<DraftPaper[]>(initial?.papers ?? []);
@@ -33,7 +35,19 @@ export function NewProjectDialog({ trigger, initial }: { trigger: ReactNode; ini
   const navigate = useNavigate();
   const matches = (people.data ?? []).filter((p) => p.match);
   const outside = (people.data ?? []).filter((p) => !p.match);
+  const carried = initial?.people ?? [];
   const toggle = (set: Set<string>, id: string, on: boolean) => { const n = new Set(set); on ? n.add(id) : n.delete(id); return n; };
+  // People named on a saved opportunity start ticked: members by name, outside researchers by id.
+  useEffect(() => {
+    if (!people.data || !carried.length) return;
+    const names = new Set(carried.map((c) => c.name.trim().toLowerCase()));
+    const ids = new Set(carried.map((c) => c.id));
+    setMembers(new Set(matches.filter((m) => names.has(m.name.trim().toLowerCase())).map((m) => m.id)));
+    setSuggested(new Set(outside.filter((m) => ids.has(m.id) || names.has(m.name.trim().toLowerCase())).map((m) => m.id)));
+  }, [people.data]); // eslint-disable-line react-hooks/exhaustive-deps
+  const memberNames = new Set(matches.map((m) => m.name.trim().toLowerCase()));
+  const outsideIds = new Set(outside.map((m) => m.id));
+  const extraPeople = carried.filter((c) => !outsideIds.has(c.id) && !memberNames.has(c.name.trim().toLowerCase()));
 
   async function runSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -43,7 +57,8 @@ export function NewProjectDialog({ trigger, initial }: { trigger: ReactNode; ini
   async function submit() {
     setBusy(true);
     try {
-      const r = await create({ data: { title, description, memberIds: [...members], suggested: outside.filter((p) => suggested.has(p.id)).map((p) => ({ id: p.id, name: p.name })), papers, source: initial?.source ?? {} } });
+      const suggestedPeople = [...outside.filter((p) => suggested.has(p.id)).map((p) => ({ id: p.id, name: p.name })), ...extraPeople];
+      const r = await create({ data: { title, description, memberIds: [...members], suggested: suggestedPeople, papers, source: initial?.source ?? {}, notes, whitespace: initial?.whitespace ?? null } });
       toast.success(members.size ? "Opportunity created and invitations sent" : "Opportunity created");
       setOpen(false);
       navigate({ to: "/projects/$id", params: { id: r.id } });
@@ -61,6 +76,13 @@ export function NewProjectDialog({ trigger, initial }: { trigger: ReactNode; ini
         <div className="space-y-5 text-sm">
           <div className="space-y-1.5"><Label htmlFor="np-title">Title</Label><Input id="np-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="A specific research question" /></div>
           <div className="space-y-1.5"><Label htmlFor="np-desc">Description</Label><Textarea id="np-desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} /></div>
+          {initial?.source && (
+            <div className="space-y-1.5">
+              <Label htmlFor="np-notes">Your notes <span className="font-normal text-muted-foreground">(shared with collaborators as the first discussion post)</span></Label>
+              <Textarea id="np-notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="No notes" />
+              <p className="text-xs text-muted-foreground">Also carried over: {papers.length} paper(s){initial.whitespace ? ", the whitespace check" : ""}{carried.length ? `, ${carried.length} suggested researcher(s)` : ""}.</p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <p className="font-medium">Invite from Lattice Scout</p>
