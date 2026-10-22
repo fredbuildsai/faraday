@@ -120,29 +120,23 @@ function ProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.works.length, p?.research_interests]);
 
+  // Analysis runs only when the user asks for it.
   async function startAnalysis(force = false) {
     setAnalysing(true);
+    const t = toast.loading("Analysing your profile… this usually takes under a minute.");
     try {
       const r = await analyse({ data: { force } });
-      if (r.status === "limited" || (force && r.status === "skipped")) toast.info(r.reason);
-      if (r.status === "failed") toast.error(r.reason);
+      if (r.status === "done") toast.success("Analysis finished.", { id: t });
+      else if (r.status === "failed") toast.error(r.reason, { id: t });
+      else if (r.status === "running") toast.info("An analysis is already running. Please wait a moment.", { id: t });
+      else toast.info(r.reason, { id: t });
     } catch {
-      toast.error("The analysis could not run.");
+      toast.error("The analysis could not run. Please try again.", { id: t });
     } finally {
       setAnalysing(false);
       await qc.invalidateQueries({ queryKey: ["my-profile"] });
     }
   }
-
-  // Analysis runs on its own after every import; the server skips it when nothing changed.
-  const analysedFor = useRef<string | null>(null);
-  useEffect(() => {
-    const key = `${data.works.length}-${p?.last_imported_at ?? ""}`;
-    if (!data.works.length || analysedFor.current === key) return;
-    analysedFor.current = key;
-    void startAnalysis(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.works.length, p?.last_imported_at]);
 
   async function persistTopics(next: string[]) {
     try {

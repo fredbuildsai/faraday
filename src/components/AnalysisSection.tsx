@@ -33,7 +33,7 @@ export function AnalysisSection({ analysis, edits, running, hasWorks, onRetry }:
       <div className="flex items-center justify-between gap-3">
         <span className={`rounded-full px-3 py-0.5 font-mono text-xs ${CHIP[status] ?? CHIP["pending"]}`}>{status}</span>
         <Button size="sm" variant="outline" onClick={onRetry} disabled={running}>
-          <RotateCw className="mr-1 h-4 w-4" />{status === "failed" ? "Retry" : "Run again"}
+          <RotateCw className={`mr-1 h-4 w-4 ${running ? "animate-spin" : ""}`} />{running ? "Analysing…" : status === "failed" ? "Retry" : hasResult ? "Run again" : "Run analysis"}
         </Button>
       </div>
       {status === "failed" && analysis?.error && <p className="text-sm text-destructive">{analysis.error}</p>}
@@ -44,7 +44,7 @@ export function AnalysisSection({ analysis, edits, running, hasWorks, onRetry }:
           <p className="text-sm text-muted-foreground">Analysing your profile…</p>
         </div>
       ) : !hasResult ? (
-        <p className="text-sm text-muted-foreground">No analysis yet.</p>
+        <p className="text-sm text-muted-foreground">No analysis yet. Press "Run analysis" when you're ready.</p>
       ) : (
         <>
           {analysis?.summary && <p className="leading-relaxed">{analysis.summary}</p>}
