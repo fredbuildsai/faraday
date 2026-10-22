@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { authenticateCronRequest } from "@/integrations/supabase/cron-auth";
-import { LOCK_MINUTES, REFRESH_AFTER_DAYS, USERS_PER_RUN, pauseReasonFor } from "@/lib/refresh";
+import { LOCK_MINUTES, REFRESH_AFTER_DAYS, USERS_PER_RUN, isLocalNight, pauseReasonFor } from "@/lib/refresh";
 
 const JOB = "monthly_refresh";
 
@@ -24,9 +24,11 @@ export const Route = createFileRoute("/api/public/cron/refresh")({
         if (!got?.length) return Response.json({ skipped: "locked" });
 
         const cutoff = new Date(now.getTime() - REFRESH_AFTER_DAYS * 86400_000).toISOString();
-        const { data: due } = await supabaseAdmin.from("profiles").select("id")
+        const { data: candidates } = await supabaseAdmin.from("profiles").select("id, timezone")
           .not("last_imported_at", "is", null).lt("last_imported_at", cutoff)
-          .order("last_imported_at", { ascending: true }).limit(USERS_PER_RUN);
+          .order("last_imported_at", { ascending: true }).limit(500);
+        // Runs hourly; only refresh people for whom it is currently night locally.
+        const due = (candidates ?? []).filter((p) => isLocalNight(p.timezone, now)).slice(0, USERS_PER_RUN);
 
         const results: any[] = [];
         let pause: string | null = null;
@@ -34,7 +36,7 @@ export const Route = createFileRoute("/api/public/cron/refresh")({
           const { importWorksFor } = await import("@/lib/import-core.server");
           const { runAnalysisFor } = await import("@/lib/analysis-core.server");
           const { computeMatchesFor } = await import("@/lib/matching-core.server");
-          for (const p of due ?? []) {
+          for (const p of due) {
             const r: any = { user: p.id };
             try {
               // Import first: it stamps last_imported_at, so a re-run never redoes this user.

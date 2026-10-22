@@ -25,3 +25,16 @@ describe("match ideas", () => {
     expect(r.summary.split(" ")).toHaveLength(60);
   });
 });
+
+import { isLocalNight, localHour } from "@/lib/refresh";
+describe("local night window", () => {
+  const t = new Date("2026-07-01T01:30:00Z"); // 03:30 Madrid, 18:30 Vancouver
+  it("Madrid at 03:30 is night", () => expect(isLocalNight("Europe/Madrid", t)).toBe(true));
+  it("Vancouver at 18:30 is not night", () => expect(isLocalNight("America/Vancouver", t)).toBe(false));
+  it("Vancouver at 02:00 local is night", () => expect(isLocalNight("America/Vancouver", new Date("2026-07-01T09:00:00Z"))).toBe(true));
+  it("missing or bad zone falls back to UTC", () => {
+    expect(localHour(null, t)).toBe(1);
+    expect(localHour("Not/AZone", t)).toBe(1);
+  });
+  it("05:00 local is outside the window", () => expect(isLocalNight("UTC", new Date("2026-07-01T05:00:00Z"))).toBe(false));
+});
