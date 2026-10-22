@@ -1,3 +1,4 @@
+import { OaBadge } from "@/components/OaBadge";
 import type { ReactNode } from "react";
 import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

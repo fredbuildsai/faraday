@@ -83,7 +83,7 @@ export const importWorks = createServerFn({ method: "POST" })
     }
     if (!authorIds.length) throw new Error("No author selected");
 
-    const select = "id,doi,title,publication_year,type,cited_by_count,topics,keywords,primary_location";
+    const select = "id,doi,title,publication_year,type,cited_by_count,topics,keywords,primary_location,open_access";
     // Works shared by several selected profiles are kept once (keyed by OpenAlex work id).
     const byId = new Map<string, any>();
     let truncated = false;

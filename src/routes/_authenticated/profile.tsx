@@ -1,3 +1,4 @@
+import { OaBadge } from "@/components/OaBadge";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
