@@ -42,3 +42,6 @@ Proposed (not yet implemented)
 - Pre-filter candidates in the database: only profiles sharing at least one topic key with the user and not already matched, then score that subset in code.
 - Store co-author ids in their own indexed table (user_id, coauthor_id) instead of reading every publication row's author list.
 - Per-user short lock (or button disable) against repeated requests.
+
+- [x] Collaborative (shared) opportunities: create, invite matches, papers + similar search, sections with versions, comments, tasks, history, notifications, export
+- [ ] Later: live co-editing, attachments, email notifications
