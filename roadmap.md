@@ -19,3 +19,8 @@
 
 ## Chunked profile analysis (done)
 - Split works into batches, analyse each, validate evidence per batch, merge duplicates, synthesise final result (fallback: deterministic merge), show "batch X of Y" progress, save if ≥ half the batches succeed.
+
+## Swipe discovery
+- [x] Discover deck on Matches: swipe right = interested + saved, left = dismissed, undo, keyboard arrows; cards show h-index, citations, recent papers, shared topics, methods, interests (platform members only)
+- [ ] 2nd-degree layer (co-authors of your co-authors on the platform): needs co-author lists stored at import
+- [ ] Further-afield layer (3–5 degrees / exploratory cross-disciplinary)

@@ -13,6 +13,17 @@ import { Section } from "@/components/Section";
 import { computeMatches, saveMatchNotes, setInterest, setMatchState, writeMatchIdeas } from "@/lib/matching.functions";
 import { Thumbs } from "@/components/Thumbs";
 import { feedbackQuery } from "./opportunities";
+import { SwipeDeck, type ScientistCard } from "@/components/SwipeDeck";
+import { inDeck } from "@/lib/swipe";
+
+const cardsQuery = queryOptions({
+  queryKey: ["match-cards"],
+  queryFn: async () => {
+    const { data, error } = await supabase.rpc("match_cards");
+    if (error) throw error;
+    return Object.fromEntries((data ?? []).map((r) => [r.other_id, r]));
+  },
+});
 
 const matchesQuery = queryOptions({
   queryKey: ["my-matches"],
@@ -35,6 +46,7 @@ const statesQuery = queryOptions({
 });
 
 const TABS = [
+  { key: "discover", label: "Discover" },
   { key: "all", label: "All" },
   { key: "saved", label: "Saved" },
   { key: "interested", label: "Mutual interest" },
@@ -53,7 +65,7 @@ export const Route = createFileRoute("/_authenticated/matches")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(matchesQuery), context.queryClient.ensureQueryData(feedbackQuery), context.queryClient.ensureQueryData(statesQuery)]),
+  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(matchesQuery), context.queryClient.ensureQueryData(feedbackQuery), context.queryClient.ensureQueryData(statesQuery), context.queryClient.ensureQueryData(cardsQuery)]),
   component: MatchesPage,
 });
 
@@ -66,8 +78,46 @@ function MatchesPage() {
   const { data: states } = useSuspenseQuery(statesQuery);
   const changeState = useServerFn(setMatchState);
   const [busy, setBusy] = useState(false);
-  const [tab, setTab] = useState<Tab>("all");
+  const [tab, setTab] = useState<Tab>("discover");
   const stateOf = (id: string) => states[id]?.state ?? "active";
+  const { data: cardInfo } = useSuspenseQuery(cardsQuery);
+  const [lastDecided, setLastDecided] = useState<string | null>(null);
+  const deck: ScientistCard[] = data.filter((m) => inDeck({ state: stateOf(m.id), i_am_interested: m.i_am_interested })).map((m) => {
+    const c = cardInfo[m.other_id];
+    return {
+      id: m.id, name: m.other_name || "A researcher", institution: m.other_institution, score: m.score, t: m.t,
+      layer: "Your field · on Lattice Scout",
+      sharedTopics: m.shared_topics, interests: c?.interests ?? null,
+      hIndex: c?.h_index ?? 0, citations: Number(c?.citations ?? 0), worksCount: c?.works_count ?? 0, recentWorks: c?.recent_works ?? 0,
+      methods: c?.methods ?? [], directions: c?.directions ?? [],
+    };
+  });
+
+  async function decide(id: string, d: "like" | "pass") {
+    try {
+      if (d === "like") {
+        await interest({ data: { matchId: id, interested: true } });
+        await changeState({ data: { matchId: id, state: "saved" } });
+        const m = data.find((x) => x.id === id);
+        if (m?.they_are_interested) toast.success(`It's a match! You can now email ${m.other_name}.`);
+        else toast.success("Saved. They'll see your interest.");
+      } else {
+        await changeState({ data: { matchId: id, state: "dismissed" } });
+      }
+      setLastDecided(id);
+      await Promise.all([qc.invalidateQueries({ queryKey: ["my-matches"] }), qc.invalidateQueries({ queryKey: ["match-states"] })]);
+    } catch { toast.error("Could not save your choice. Please try again."); }
+  }
+
+  async function undo() {
+    if (!lastDecided) return;
+    try {
+      await interest({ data: { matchId: lastDecided, interested: false } });
+      await changeState({ data: { matchId: lastDecided, state: "active" } });
+      setLastDecided(null);
+      await Promise.all([qc.invalidateQueries({ queryKey: ["my-matches"] }), qc.invalidateQueries({ queryKey: ["match-states"] })]);
+    } catch { toast.error("Could not undo."); }
+  }
   const shown = data.filter((m) => {
     const st = stateOf(m.id);
     if (tab === "dismissed") return st === "dismissed";
@@ -120,7 +170,10 @@ function MatchesPage() {
           ))}
         </div>
 
-        {!data.length ? (
+        {tab === "discover" ? (
+          data.length ? <SwipeDeck cards={deck} onDecide={decide} onUndo={undo} canUndo={!!lastDecided} />
+          : <div className="rounded-xl border border-dashed bg-card p-10 text-center text-muted-foreground">No matches yet. Run your profile analysis, then press "Find new matches".</div>
+        ) : !data.length ? (
           <div className="rounded-xl border border-dashed bg-card p-10 text-center text-muted-foreground">
             No matches yet. Run your profile analysis, then press "Find new matches".
           </div>
