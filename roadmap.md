@@ -7,3 +7,4 @@
 - [x] compute-matches server function, method synonyms, Matches page, double opt-in
 - [ ] Opportunities, feedback, notices, empty/loading states
 - [ ] Monthly refresh cron
+- [ ] Seed test researchers Johan Foster (UBC email) & Raphaell Moreira (Bremen email), check their match
