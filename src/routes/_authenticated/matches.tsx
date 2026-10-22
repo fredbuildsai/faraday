@@ -65,16 +65,6 @@ function MatchesPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b bg-card">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-          <Logo />
-          <nav className="flex gap-4 text-sm">
-            <Link to="/profile" className="text-muted-foreground hover:text-foreground">Profile</Link>
-            <Link to="/matches" className="font-medium text-foreground">Matches</Link>
-            <Link to="/opportunities" className="text-muted-foreground hover:text-foreground">Opportunities</Link>
-          </nav>
-        </div>
-      </header>
       <main className="mx-auto max-w-5xl space-y-6 px-6 py-10">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>

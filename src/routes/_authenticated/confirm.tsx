@@ -59,9 +59,6 @@ function ConfirmPage() {
   const others = d ? d.candidates.filter((c) => c.id !== d.suggested?.id) : [];
   return (
     <div className="min-h-screen">
-      <header className="border-b bg-card">
-        <div className="mx-auto max-w-4xl px-6 py-3"><Logo /></div>
-      </header>
       <main className="mx-auto max-w-4xl space-y-6 px-6 py-10">
         <h1 className="font-serif text-4xl">Is this you{d?.firstName ? `, ${d.firstName}` : ""}?</h1>
         <p className="text-muted-foreground">
