@@ -7,6 +7,11 @@ export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
     const { data } = await supabase.auth.getUser();
     if (!data.user) throw redirect({ to: "/auth" });
+    // Remember the person's time zone so the nightly refresh runs during their night.
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz) void supabase.from("profiles").update({ timezone: tz }).eq("id", data.user.id).neq("timezone", tz).then(async (r) => {
+      if (!r.error) await supabase.from("profiles").update({ timezone: tz }).eq("id", data.user.id).is("timezone", null);
+    });
     return { user: data.user };
   },
   component: () => (
