@@ -21,6 +21,7 @@ import { feedbackQuery } from "./opportunities";
 import { SwipeDeck, type ScientistCard } from "@/components/SwipeDeck";
 import { inDeck } from "@/lib/swipe";
 import { OpenAlexDialog } from "@/components/OpenAlexDialog";
+import { LogoMark } from "@/components/Logo";
 
 const cardsQuery = queryOptions({
   queryKey: ["match-cards"],
@@ -257,7 +258,7 @@ function MatchesPage() {
             defaultOpen={i === 0}
             title={m.other_name || "A researcher"}
             subtitle={m.other_institution || "Institution not given"}
-            aside={<>{stateOf(m.id) === "saved" && <BookmarkCheck className="h-4 w-4 text-primary" aria-label="Saved" />}<Thumbs type="match" id={m.id} value={fb[`match:${m.id}`] ?? 0} /><span className="rounded-full bg-accent px-3 py-1 font-mono text-sm text-accent-foreground">{Math.round(m.score * 100)}%</span></>}
+            aside={<>{stateOf(m.id) === "saved" && <BookmarkCheck className="h-4 w-4 text-primary" aria-label="Saved" />}<span className="inline-flex items-center gap-1 rounded-full border bg-background px-2 py-0.5 text-xs font-medium" title="On Lattice Scout"><LogoMark className="h-3.5 w-3.5" /> Lattice Scout</span><Thumbs type="match" id={m.id} value={fb[`match:${m.id}`] ?? 0} /><span className="rounded-full bg-accent px-3 py-1 font-mono text-sm text-accent-foreground">{Math.round(m.score * 100)}%</span></>}
           >
            <div className="space-y-4">
             {m.shared_topics.length > 0 && (
