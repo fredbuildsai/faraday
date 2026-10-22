@@ -10,7 +10,13 @@ export function swipeDecision(dx: number, threshold = SWIPE_THRESHOLD): SwipeDec
   return null;
 }
 
-/** A match still waits in the deck until the user has decided on it. */
-export function inDeck(m: { state: string; i_am_interested: boolean }): boolean {
+/**
+ * A Lattice Scout member stays in the deck until the user has decided on them.
+ * Members dismissed earlier are proposed again (shown with a "previously dismissed" note),
+ * except the ones passed during the current visit.
+ */
+export function inDeck(m: { state: string; i_am_interested: boolean }, passedThisVisit = false): boolean {
+  if (passedThisVisit) return false;
+  if (m.state === "dismissed") return true;
   return m.state === "active" && !m.i_am_interested;
 }

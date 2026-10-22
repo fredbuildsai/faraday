@@ -8,7 +8,11 @@ describe("swipe", () => {
   it("decided matches leave the deck", () => {
     expect(inDeck({ state: "active", i_am_interested: false })).toBe(true);
     expect(inDeck({ state: "saved", i_am_interested: false })).toBe(false);
-    expect(inDeck({ state: "dismissed", i_am_interested: false })).toBe(false);
     expect(inDeck({ state: "active", i_am_interested: true })).toBe(false);
+  });
+  it("dismissed members are proposed again, unless passed this visit", () => {
+    expect(inDeck({ state: "dismissed", i_am_interested: false })).toBe(true);
+    expect(inDeck({ state: "dismissed", i_am_interested: true })).toBe(true);
+    expect(inDeck({ state: "dismissed", i_am_interested: false }, true)).toBe(false);
   });
 });

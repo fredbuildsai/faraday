@@ -23,6 +23,8 @@ export type ScientistCard = {
   openalexId?: string | null;
   /** True when this researcher is a Lattice Scout member. */
   member?: boolean;
+  /** True when the user dismissed this member before; they are proposed again with a note. */
+  dismissed?: boolean;
 };
 
 type Props = {
@@ -114,12 +116,17 @@ function CardBody({ c }: { c: ScientistCard }) {
       <div className="flex items-start gap-4">
         <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary font-serif text-2xl text-primary-foreground">{initials(c.name)}</div>
         <div className="min-w-0 flex-1">
-          <p className="mb-1 inline-block rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">{c.layer}</p>
           {c.member && (
-            <p className="mb-1 ml-1 inline-flex items-center gap-1 rounded-full border bg-background px-2 py-0.5 text-xs font-medium" title="On Lattice Scout">
-              <LogoMark className="h-3.5 w-3.5" /> Lattice Scout
-            </p>
+            <div className="mb-2 flex flex-wrap items-center gap-1.5">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary" title="On Lattice Scout">
+                <LogoMark className="h-4 w-4" /> Lattice Scout member
+              </span>
+              {c.dismissed && (
+                <span className="rounded-full border border-dashed bg-muted px-2.5 py-1 text-xs text-muted-foreground">Previously dismissed</span>
+              )}
+            </div>
           )}
+          <p className="mb-1 inline-block rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">{c.layer}</p>
           <h2 className="truncate font-serif text-2xl">{c.name}</h2>
           <p className="truncate text-sm text-muted-foreground">{c.institution || "Institution not given"}</p>
         </div>
