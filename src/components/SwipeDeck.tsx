@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Heart, Undo2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { swipeDecision } from "@/lib/swipe";
+import { OpenAlexDialog } from "@/components/OpenAlexDialog";
 
 export type ScientistCard = {
   id: string;
@@ -18,6 +19,7 @@ export type ScientistCard = {
   recentWorks: number;
   methods: string[];
   directions: string[];
+  openalexId?: string | null;
 };
 
 type Props = {
@@ -121,6 +123,7 @@ function CardBody({ c }: { c: ScientistCard }) {
         <Stat label="citations" value={c.citations.toLocaleString()} />
         <Stat label="papers, 3 yrs" value={c.recentWorks} />
       </div>
+      {c.openalexId && <div><OpenAlexDialog authorId={c.openalexId} name={c.name} /></div>}
 
       {c.sharedTopics.length > 0 && (
         <div>

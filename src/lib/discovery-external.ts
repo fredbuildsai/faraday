@@ -56,14 +56,16 @@ export function authorTopicWeights(author: any): Record<string, number> {
 }
 
 /** Activity: works in the last 3 years / 3, capped at 1 (same rule as members). */
+export function recentWorksCount(author: any, currentYear: number): number {
+  return (author?.counts_by_year ?? []).filter((c: any) => c.year >= currentYear - 2).reduce((s: number, c: any) => s + (c.works_count ?? 0), 0);
+}
 export function authorActivity(author: any, currentYear: number): number {
-  const n = (author?.counts_by_year ?? []).filter((c: any) => c.year >= currentYear - 2).reduce((s: number, c: any) => s + (c.works_count ?? 0), 0);
-  return Math.min(1, n / 3);
+  return Math.min(1, recentWorksCount(author, currentYear) / 3);
 }
 
 export interface ExternalPick {
   openalex_id: string; name: string; institution: string | null; score: number; t: number;
-  layer: Layer; via: string | null; shared_topics: string[]; h_index: number; citations: number; works_count: number;
+  layer: Layer; via: string | null; shared_topics: string[]; h_index: number; citations: number; works_count: number; recent_works: number;
 }
 
 /** Score looked-up authors against you with the same rule as members; keep the best `size`. */
@@ -80,6 +82,7 @@ export function rankExternal(me: Profile, raws: RawCandidate[], authors: Map<str
       openalex_id: r.id, name: a.display_name || r.name, institution: a.last_known_institutions?.[0]?.display_name ?? null,
       score: s.score, t: s.T, layer: r.layer, via: r.via, shared_topics: s.sharedTopics.map((k) => String(topicNames.get(k) ?? k)),
       h_index: a.summary_stats?.h_index ?? 0, citations: a.cited_by_count ?? 0, works_count: a.works_count ?? 0,
+      recent_works: recentWorksCount(a, currentYear),
     });
   }
   out.sort((x, y) => (x.layer === y.layer ? 0 : x.layer === "second_degree" ? -1 : 1) || y.score - x.score);

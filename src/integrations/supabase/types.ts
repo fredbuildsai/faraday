@@ -71,6 +71,7 @@ export type Database = {
           layer: string
           name: string
           openalex_id: string
+          recent_works: number | null
           score: number
           shared_topics: string[]
           state: string
@@ -89,6 +90,7 @@ export type Database = {
           layer?: string
           name: string
           openalex_id: string
+          recent_works?: number | null
           score: number
           shared_topics?: string[]
           state?: string
@@ -107,6 +109,7 @@ export type Database = {
           layer?: string
           name?: string
           openalex_id?: string
+          recent_works?: number | null
           score?: number
           shared_topics?: string[]
           state?: string
@@ -614,6 +617,7 @@ export type Database = {
           h_index: number
           interests: string
           methods: string[]
+          openalex_ids: string[]
           other_id: string
           recent_works: number
           works_count: number
