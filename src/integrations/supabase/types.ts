@@ -164,18 +164,21 @@ export type Database = {
         Row: {
           created_at: string
           dropped_claims: Json
+          settings: Json
           suggestions: Json
           user_id: string
         }
         Insert: {
           created_at?: string
           dropped_claims?: Json
+          settings?: Json
           suggestions?: Json
           user_id: string
         }
         Update: {
           created_at?: string
           dropped_claims?: Json
+          settings?: Json
           suggestions?: Json
           user_id?: string
         }
@@ -319,6 +322,50 @@ export type Database = {
           works_truncated?: boolean
         }
         Relationships: []
+      }
+      saved_opportunities: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string
+          notes_updated_at: string | null
+          snapshot: Json
+          source_key: string
+          state: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string
+          notes_updated_at?: string | null
+          snapshot?: Json
+          source_key: string
+          state?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string
+          notes_updated_at?: string | null
+          snapshot?: Json
+          source_key?: string
+          state?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_opportunities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       works: {
         Row: {

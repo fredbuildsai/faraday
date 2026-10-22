@@ -50,6 +50,13 @@
       "when": 1792669422939,
       "tag": "0006_opportunities_feedback",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792675060824,
+      "tag": "0007_opportunity_modes_saved",
+      "breakpoints": true
     }
   ]
 }
