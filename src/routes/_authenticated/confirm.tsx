@@ -5,7 +5,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { importWorks, resolveAuthor } from "@/lib/openalex.functions";
 import type { AuthorCandidate } from "@/lib/openalex-math";
-import { Logo } from "@/components/Logo";
 import { ConfidentialNotice } from "@/components/ConfidentialNotice";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";

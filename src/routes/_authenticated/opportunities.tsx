@@ -10,7 +10,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Logo } from "@/components/Logo";
 import { OpportunityCard } from "@/components/OpportunityCard";
 import { findOpportunities } from "@/lib/opportunities.functions";
 import { markOpportunity, type SavedState } from "@/lib/saved-opportunities";

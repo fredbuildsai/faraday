@@ -14,7 +14,6 @@ import type { WorkTopic } from "@/lib/openalex-math";
 import { runAnalysis } from "@/lib/analysis.functions";
 import { AnalysisSection } from "@/components/AnalysisSection";
 import type { Edit } from "@/lib/analysis";
-import { Logo } from "@/components/Logo";
 import { ConfidentialNotice } from "@/components/ConfidentialNotice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -190,16 +189,6 @@ function ProfilePage() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b bg-card">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-          <Logo />
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/matches" })}>Matches</Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/opportunities" })}>Opportunities</Button>
-            <Button variant="outline" size="sm" onClick={signOut}>Sign out</Button>
-          </div>
-        </div>
-      </header>
       <main className="mx-auto max-w-5xl space-y-6 px-6 py-10">
         <ConfidentialNotice />
         <div className="flex flex-wrap items-center gap-5 rounded-xl border bg-card p-6">

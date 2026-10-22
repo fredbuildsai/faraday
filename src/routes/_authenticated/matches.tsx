@@ -7,7 +7,6 @@ import { ChevronDown, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Logo } from "@/components/Logo";
 import { Section } from "@/components/Section";
 import { computeMatches, setInterest } from "@/lib/matching.functions";
 import { Thumbs } from "@/components/Thumbs";

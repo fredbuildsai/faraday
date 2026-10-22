@@ -11,7 +11,6 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Logo } from "@/components/Logo";
 import { ConfidentialNotice } from "@/components/ConfidentialNotice";
 import { OpportunityCard } from "@/components/OpportunityCard";
 import type { Suggestion } from "@/lib/opportunities";
