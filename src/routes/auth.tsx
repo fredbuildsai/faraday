@@ -16,7 +16,7 @@ export const Route = createFileRoute("/auth")({
       { title: "Sign in — Lattice Scout" },
       { name: "description", content: "Sign in or create your Lattice Scout account with email or Google." },
       { property: "og:title", content: "Sign in — Lattice Scout" },
-      { property: "og:description", content: "Find the paper hiding in your drawer." },
+      { property: "og:description", content: "Connect. Innovate. Publish." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -91,9 +91,11 @@ function AuthPage() {
   return (
     <div className="grid min-h-screen content-start lg:grid-cols-2 lg:content-stretch">
       <section className="flex flex-col gap-4 px-6 pb-2 pt-6 lg:justify-between lg:gap-0 lg:p-16">
-        <Logo tag size="large" />
+        <div className="flex justify-center">
+          <Logo tag size="large" />
+        </div>
         <div className="max-w-md lg:my-12">
-          <h1 className="font-serif text-2xl leading-tight lg:text-3xl">Find the paper hiding in your drawer.</h1>
+          <h1 className="font-serif text-2xl leading-tight lg:text-3xl">Connect. Innovate. Publish.</h1>
           <ul className="mt-10 hidden space-y-5 lg:block">
             {features.map((t) => (
               <li key={t} className="border-l-2 border-primary pl-4 font-medium">{t}</li>
