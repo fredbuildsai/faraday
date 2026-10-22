@@ -18,7 +18,7 @@ export async function aiChat(messages: Msg[], opts: { json?: boolean } = {}): Pr
       // A slow provider must not hang the request: give up after 40s and try the next one.
       const res = await fetch(`${c.baseUrl}/chat/completions`, {
         method: "POST",
-        signal: AbortSignal.timeout(Number(process.env.AI_TIMEOUT_MS) || 40_000),
+        signal: AbortSignal.timeout(Number(process.env["AI_TIMEOUT_MS"]) || 40_000),
         headers: { Authorization: `Bearer ${c.apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({ model: c.model, temperature: 0.2, messages, ...(opts.json ? { response_format: { type: "json_object" } } : {}) }),
       });
