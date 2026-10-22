@@ -1,7 +1,8 @@
 /** Monthly refresh rules. */
 export const REFRESH_AFTER_DAYS = 30;
-export const USERS_PER_RUN = 1;
-export const LOCK_MINUTES = 10;
+/** Runs once a night, so each run handles a small batch of due profiles. */
+export const USERS_PER_RUN = 5;
+export const LOCK_MINUTES = 30;
 
 /** Is this profile due for its monthly re-import? */
 export function isDue(lastImportedAt: string | null, now: Date): boolean {
