@@ -3,7 +3,8 @@ import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Bookmark, BookmarkCheck, ThumbsDown } from "lucide-react";
+import { AlertTriangle, Bookmark, BookmarkCheck, ThumbsDown } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -116,19 +117,32 @@ function OpportunitiesPage() {
         </div>
 
         {mode === "network" && (
-          <section className="space-y-3">
-              <h2 className="font-serif text-xl">Collaborators and matches</h2>
-              {shownMatches.length ? (
-                <div className="flex flex-wrap gap-4">
-                  {shownMatches.map((m) => (
-                    <label key={m.id} className="flex items-center gap-2 text-sm">
-                      <Checkbox checked={picked.has(m.id)} onCheckedChange={(v) => setPicked((p) => { const n = new Set(p); v ? n.add(m.id) : n.delete(m.id); return n; })} />
-                      {m.name}{m.collaborator ? " · collaborator" : ""}{m.mutual ? " · mutual" : ""}
-                    </label>
-                  ))}
-                </div>
-              ) : <p className="text-sm text-muted-foreground">{mutualOnly ? "No collaborators or mutual-interest matches yet." : "No collaborators or matches found yet."}</p>}
-              {shownMatches.length > 0 && picked.size === 0 && <p className="text-xs text-muted-foreground">None selected — opportunities will come from your own publications only.</p>}
+          <section className="space-y-4">
+            {[
+              { title: "Collaborators", people: shownMatches.filter((m) => m.collaborator), empty: "No collaborators found yet." },
+              { title: "Matches", people: shownMatches.filter((m) => !m.collaborator), empty: mutualOnly ? "No mutual-interest matches yet." : "No matches yet." },
+            ].map((g) => (
+              <div key={g.title} className="space-y-2">
+                <h2 className="font-serif text-xl">{g.title}</h2>
+                {g.people.length ? (
+                  <div className="flex flex-wrap gap-4">
+                    {g.people.map((m) => (
+                      <label key={m.id} className="flex items-center gap-2 text-sm">
+                        <Checkbox checked={picked.has(m.id)} onCheckedChange={(v) => setPicked((p) => { const n = new Set(p); v ? n.add(m.id) : n.delete(m.id); return n; })} />
+                        {m.name}{m.mutual ? " · mutual" : ""}
+                      </label>
+                    ))}
+                  </div>
+                ) : <p className="text-sm text-muted-foreground">{g.empty}</p>}
+              </div>
+            ))}
+            {picked.size === 0 && (
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>No one selected</AlertTitle>
+                <AlertDescription>Opportunities will come from your own publications only. Each will list potential collaborators from your network.</AlertDescription>
+              </Alert>
+            )}
           </section>
         )}
 

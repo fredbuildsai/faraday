@@ -30,6 +30,19 @@ export function OpportunityCard({ s, actions, children }: { s: Suggestion; actio
       {!!s.collaborators?.length && (
         <div className="text-sm"><span className="font-medium">Collaborators and matches whose papers are cited here: </span>{s.collaborators.map((c) => c.name).join(", ")}</div>
       )}
+      {!!s.potential?.length && (
+        <div className="text-sm">
+          <p className="font-medium">Potential collaborators <span className="font-normal text-muted-foreground">(your collaborators and their co-authors working on this)</span></p>
+          <ul className="mt-1 space-y-0.5 text-muted-foreground">
+            {s.potential.map((p) => (
+              <li key={p.id}>
+                <OpenAlexDialog authorId={p.id} name={p.name} trigger={<button type="button" className="text-foreground hover:underline">{p.name}</button>} />
+                {" · "}{p.degree === 1 ? "1st · direct collaborator" : `2nd · via ${p.via.join(", ")}`}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="text-sm">
         <p className="font-medium">Likely principal investigators <span className="font-normal text-muted-foreground">(last author of each evidence paper)</span></p>
         {s.pis?.length ? (

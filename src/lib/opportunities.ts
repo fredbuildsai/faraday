@@ -29,6 +29,8 @@ export type Suggestion = {
   novelty?: number | null;
   pis?: Person[];
   collaborators?: { id: string; name: string }[];
+  /** Own-work searches: direct collaborators (degree 1) and their co-authors (degree 2). */
+  potential?: { id: string; name: string; degree: 1 | 2; via: string[] }[];
   whitespace?: Whitespace;
 };
 export type OppSettings = { mode: "network" | "broad"; excludeReviews: boolean; matchIds: string[]; collaboratorIds?: string[]; mutualOnly: boolean };
