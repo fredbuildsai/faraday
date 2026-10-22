@@ -16,6 +16,7 @@ import { Route as AuthenticatedConfirmRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedMatchesRouteImport } from './routes/_authenticated/matches'
 import { Route as AuthenticatedOpportunitiesRouteImport } from './routes/_authenticated/opportunities'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedOpportunitiesManageRouteImport } from './routes/_authenticated/opportunities_.manage'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,12 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOpportunitiesManageRoute =
+  AuthenticatedOpportunitiesManageRouteImport.update({
+    id: '/opportunities_/manage',
+    path: '/opportunities/manage',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/matches': typeof AuthenticatedMatchesRoute
   '/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/opportunities/manage': typeof AuthenticatedOpportunitiesManageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -68,6 +76,7 @@ export interface FileRoutesByTo {
   '/matches': typeof AuthenticatedMatchesRoute
   '/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/opportunities/manage': typeof AuthenticatedOpportunitiesManageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -78,13 +87,27 @@ export interface FileRoutesById {
   '/_authenticated/matches': typeof AuthenticatedMatchesRoute
   '/_authenticated/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/opportunities_/manage': typeof AuthenticatedOpportunitiesManageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/confirm' | '/matches' | '/opportunities' | '/profile'
+    | '/'
+    | '/auth'
+    | '/confirm'
+    | '/matches'
+    | '/opportunities'
+    | '/profile'
+    | '/opportunities/manage'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/confirm' | '/matches' | '/opportunities' | '/profile'
+  to:
+    | '/'
+    | '/auth'
+    | '/confirm'
+    | '/matches'
+    | '/opportunities'
+    | '/profile'
+    | '/opportunities/manage'
   id:
     | '__root__'
     | '/'
@@ -94,6 +117,7 @@ export interface FileRouteTypes {
     | '/_authenticated/matches'
     | '/_authenticated/opportunities'
     | '/_authenticated/profile'
+    | '/_authenticated/opportunities_/manage'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -153,6 +177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/opportunities_/manage': {
+      id: '/_authenticated/opportunities_/manage'
+      path: '/opportunities/manage'
+      fullPath: '/opportunities/manage'
+      preLoaderRoute: typeof AuthenticatedOpportunitiesManageRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -161,6 +192,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMatchesRoute: typeof AuthenticatedMatchesRoute
   AuthenticatedOpportunitiesRoute: typeof AuthenticatedOpportunitiesRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedOpportunitiesManageRoute: typeof AuthenticatedOpportunitiesManageRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -168,6 +200,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMatchesRoute: AuthenticatedMatchesRoute,
   AuthenticatedOpportunitiesRoute: AuthenticatedOpportunitiesRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedOpportunitiesManageRoute: AuthenticatedOpportunitiesManageRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

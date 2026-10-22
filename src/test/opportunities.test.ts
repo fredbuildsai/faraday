@@ -34,3 +34,43 @@ describe("opportunities", () => {
     expect(isFresh("2026-01-01T00:00:00Z", now)).toBe(false);
   });
 });
+
+import { assessWhitespace, principalInvestigators, sameSettings } from "@/lib/opportunities";
+import { describe as d2, it as i2, expect as e2 } from "vitest";
+
+d2("principal investigators", () => {
+  i2("lists last and corresponding authors, merged by id", () => {
+    const pis = principalInvestigators([
+      { authorships: [
+        { author_position: "first", is_corresponding: false, author: { id: "A1", display_name: "First" } },
+        { author_position: "middle", is_corresponding: true, author: { id: "A2", display_name: "Corr" } },
+        { author_position: "last", is_corresponding: false, author: { id: "A3", display_name: "Senior" } },
+      ] },
+      { authorships: [{ author_position: "last", is_corresponding: true, author: { id: "A2", display_name: "Corr" } }] },
+    ]);
+    e2(pis.map((p) => p.name)).toEqual(["Corr", "Senior"]);
+    e2(pis[0]!.roles.sort()).toEqual(["corresponding", "last"]);
+  });
+});
+
+d2("whitespace", () => {
+  const base = { query: "sodium battery cathode aging", sinceYear: 2023, totalCount: 100 };
+  i2("under 50 recent papers is potentially underexplored", () => {
+    e2(assessWhitespace({ ...base, recentCount: 49, closest: [] }).level).toBe("underexplored");
+  });
+  i2("500 or more recent papers is well studied", () => {
+    e2(assessWhitespace({ ...base, recentCount: 500, closest: [] }).level).toBe("crowded");
+  });
+  i2("a closely matching existing title marks it well studied", () => {
+    const w = assessWhitespace({ ...base, recentCount: 3, closest: [{ id: "W1", title: "Sodium battery cathode aging", url: "" }] });
+    e2(w.level).toBe("crowded");
+  });
+});
+
+d2("settings cache", () => {
+  i2("different mode or review filter means not the same", () => {
+    const s = { mode: "broad" as const, excludeReviews: false, mutualOnly: false, matchIds: [] };
+    e2(sameSettings(s, s)).toBe(true);
+    e2(sameSettings({ ...s, excludeReviews: true }, s)).toBe(false);
+  });
+});
