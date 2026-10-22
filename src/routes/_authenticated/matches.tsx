@@ -131,7 +131,7 @@ function MatchesPage() {
       connection: layers[m.id]?.layer === "second_degree" ? layers[m.id]?.vias ?? [] : [],
       sharedTopics: m.shared_topics, interests: c?.interests ?? null,
       hIndex: c?.h_index ?? 0, citations: Number(c?.citations ?? 0), worksCount: c?.works_count ?? 0, recentWorks: c?.recent_works ?? 0,
-      methods: c?.methods ?? [], directions: c?.directions ?? [], openalexId: c?.openalex_ids?.[0] ?? null,
+      methods: c?.methods ?? [], directions: c?.directions ?? [], openalexId: c?.openalex_ids?.[0] ?? null, openalexIds: c?.openalex_ids ?? [],
       member: true, dismissed: stateOf(m.id) === "dismissed",
     };
   }).concat(external.filter((e) => e.state === "active").map((e) => ({
