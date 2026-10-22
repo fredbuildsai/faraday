@@ -604,8 +604,11 @@ export type Database = {
           body: string
           created_at: string
           id: string
+          item_id: string | null
+          mentions: string[]
           paper_id: string | null
           project_id: string
+          reference_id: string | null
           resolved: boolean
           section_id: string | null
         }
@@ -614,8 +617,11 @@ export type Database = {
           body: string
           created_at?: string
           id?: string
+          item_id?: string | null
+          mentions?: string[]
           paper_id?: string | null
           project_id: string
+          reference_id?: string | null
           resolved?: boolean
           section_id?: string | null
         }
@@ -624,12 +630,22 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          item_id?: string | null
+          mentions?: string[]
           paper_id?: string | null
           project_id?: string
+          reference_id?: string | null
           resolved?: boolean
           section_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "project_comments_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "project_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "project_comments_paper_id_fkey"
             columns: ["paper_id"]
@@ -645,10 +661,87 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "project_comments_reference_id_fkey"
+            columns: ["reference_id"]
+            isOneToOne: false
+            referencedRelation: "project_references"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "project_comments_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
             referencedRelation: "project_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_contributions: {
+        Row: {
+          created_at: string
+          project_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          project_id: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          project_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_contributions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_items: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string
+          id: string
+          kind: string
+          project_id: string
+          resolved: boolean
+          title: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind: string
+          project_id: string
+          resolved?: boolean
+          title: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind?: string
+          project_id?: string
+          resolved?: boolean
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
@@ -732,6 +825,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "project_papers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_references: {
+        Row: {
+          added_by: string
+          authors: string
+          created_at: string
+          doi: string
+          id: string
+          openalex_id: string | null
+          project_id: string
+          title: string
+          url: string | null
+          venue: string
+          year: number | null
+        }
+        Insert: {
+          added_by?: string
+          authors?: string
+          created_at?: string
+          doi?: string
+          id?: string
+          openalex_id?: string | null
+          project_id: string
+          title: string
+          url?: string | null
+          venue?: string
+          year?: number | null
+        }
+        Update: {
+          added_by?: string
+          authors?: string
+          created_at?: string
+          doi?: string
+          id?: string
+          openalex_id?: string | null
+          project_id?: string
+          title?: string
+          url?: string | null
+          venue?: string
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_references_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
@@ -873,6 +1016,7 @@ export type Database = {
         Row: {
           archived: boolean
           created_at: string
+          custom_roles: Json
           description: string
           id: string
           owner_id: string
@@ -886,6 +1030,7 @@ export type Database = {
         Insert: {
           archived?: boolean
           created_at?: string
+          custom_roles?: Json
           description?: string
           id?: string
           owner_id: string
@@ -899,6 +1044,7 @@ export type Database = {
         Update: {
           archived?: boolean
           created_at?: string
+          custom_roles?: Json
           description?: string
           id?: string
           owner_id?: string
