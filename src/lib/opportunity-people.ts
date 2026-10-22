@@ -1,9 +1,10 @@
+import { DEFAULT_OPPORTUNITY_CONFIG } from "@/lib/opportunity-config";
+
 export type OpportunityPerson = { id: string; name: string; mutual: boolean; collaborator: boolean };
 export type OpportunityMatch = { id: string; name: string; mutual: boolean; authorIds: string[] };
-export const OPPORTUNITY_COLLABORATOR_LIMIT = 10;
 
 /** Direct co-authors are eligible here even though discovery excludes them. */
-export function opportunityPeople(matches: OpportunityMatch[], works: { authors: { id: string; name: string }[] }[], ownIds: string[]): OpportunityPerson[] {
+export function opportunityPeople(matches: OpportunityMatch[], works: { authors: { id: string; name: string }[] }[], ownIds: string[], config = DEFAULT_OPPORTUNITY_CONFIG): OpportunityPerson[] {
   const short = (id: string) => id.split("/").pop() ?? "";
   const own = new Set(ownIds.map(short));
   const people = new Map<string, OpportunityPerson>(matches.map((m) => [m.id, { id: m.id, name: m.name, mutual: m.mutual, collaborator: false }]));
@@ -21,7 +22,7 @@ export function opportunityPeople(matches: OpportunityMatch[], works: { authors:
       counted.add(key);
     }
   }
-  const top = [...frequency.keys()].sort((a, b) => (frequency.get(b) ?? 0) - (frequency.get(a) ?? 0) || (names.get(a) ?? "").localeCompare(names.get(b) ?? "")).slice(0, OPPORTUNITY_COLLABORATOR_LIMIT);
+  const top = [...frequency.keys()].sort((a, b) => (frequency.get(b) ?? 0) - (frequency.get(a) ?? 0) || (names.get(a) ?? "").localeCompare(names.get(b) ?? "")).slice(0, config.collaboratorLimit);
   for (const id of top) {
     const member = people.get(id);
     if (member) member.collaborator = true;

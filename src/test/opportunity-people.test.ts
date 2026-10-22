@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { opportunityPeople, eligibleOpportunityPeople } from "@/lib/opportunity-people";
+import { resolveOpportunityConfig } from "@/lib/opportunity-config";
 
 describe("opportunity collaborators", () => {
   const works = [{ authors: [{ id: "A1", name: "Me" }, { id: "A2", name: "Brett" }, { id: "https://openalex.org/A2", name: "Brett" }, { id: "A3", name: "Hubert" }] }];
@@ -25,5 +26,12 @@ describe("opportunity collaborators", () => {
   it("counts each collaborator once per paper, not per author entry", () => {
     const people = opportunityPeople([], [works[0], { authors: [{ id: "A3", name: "Hubert" }] }].filter((w): w is typeof works[number] => !!w), ["A1"]);
     expect(people[0]?.id).toBe("A3");
+  });
+  it("honours a configurable limit rather than fixing selection at ten", () => {
+    const papers = Array.from({ length: 20 }, (_, i) => ({ authors: [{ id: `A${i + 2}`, name: `Person ${i}` }] }));
+    expect(opportunityPeople([], papers, ["A1"], resolveOpportunityConfig({ OPPORTUNITY_COLLABORATOR_LIMIT: "4" }))).toHaveLength(4);
+  });
+  it("defaults to ten for invalid configuration", () => {
+    expect(resolveOpportunityConfig({ OPPORTUNITY_COLLABORATOR_LIMIT: "invalid" }).collaboratorLimit).toBe(10);
   });
 });

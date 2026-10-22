@@ -8,7 +8,7 @@
 - [x] Opportunities, feedback, notices, empty/loading states
 - [x] Opportunity modes, review filter, likely PIs, whitespace check, save/dismiss + manage page with notes
 - [x] Include direct collaborators alongside matches in opportunity selection and published-work evidence
-- [ ] Limit opportunity collaborator choices to the 10 most frequent co-authors
+- [ ] Limit opportunity collaborator choices using configurable settings (default: 10 most frequent)
 - [x] Add fourth scientist-card metric: open-access percentage over the rolling last three years
 - [x] Match management (save/dismiss, tabs, private notes, AI collaboration ideas)
 - [x] Monthly refresh cron (once a night at 01:00 UTC = 03:00 Madrid summer time, up to 5 due users per run, pauses on AI 402/403)
