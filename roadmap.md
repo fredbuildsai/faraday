@@ -8,7 +8,7 @@
 - [x] Opportunities, feedback, notices, empty/loading states
 - [x] Opportunity modes, review filter, likely PIs, whitespace check, save/dismiss + manage page with notes
 - [x] Match management (save/dismiss, tabs, private notes, AI collaboration ideas)
-- [x] Monthly refresh cron (every 20 min, 1 due user per run, pauses on AI 402/403)
+- [x] Monthly refresh cron (once a night at 01:00 UTC = 03:00 Madrid summer time, up to 5 due users per run, pauses on AI 402/403)
 - [ ] Seed test researchers Johan Foster (UBC email) & Raphaell Moreira (Bremen email), check their match
 - [x] Test researchers Gasteiger, Dahn, Lucht (scripts/test-seed, rollback ready)
 - [ ] Remove test researchers when testing is done (run rollback)
