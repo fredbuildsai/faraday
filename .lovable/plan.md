@@ -34,6 +34,15 @@
 - Skipped when works + interests text are unchanged. Max 3 analyses per user per day, with a notice when exceeded.
 - User can delete any interest/method and add their own (marked "added by you"); these edits survive re-analysis.
 
+## Matching (no AI in the score)
+- Runs automatically each time a profile analysis finishes, comparing the user with everyone else who has a finished analysis.
+- Score = topic similarity x (1 - method overlap)^1.5 x activity factor: "similar topics, different methods, both active".
+- Pairs where either side brings no method the other lacks are skipped. Minimum score 0.11 (adjustable setting). Max 5 new matches per user per 7 days, best first.
+- **Matches page**: header gains a "Matches" link. Cards show name, institution, score, shared topics, "you bring / they bring" methods, and a collapsible "Why this score" panel with each number. No email on cards.
+- **Match detail**: short AI summary (max 60 words) and up to 2 collaboration ideas, from shared topics, methods and up to 5 work titles each only; generated once and saved.
+- **Double opt-in**: "I'm interested" button. Both emails appear only once both people clicked it, enforced in the database, not just on screen.
+- Seed profiles get analyses and methods so matches show up right away.
+
 ## Seed data
 - Invites: 3 example researchers (example.edu) plus your email (please send it).
 - 3 example profiles with synthetic works, topic weights and activity.
@@ -46,4 +55,6 @@
 - The brief's "Edge Function `import-works`" is implemented as server functions (`resolveAuthor`, `importWorks`) on this stack, authenticated as the user and using the service role server-side for cache writes. Secrets `OPENALEX_MAILTO` (required) and `OPENALEX_API_KEY` (optional) requested after approval.
 - ORCID checksum (ISO 7064 MOD 11-2) and the topic-weight / activity math in a pure module with unit tests.
 - Analysis: "Edge Function `analyze-profile`" implemented as a server function started in the background after `importWorks`, calling the Mistral API directly with secret `MISTRAL_API_KEY`. Tables `profile_analysis(user_id, status, summary, research_interests, methods, emerging_directions, evidence, dropped_claims, model, input_hash, created_at)`, `profile_analysis_edits(user_id, kind, value, action add/remove)` for user edits, `llm_calls(user_id, tokens, ms, ok)`. RLS own rows only; `dropped_claims` excluded from client reads (served via a view/server function). Daily limit counted from `profile_analysis` rows. Evidence verification, input hash and edit-merge logic in a pure module with unit tests.
+- Matching: TypeScript server function `computeMatches(userId)` (pure scoring module with unit tests for T, M, act, score, complementarity skip, threshold, 7-day cap) run after analysis reaches done. Setting table `app_settings(match_threshold default 0.11)`. Table `matches(user_a, user_b, score, t, m, act, shared_topics, a_only, b_only, formula 'c2', explanation jsonb, created_at)`; RLS readable only by its two users; no email column. `explainMatch` server function calls Mistral (JSON schema, max 60-word summary, max 2 ideas) with only topics, methods and up to 5 titles each; result cached in `matches.explanation`; logged in `llm_calls`.
+- Double opt-in: table `interests(from_user, to_user)` (insert own only). View `match_reveal_v` (security barrier, filtered to auth.uid()) returns the other user's email only when both interest rows exist; email is never readable any other way.
 - Seed via migration INSERTs (synthetic auth users for the 3 examples).
