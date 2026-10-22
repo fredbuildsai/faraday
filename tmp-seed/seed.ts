@@ -1,8 +1,8 @@
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { openalexGet } from "@/lib/openalex.server";
-import { computeActivity, computeTopicWeights, shortId, type WorkTopic } from "@/lib/openalex-math";
-import { aiChat, parseJson } from "@/lib/ai-call.server";
-import { CHUNK_SIZE, LIMITS, chunk, clipWords, inputFingerprint, verifyClaims } from "@/lib/analysis";
+import { supabaseAdmin } from "../src/integrations/supabase/client.server";
+import { openalexGet } from "../src/lib/openalex.server";
+import { computeActivity, computeTopicWeights, shortId, type WorkTopic } from "../src/lib/openalex-math";
+import { aiChat, parseJson } from "../src/lib/ai-call.server";
+import { CHUNK_SIZE, LIMITS, chunk, clipWords, inputFingerprint, verifyClaims } from "../src/lib/analysis";
 
 const SYSTEM = `You analyse a researcher's published work. Use ONLY the given titles, keywords, topics and their own interests text.
 Return JSON: {"summary": string (max 80 words), "interests": [{"label": string, "evidence": [2 exact titles]}] (max 10),
