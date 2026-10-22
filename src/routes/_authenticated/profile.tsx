@@ -1,3 +1,4 @@
+import { OaBadge } from "@/components/OaBadge";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -13,7 +14,6 @@ import type { WorkTopic } from "@/lib/openalex-math";
 import { runAnalysis } from "@/lib/analysis.functions";
 import { AnalysisSection } from "@/components/AnalysisSection";
 import type { Edit } from "@/lib/analysis";
-import { Logo } from "@/components/Logo";
 import { ConfidentialNotice } from "@/components/ConfidentialNotice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ const profileQuery = queryOptions({
     const uid = u.user!.id;
     const [{ data: profile, error }, { data: works }, { data: analysis }, { data: edits }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
-      supabase.from("works").select("id, title, venue, year, cited_by_count, type, topics, doi")
+      supabase.from("works").select("id, title, venue, year, cited_by_count, type, topics, doi, is_oa")
         .eq("user_id", uid).order("year", { ascending: false, nullsFirst: false }).limit(1000),
       supabase.from("profile_analysis").select("status, summary, interests, methods, directions, error, finished_at").eq("user_id", uid).maybeSingle(),
       supabase.from("profile_analysis_edits").select("kind, value, action").eq("user_id", uid),
@@ -189,16 +189,6 @@ function ProfilePage() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b bg-card">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-          <Logo />
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/matches" })}>Matches</Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/opportunities" })}>Opportunities</Button>
-            <Button variant="outline" size="sm" onClick={signOut}>Sign out</Button>
-          </div>
-        </div>
-      </header>
       <main className="mx-auto max-w-5xl space-y-6 px-6 py-10">
         <ConfidentialNotice />
         <div className="flex flex-wrap items-center gap-5 rounded-xl border bg-card p-6">
@@ -300,6 +290,7 @@ function ProfilePage() {
                       <div className="text-sm text-muted-foreground">{[w.venue, w.year].filter(Boolean).join(" · ")}</div>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
+                      {w.is_oa && <OaBadge />}
                       {w.type && <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{w.type}</span>}
                       <span className="font-mono text-xs text-muted-foreground">{w.cited_by_count} cit.</span>
                     </div>

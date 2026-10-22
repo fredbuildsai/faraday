@@ -11,7 +11,6 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Logo } from "@/components/Logo";
 import { ConfidentialNotice } from "@/components/ConfidentialNotice";
 import { OpportunityCard } from "@/components/OpportunityCard";
 import type { Suggestion } from "@/lib/opportunities";
@@ -64,17 +63,6 @@ function ManagePage() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b bg-card">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-          <Logo />
-          <nav className="flex gap-4 text-sm">
-            <Link to="/profile" className="text-muted-foreground hover:text-foreground">Profile</Link>
-            <Link to="/matches" className="text-muted-foreground hover:text-foreground">Matches</Link>
-            <Link to="/opportunities" className="text-muted-foreground hover:text-foreground">Opportunities</Link>
-            <Link to="/opportunities/manage" className="font-medium text-foreground">Saved</Link>
-          </nav>
-        </div>
-      </header>
       <main className="mx-auto max-w-5xl space-y-6 px-6 py-10">
         <div>
           <h1 className="font-serif text-3xl">Manage opportunities</h1>

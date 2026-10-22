@@ -89,3 +89,8 @@
 - Feedback: table `feedback(user_id, target_type 'match'|'opportunity', target_id, value -1|1, created_at, unique(user_id, target_type, target_id))`; RLS own rows; upsert on click.
 - Monthly refresh: daily pg_cron job calls `/api/public/cron/refresh` with a shared secret header (`CRON_SECRET`, generated). Picks up to 20 users whose `last_imported_at` is over 30 days old, runs import then analysis (skipped if input hash unchanged) then matching. Lease row in `job_locks` for single-flight; pauses and records reason on Mistral 402/403 or repeated 429.
 - Seed via migration INSERTs (synthetic auth users for the 3 examples).
+
+## Navigation and paper badges (added)
+- One shared header on every signed-in page. Clicking the Lattice Scout logo or name goes to your profile.
+- Burger menu (slide-out panel) with groups: **Your research** (Profile, Confirm publication profile), **Collaboration** (Matches, Opportunities, with Saved opportunities as a sub-item), then Sign out. Current page is highlighted.
+- Papers that are open access (per OpenAlex) show an "Open access" badge in the publication list and in opportunity evidence papers. Closed papers show no badge. Existing publications get the badge after the next publication refresh.

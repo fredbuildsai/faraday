@@ -14,3 +14,5 @@
 - Signed-in pages live under `src/routes/_authenticated/`; `/` redirects to `/auth` or `/profile`.
 - AI provider/model choice lives in `src/lib/ai-config.ts` (code defaults, env overrides `AI_PROVIDER`, `<PROVIDER>_MODEL`); why: model names are not secret, only keys go in Secrets.
 - Test data lives in `scripts/test-seed/` (seed.ts + rollback.ts, accounts tagged `user_metadata.seed`); why: test people must be removable cleanly with all linked rows.
+- Signed-in navigation is one `AppHeader` (logo → /profile, burger drawer with grouped items) rendered by `src/routes/_authenticated/route.tsx`; why: pages must not duplicate their own headers or nav.
+- Open-access status is stored per work (`works.is_oa`, from OpenAlex `open_access.is_oa`) and shown via `OaBadge` only when true; why: one source of truth for every paper list.

@@ -1,3 +1,4 @@
+import { OaBadge } from "@/components/OaBadge";
 import type { ReactNode } from "react";
 import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +47,7 @@ export function OpportunityCard({ s, actions, children }: { s: Suggestion; actio
         <p className="font-medium">Evidence papers</p>
         <ul className="mt-1 space-y-1">
           {s.evidence.map((w) => (
-            <li key={w.id}><a href={w.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary">{w.title} <ExternalLink className="h-3 w-3" /></a></li>
+            <li key={w.id}><a href={w.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary">{w.title} <ExternalLink className="h-3 w-3" /></a>{w.isOa && <> <OaBadge /></>}</li>
           ))}
         </ul>
       </div>

@@ -373,6 +373,7 @@ export type Database = {
           created_at: string
           doi: string | null
           id: string
+          is_oa: boolean
           keywords: Json
           openalex_id: string
           title: string
@@ -387,6 +388,7 @@ export type Database = {
           created_at?: string
           doi?: string | null
           id?: string
+          is_oa?: boolean
           keywords?: Json
           openalex_id: string
           title: string
@@ -401,6 +403,7 @@ export type Database = {
           created_at?: string
           doi?: string | null
           id?: string
+          is_oa?: boolean
           keywords?: Json
           openalex_id?: string
           title?: string
