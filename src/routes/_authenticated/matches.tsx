@@ -113,7 +113,7 @@ function MatchesPage() {
   const { data: layers } = useSuspenseQuery(layersQuery);
   const { data: external } = useSuspenseQuery(externalQuery);
   const layerLabel = (layer: string, via: string | null, topic?: string) => layer === "second_degree"
-    ? `Collaborator of a collaborator${via ? ` · via ${via}` : ""}`
+    ? (via ? `Common connection: ${via}` : "Collaborator of a collaborator")
     : `Shared focus${topic ? ` · ${topic}` : ""}`;
   async function setExternal(id: string, state: string) {
     const { error } = await supabase.from("external_suggestions").update({ state, updated_at: new Date().toISOString() }).eq("id", id);

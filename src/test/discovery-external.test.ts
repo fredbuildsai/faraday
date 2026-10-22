@@ -50,3 +50,13 @@ describe("principal-investigator toggle", () => {
     expect(collectCandidates([], works, new Set(), false).map((x) => x.id).sort()).toEqual(["F", "L", "M"]);
   });
 });
+
+import { topicalPages, BRIDGE_COAUTHORS } from "@/lib/discovery-external";
+import { describe as d2, it as i2, expect as e2 } from "vitest";
+d2("wider search", () => {
+  i2("follows 15 co-authors", () => e2(BRIDGE_COAUTHORS).toBe(15));
+  i2("goes deeper as more people are seen", () => {
+    e2(topicalPages(0)).toEqual([1, 2]);
+    e2(topicalPages(74)).toEqual([1, 5]);
+  });
+});

@@ -1,7 +1,7 @@
 // Fetches outside-the-platform candidates from OpenAlex and stores them as suggestions.
 import type { Profile } from "@/lib/matching";
 import type { MatchWeights } from "@/lib/match-score";
-import { MAX_LOOKUPS, collectCandidates, rankExternal, topCoauthors } from "@/lib/discovery-external";
+import { MAX_LOOKUPS, collectCandidates, rankExternal, topCoauthors, topicalPages } from "@/lib/discovery-external";
 import { threeYearsAgo } from "@/lib/opportunities";
 
 export async function findExternalFor(opts: {
@@ -18,12 +18,18 @@ export async function findExternalFor(opts: {
   for (const w of opts.myWorks) for (const a of w.authors ?? []) if (a?.id) exclude.add(a.id); // direct co-authors
 
   const safe = async (path: string) => { try { return (await openalexGet(path)).results ?? []; } catch (e) { console.error("openalex", path, e); return []; } };
+  const seenCount = (seen ?? []).length;
   const bridges = topCoauthors(opts.myWorks, opts.myAuthorIds);
-  const topTopics = Object.entries(opts.me.topics).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k]) => k);
-  const [bridged, topical] = await Promise.all([
-    Promise.all(bridges.map(async (b) => ({ via: b.name, works: await safe(`/works?filter=author.id:${b.id},from_publication_date:${since}&per_page=50&select=authorships`) }))),
-    topTopics.length ? safe(`/works?filter=topics.id:${topTopics.join("|")},from_publication_date:${since}&sort=cited_by_count:desc&per_page=100&select=authorships`) : Promise.resolve([]),
+  // All your topics (OpenAlex caps OR filters), rotated through pages as you see more people.
+  const topics = Object.entries(opts.me.topics).sort((a, b) => b[1] - a[1]).slice(0, 25).map(([k]) => k);
+  const pages = topicalPages(seenCount);
+  const [bridged, topicalPagesRes] = await Promise.all([
+    Promise.all(bridges.map(async (b) => ({ via: b.name, works: await safe(`/works?filter=author.id:${b.id},from_publication_date:${since}&per_page=100&select=authorships`) }))),
+    topics.length
+      ? Promise.all(pages.map((p) => safe(`/works?filter=topics.id:${topics.join("|")},from_publication_date:${since}&sort=cited_by_count:desc&per_page=100&page=${p}&select=authorships`)))
+      : Promise.resolve([] as any[][]),
   ]);
+  const topical = topicalPagesRes.flat();
 
   const raws = collectCandidates(bridged, topical, exclude, opts.piOnly ?? true);
   // Keep room for both kinds of suggestion.
