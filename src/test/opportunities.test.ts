@@ -39,17 +39,15 @@ import { assessWhitespace, principalInvestigators, sameSettings } from "@/lib/op
 import { describe as d2, it as i2, expect as e2 } from "vitest";
 
 d2("principal investigators", () => {
-  i2("lists last and corresponding authors, merged by id", () => {
+  i2("lists each paper's last author once, merged by id", () => {
     const pis = principalInvestigators([
       { authorships: [
-        { author_position: "first", is_corresponding: false, author: { id: "A1", display_name: "First" } },
         { author_position: "middle", is_corresponding: true, author: { id: "A2", display_name: "Corr" } },
-        { author_position: "last", is_corresponding: false, author: { id: "A3", display_name: "Senior" } },
+        { author_position: "last", author: { id: "A3", display_name: "Senior" } },
       ] },
-      { authorships: [{ author_position: "last", is_corresponding: true, author: { id: "A2", display_name: "Corr" } }] },
+      { authorships: [{ author_position: "last", author: { id: "A3", display_name: "Senior" } }] },
     ]);
-    e2(pis.map((p) => p.name)).toEqual(["Corr", "Senior"]);
-    e2(pis[0]!.roles.sort()).toEqual(["corresponding", "last"]);
+    e2(pis.map((p) => p.name)).toEqual(["Senior"]);
   });
 });
 
