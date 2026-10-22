@@ -76,6 +76,13 @@ export function NewProjectDialog({ trigger, initial }: { trigger: ReactNode; ini
         <div className="space-y-5 text-sm">
           <div className="space-y-1.5"><Label htmlFor="np-title">Title</Label><Input id="np-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="A specific research question" /></div>
           <div className="space-y-1.5"><Label htmlFor="np-desc">Description</Label><Textarea id="np-desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} /></div>
+          {initial?.source && (
+            <div className="space-y-1.5">
+              <Label htmlFor="np-notes">Your notes <span className="font-normal text-muted-foreground">(shared with collaborators as the first discussion post)</span></Label>
+              <Textarea id="np-notes" value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="No notes" />
+              <p className="text-xs text-muted-foreground">Also carried over: {papers.length} paper(s){initial.whitespace ? ", the whitespace check" : ""}{carried.length ? `, ${carried.length} suggested researcher(s)` : ""}.</p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <p className="font-medium">Invite from Lattice Scout</p>
