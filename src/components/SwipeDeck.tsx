@@ -12,8 +12,8 @@ export type ScientistCard = {
   score: number;
   t: number;
   layer: string;
-  /** Shared co-author who links you, when found through your network. */
-  connection?: string | null;
+  /** Shared co-authors who link you, when found through your network (each a 2nd-degree connection). */
+  connection?: string[] | null;
   sharedTopics: string[];
   interests: string | null;
   hIndex: number;
@@ -142,10 +142,12 @@ function CardBody({ c }: { c: ScientistCard }) {
       </div>
       {c.openalexId && <div><OpenAlexDialog authorId={c.openalexId} name={c.name} /></div>}
 
-      {c.connection && (
+      {c.connection && c.connection.length > 0 && (
         <div>
           <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Common connection</p>
-          <span className="rounded-full border px-2.5 py-0.5 text-xs">{c.connection}</span>
+          <div className="flex flex-wrap gap-1.5">
+            {c.connection.map((n) => <span key={n} className="rounded-full border px-2.5 py-0.5 text-xs">2nd · {n}</span>)}
+          </div>
         </div>
       )}
 
