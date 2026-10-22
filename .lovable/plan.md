@@ -25,6 +25,15 @@
 - Fetches all works via cursor paging (200 per page), skips untitled works, stops at 2,000 with a notice.
 - Saves each work (deduplicated per user), then computes topic weights (top 25, summing to 1) and activity score (works in last 3 calendar years / 3, capped at 1).
 
+## Automatic profile analysis (Mistral)
+- Starts on its own after every import (first and each refresh); no click needed.
+- Profile page shows a status chip: pending, running, done, failed (with "Retry"). The last finished result stays visible while a new one runs.
+- Sends only work titles, keywords, topic names, years, and the user's own research-interests text (no email, ORCID, institution or ids). 100 works per call, then one merge call. Model `mistral-small-latest`, temperature 0.2, JSON-schema output; one retry on invalid output, then failed.
+- Result: summary (max 80 words), up to 10 research interests, up to 8 methods, up to 5 emerging directions (themes new in the last 3 years), each interest/method backed by 2 exact work titles.
+- Code checks every evidence title against the user's works; items with fewer than 2 verified titles are dropped and kept privately (never shown).
+- Skipped when works + interests text are unchanged. Max 3 analyses per user per day, with a notice when exceeded.
+- User can delete any interest/method and add their own (marked "added by you"); these edits survive re-analysis.
+
 ## Seed data
 - Invites: 3 example researchers (example.edu) plus your email (please send it).
 - 3 example profiles with synthetic works, topic weights and activity.
@@ -36,4 +45,5 @@
 - Invite check: a security-definer function `is_invited(email)` plus a trigger on `auth.users` that rejects non-invited signups and creates the profile row from signup metadata.
 - The brief's "Edge Function `import-works`" is implemented as server functions (`resolveAuthor`, `importWorks`) on this stack, authenticated as the user and using the service role server-side for cache writes. Secrets `OPENALEX_MAILTO` (required) and `OPENALEX_API_KEY` (optional) requested after approval.
 - ORCID checksum (ISO 7064 MOD 11-2) and the topic-weight / activity math in a pure module with unit tests.
+- Analysis: "Edge Function `analyze-profile`" implemented as a server function started in the background after `importWorks`, calling the Mistral API directly with secret `MISTRAL_API_KEY`. Tables `profile_analysis(user_id, status, summary, research_interests, methods, emerging_directions, evidence, dropped_claims, model, input_hash, created_at)`, `profile_analysis_edits(user_id, kind, value, action add/remove)` for user edits, `llm_calls(user_id, tokens, ms, ok)`. RLS own rows only; `dropped_claims` excluded from client reads (served via a view/server function). Daily limit counted from `profile_analysis` rows. Evidence verification, input hash and edit-merge logic in a pure module with unit tests.
 - Seed via migration INSERTs (synthetic auth users for the 3 examples).
