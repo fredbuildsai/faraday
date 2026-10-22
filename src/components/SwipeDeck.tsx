@@ -93,7 +93,7 @@ export function SwipeDeck({ cards, onDecide, onUndo, canUndo }: Props) {
               {hint === "like" ? "Connect" : "Pass"}
             </span>
           )}
-          <CardBody c={top} />
+          <CardBody key={top.id} c={top} />
         </div>
       </div>
       <div className="mt-6 flex items-center justify-center gap-5">

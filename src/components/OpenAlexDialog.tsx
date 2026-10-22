@@ -15,6 +15,9 @@ export function OpenAlexDialog({ authorId, name }: { authorId: string; name: str
   const [error, setError] = useState(false);
   const id = authorId.split("/").pop()!;
 
+  // Reset when the researcher changes (the deck reuses this component across cards).
+  useEffect(() => { setAuthor(null); setWorks([]); setError(false); }, [id]);
+
   useEffect(() => {
     if (!open || author) return;
     const base = "https://api.openalex.org";
