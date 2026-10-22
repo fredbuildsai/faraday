@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { OaBadge } from "@/components/OaBadge";
+import { PaperDialog } from "@/components/PaperDialog";
 
 type Author = { display_name: string; works_count: number; cited_by_count: number; summary_stats?: { h_index?: number }; last_known_institutions?: { display_name: string }[]; topics?: { display_name: string }[]; counts_by_year?: { year: number; works_count: number }[] };
 type Work = { id: string; title: string | null; publication_year: number; cited_by_count: number; doi: string | null; open_access?: { is_oa?: boolean }; primary_location?: { source?: { display_name?: string } | null } | null };
 
 /** Shows an OpenAlex author profile inside the app (read from the public OpenAlex API). */
-export function OpenAlexDialog({ authorId, name }: { authorId: string; name: string }) {
+export function OpenAlexDialog({ authorId, name, trigger }: { authorId: string; name: string; trigger?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [author, setAuthor] = useState<Author | null>(null);
   const [works, setWorks] = useState<Work[]>([]);
@@ -33,7 +34,7 @@ export function OpenAlexDialog({ authorId, name }: { authorId: string; name: str
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" onPointerDown={(e) => e.stopPropagation()}>View on OpenAlex</Button>
+        {trigger ?? <Button size="sm" variant="outline" onPointerDown={(e) => e.stopPropagation()}>View on OpenAlex</Button>}
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
@@ -57,7 +58,7 @@ export function OpenAlexDialog({ authorId, name }: { authorId: string; name: str
               <ul className="space-y-2">
                 {works.map((w) => (
                   <li key={w.id} className="rounded-lg border p-3">
-                    <p className="font-medium">{w.doi ? <a className="text-primary hover:underline" href={w.doi} target="_blank" rel="noreferrer">{w.title}</a> : w.title}</p>
+                    <p className="font-medium"><PaperDialog href={w.id} title={w.title ?? "Untitled"} className="text-primary" /></p>
                     <p className="text-xs text-muted-foreground">{w.publication_year} · {w.primary_location?.source?.display_name ?? "Unknown venue"} · {w.cited_by_count} citations {w.open_access?.is_oa && <OaBadge />}</p>
                   </li>
                 ))}

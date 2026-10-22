@@ -1,6 +1,7 @@
 import { OaBadge } from "@/components/OaBadge";
 import type { ReactNode } from "react";
-import { ExternalLink } from "lucide-react";
+import { PaperDialog } from "@/components/PaperDialog";
+import { OpenAlexDialog } from "@/components/OpenAlexDialog";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { Suggestion } from "@/lib/opportunities";
@@ -35,7 +36,7 @@ export function OpportunityCard({ s, actions, children }: { s: Suggestion; actio
           <ul className="mt-1 space-y-0.5 text-muted-foreground">
             {s.pis.map((p) => (
               <li key={p.id}>
-                <a href={p.id.startsWith("http") ? p.id : undefined} target="_blank" rel="noreferrer" className="text-foreground">{p.name}</a>
+                {/A\d+$/.test(p.id) ? <OpenAlexDialog authorId={p.id} name={p.name} trigger={<button type="button" className="text-foreground hover:underline">{p.name}</button>} /> : <span className="text-foreground">{p.name}</span>}
                 {p.institution ? ` · ${p.institution}` : ""}
               </li>
             ))}
@@ -47,7 +48,7 @@ export function OpportunityCard({ s, actions, children }: { s: Suggestion; actio
         <p className="font-medium">Evidence papers</p>
         <ul className="mt-1 space-y-1">
           {s.evidence.map((w) => (
-            <li key={w.id}><a href={w.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-primary">{w.title} <ExternalLink className="h-3 w-3" /></a>{w.isOa && <> <OaBadge /></>}</li>
+            <li key={w.id}><PaperDialog href={w.url || w.id} title={w.title} className="text-primary" />{w.isOa && <> <OaBadge /></>}</li>
           ))}
         </ul>
       </div>
@@ -65,7 +66,7 @@ export function OpportunityCard({ s, actions, children }: { s: Suggestion; actio
                 <p className="font-medium">Closest existing papers</p>
                 <ul className="mt-1 space-y-1">
                   {ws.closest.map((c) => (
-                    <li key={c.id || c.title}><a href={c.url} target="_blank" rel="noreferrer" className="text-primary">{c.title}</a> <span className="font-mono text-xs text-muted-foreground">{Math.round(c.similarity * 100)}% title overlap</span></li>
+                    <li key={c.id || c.title}><PaperDialog href={c.url || c.id} title={c.title} className="text-primary" /> <span className="font-mono text-xs text-muted-foreground">{Math.round(c.similarity * 100)}% title overlap</span></li>
                   ))}
                 </ul>
               </div>
