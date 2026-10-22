@@ -532,6 +532,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      match_cards: {
+        Args: never
+        Returns: {
+          citations: number
+          directions: string[]
+          h_index: number
+          interests: string
+          methods: string[]
+          other_id: string
+          recent_works: number
+          works_count: number
+        }[]
+      }
       my_matches: {
         Args: never
         Returns: {
