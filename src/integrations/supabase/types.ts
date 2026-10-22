@@ -193,6 +193,7 @@ export type Database = {
           created_at: string
           formula: string
           id: string
+          layer: string
           m: number
           score: number
           shared_methods: string[]
@@ -200,6 +201,7 @@ export type Database = {
           t: number
           user_a: string
           user_b: string
+          via: string | null
         }
         Insert: {
           a_only?: string[]
@@ -208,6 +210,7 @@ export type Database = {
           created_at?: string
           formula?: string
           id?: string
+          layer?: string
           m: number
           score: number
           shared_methods?: string[]
@@ -215,6 +218,7 @@ export type Database = {
           t: number
           user_a: string
           user_b: string
+          via?: string | null
         }
         Update: {
           a_only?: string[]
@@ -223,6 +227,7 @@ export type Database = {
           created_at?: string
           formula?: string
           id?: string
+          layer?: string
           m?: number
           score?: number
           shared_methods?: string[]
@@ -230,6 +235,7 @@ export type Database = {
           t?: number
           user_a?: string
           user_b?: string
+          via?: string | null
         }
         Relationships: [
           {
@@ -481,6 +487,7 @@ export type Database = {
       }
       works: {
         Row: {
+          authors: Json
           cited_by_count: number
           created_at: string
           doi: string | null
@@ -496,6 +503,7 @@ export type Database = {
           year: number | null
         }
         Insert: {
+          authors?: Json
           cited_by_count?: number
           created_at?: string
           doi?: string | null
@@ -511,6 +519,7 @@ export type Database = {
           year?: number | null
         }
         Update: {
+          authors?: Json
           cited_by_count?: number
           created_at?: string
           doi?: string | null
