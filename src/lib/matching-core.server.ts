@@ -17,7 +17,7 @@ async function allRows(db: any, cols: string) {
 }
 
 /** Find up to 10 new researchers for one user (recorded for both people). */
-export async function computeMatchesFor(uid: string) {
+export async function computeMatchesFor(uid: string, opts: { piOnly?: boolean } = {}) {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Only this user's matches are read (indexed), not the whole table.
@@ -96,7 +96,7 @@ export async function computeMatchesFor(uid: string) {
       const { findExternalFor } = await import("@/lib/discovery-external.server");
       external = await findExternalFor({
         uid, me: meC.profile, myAuthorIds: meC.authorIds, myWorks: worksBy.get(uid) ?? [],
-        memberAuthorIds: candidates.flatMap((c) => c.authorIds), weights: myWeights, needed: BATCH_SIZE - chosen.length,
+        memberAuthorIds: candidates.flatMap((c) => c.authorIds), weights: myWeights, needed: BATCH_SIZE - chosen.length, piOnly: opts.piOnly ?? true,
       });
     } catch (e) { console.error("external discovery", e); }
     const added = chosen.length + external;

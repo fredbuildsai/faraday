@@ -12,6 +12,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Section } from "@/components/Section";
 import { computeMatches, removeMatch, saveMatchNotes, setInterest, setMatchState, writeMatchIdeas } from "@/lib/matching.functions";
@@ -103,6 +104,7 @@ function MatchesPage() {
   const changeState = useServerFn(setMatchState);
   const removeMatchFn = useServerFn(removeMatch);
   const [busy, setBusy] = useState(false);
+  const [piOnly, setPiOnly] = useState(true);
   const [tab, setTab] = useState<Tab>("discover");
   const stateOf = (id: string) => states[id]?.state ?? "active";
   const { data: cardInfo } = useSuspenseQuery(cardsQuery);
@@ -199,7 +201,7 @@ function MatchesPage() {
   async function find() {
     setBusy(true);
     try {
-      const r = await compute();
+      const r = await compute({ data: { piOnly } });
       if (r.added) toast.success(`${r.added} new match${r.added > 1 ? "es" : ""}`);
       else toast.info(r.reason ?? "No new matches");
       await Promise.all([qc.invalidateQueries({ queryKey: ["my-matches"] }), qc.invalidateQueries({ queryKey: ["match-cards"] }), qc.invalidateQueries({ queryKey: ["match-layers"] }), qc.invalidateQueries({ queryKey: ["external-suggestions"] })]);
@@ -222,7 +224,13 @@ function MatchesPage() {
             <h1 className="font-serif text-3xl">Your matches</h1>
             <p className="text-muted-foreground">Shared topics, different methods. Emails appear only when you both say yes.</p>
           </div>
-          <Button onClick={find} disabled={busy}>{busy ? "Looking…" : "Find new matches"}</Button>
+          <div className="flex flex-wrap items-center gap-4">
+            <label className="flex items-center gap-2 text-sm" title="For researchers outside Lattice Scout, suggest only last authors (likely lab heads)">
+              <Switch checked={piOnly} onCheckedChange={setPiOnly} aria-label="Principal investigators only" />
+              Principal investigators only
+            </label>
+            <Button onClick={find} disabled={busy}>{busy ? "Looking…" : "Find new matches"}</Button>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2" role="tablist">

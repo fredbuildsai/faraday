@@ -15,7 +15,7 @@ describe("wider OpenAlex discovery", () => {
   });
   it("excludes known people and puts collaborators of collaborators first", () => {
     const r = collectCandidates(
-      [{ via: "Bo", works: [{ authorships: [au("B", "Bo"), au("X", "Xi")] }] }],
+      [{ via: "Bo", works: [{ authorships: [au("B", "Bo"), au("X", "Xi", "last")] }] }],
       [{ authorships: [au("Y", "Yo", "first"), au("Z", "Zed", "last")] }],
       new Set(["B"]),
     );
@@ -38,5 +38,15 @@ describe("wider OpenAlex discovery", () => {
     const authors = new Map(["a", "b", "c"].map((id) => [id, author(id, [["T1", 1]])]));
     const raws = ["a", "b", "c"].map((id) => ({ id, name: id, layer: "interest" as const, via: null, hits: 1 }));
     expect(rankExternal(me, raws, authors, {}, 2, 2026)).toHaveLength(2);
+  });
+});
+
+describe("principal-investigator toggle", () => {
+  const works = [{ authorships: [au("F", "F", "first"), au("M", "M"), au("L", "L", "last")] }];
+  it("on by default: only last authors", () => {
+    expect(collectCandidates([{ via: "Bo", works }], works, new Set()).map((x) => x.id)).toEqual(["L"]);
+  });
+  it("off: every author", () => {
+    expect(collectCandidates([], works, new Set(), false).map((x) => x.id).sort()).toEqual(["F", "L", "M"]);
   });
 });

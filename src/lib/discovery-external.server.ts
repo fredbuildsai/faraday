@@ -6,7 +6,7 @@ import { threeYearsAgo } from "@/lib/opportunities";
 
 export async function findExternalFor(opts: {
   uid: string; me: Profile; myAuthorIds: string[]; myWorks: { authors: { id: string; name: string }[] }[];
-  memberAuthorIds: string[]; weights: Partial<MatchWeights>; needed: number;
+  memberAuthorIds: string[]; weights: Partial<MatchWeights>; needed: number; piOnly?: boolean;
 }): Promise<number> {
   if (opts.needed <= 0) return 0;
   const { openalexGet } = await import("@/lib/openalex.server");
@@ -25,7 +25,7 @@ export async function findExternalFor(opts: {
     topTopics.length ? safe(`/works?filter=topics.id:${topTopics.join("|")},from_publication_date:${since}&sort=cited_by_count:desc&per_page=100&select=authorships`) : Promise.resolve([]),
   ]);
 
-  const raws = collectCandidates(bridged, topical, exclude);
+  const raws = collectCandidates(bridged, topical, exclude, opts.piOnly ?? true);
   // Keep room for both kinds of suggestion.
   const second = raws.filter((r) => r.layer === "second_degree").slice(0, Math.ceil(MAX_LOOKUPS * 0.6));
   const pool = [...second, ...raws.filter((r) => r.layer === "interest")].slice(0, MAX_LOOKUPS);

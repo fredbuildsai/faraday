@@ -8,9 +8,10 @@ const topicKey = (id: unknown) => String(id ?? "").split("/").pop() ?? "";
 /** Find new matches for the signed-in user (and record them for both people). */
 export const computeMatches = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d: { piOnly?: boolean } | undefined) => ({ piOnly: d?.piOnly !== false }))
+  .handler(async ({ data, context }) => {
     const { computeMatchesFor } = await import("@/lib/matching-core.server");
-    return computeMatchesFor(context.userId);
+    return computeMatchesFor(context.userId, { piOnly: data.piOnly });
   });
 
 /** Say "I'm interested" in a match (or take it back while the other person hasn't answered). */
