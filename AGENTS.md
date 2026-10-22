@@ -12,3 +12,4 @@
 - Pure business logic (matching maths, ORCID checks) lives in `src/lib/*.ts` with Vitest tests in `src/test/`; why: deterministic rules must stay testable without the backend.
 - `src/lib/matching.ts` is the user's verbatim reference implementation; only type-level tweaks allowed, never change the maths.
 - Signed-in pages live under `src/routes/_authenticated/`; `/` redirects to `/auth` or `/profile`.
+- AI provider/model choice lives in `src/lib/ai-config.ts` (code defaults, env overrides `AI_PROVIDER`, `<PROVIDER>_MODEL`); why: model names are not secret, only keys go in Secrets.
