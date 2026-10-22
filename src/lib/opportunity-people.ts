@@ -1,6 +1,6 @@
 export type OpportunityPerson = { id: string; name: string; mutual: boolean; collaborator: boolean };
 export type OpportunityMatch = { id: string; name: string; mutual: boolean; authorIds: string[] };
-export const OPPORTUNITY_COLLABORATOR_LIMIT = 15;
+export const OPPORTUNITY_COLLABORATOR_LIMIT = 10;
 
 /** Direct co-authors are eligible here even though discovery excludes them. */
 export function opportunityPeople(matches: OpportunityMatch[], works: { authors: { id: string; name: string }[] }[], ownIds: string[]): OpportunityPerson[] {
@@ -13,12 +13,12 @@ export function opportunityPeople(matches: OpportunityMatch[], works: { authors:
   for (const work of works) {
     const counted = new Set<string>();
     for (const author of work.authors ?? []) {
-    const id = short(author.id);
-    if (!/^A\d+$/.test(id) || own.has(id) || !author.name.trim()) continue;
-    const key = members.get(id) ?? id;
-    names.set(key, author.name);
-    if (!counted.has(key)) frequency.set(key, (frequency.get(key) ?? 0) + 1);
-    counted.add(key);
+      const id = short(author.id);
+      if (!/^A\d+$/.test(id) || own.has(id) || !author.name.trim()) continue;
+      const key = members.get(id) ?? id;
+      names.set(key, author.name);
+      if (!counted.has(key)) frequency.set(key, (frequency.get(key) ?? 0) + 1);
+      counted.add(key);
     }
   }
   const top = [...frequency.keys()].sort((a, b) => (frequency.get(b) ?? 0) - (frequency.get(a) ?? 0) || (names.get(a) ?? "").localeCompare(names.get(b) ?? "")).slice(0, OPPORTUNITY_COLLABORATOR_LIMIT);
