@@ -3,6 +3,8 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { aiChat, parseJson } from "@/lib/ai-call.server";
 import { eligibleOpportunityPeople } from "@/lib/opportunity-people";
+import { potentialCollaborators, secondDegree } from "@/lib/opportunity-network";
+import { DEFAULT_OPPORTUNITY_CONFIG } from "@/lib/opportunity-config";
 import {
   MAX_SUGGESTIONS, assessWhitespace, isFresh, principalInvestigators, sameSettings, searchTerms, threeYearsAgo, byFewestRecent, verifySuggestions, workKey,
   type OaWork, type OppSettings,
@@ -46,10 +48,11 @@ export const findOpportunities = createServerFn({ method: "POST" })
     let matchIds: string[] = [];
     let collaboratorIds: string[] = [];
     const names = new Map<string, string>();
+    const direct = new Map<string, string>();
     if (data.mode === "network") {
       const { loadOpportunityPeople } = await import("@/lib/opportunity-people.server");
       const allowed = eligibleOpportunityPeople(await loadOpportunityPeople(context.supabase, uid), data.mutualOnly);
-      for (const person of allowed) names.set(person.id, person.name);
+      for (const person of allowed) { names.set(person.id, person.name); if (person.collaborator && /^A\d+$/.test(person.id)) direct.set(person.id, person.name); }
       matchIds = data.matchIds.filter((id) => names.has(id));
       collaboratorIds = data.collaboratorIds.filter((id) => names.has(id));
     }
@@ -70,6 +73,21 @@ export const findOpportunities = createServerFn({ method: "POST" })
     const solo = data.mode === "network" && !matchIds.length && !collaboratorIds.length;
 
     const sinceDate = threeYearsAgo(new Date());
+
+    // Own-work search: build the user's network (direct collaborators and their co-authors) once.
+    let ownIds: string[] = [];
+    let second = new Map<string, { name: string; via: Set<string> }>();
+    if (solo) {
+      const { data: me } = await context.supabase.from("profiles").select("openalex_author_id, openalex_author_ids").eq("id", uid).maybeSingle();
+      ownIds = me?.openalex_author_ids?.length ? me.openalex_author_ids : me?.openalex_author_id ? [me.openalex_author_id] : [];
+      const collaboratorPapers = await Promise.all([...direct.keys()].map(async (id) => {
+        try {
+          const r: any = await openalexGet(`/works?filter=author.id:${id},from_publication_date:${sinceDate}&per_page=50&select=authorships`);
+          return { collaboratorId: id, papers: r?.results ?? [] };
+        } catch { return { collaboratorId: id, papers: [] }; }
+      }));
+      second = secondDegree(direct, collaboratorPapers, ownIds);
+    }
     const since = Number(sinceDate.slice(0, 4));
     let works: OaWork[] = [];
     try {
@@ -115,6 +133,14 @@ export const findOpportunities = createServerFn({ method: "POST" })
         const ids = s.evidence.map((w) => w.id).join("|");
         const r: any = await openalexGet(`/works?filter=openalex_id:${ids}&per_page=10&select=id,authorships`);
         s.pis = principalInvestigators(r?.results ?? []);
+        if (solo) {
+          let topic: any[] = [];
+          try {
+            const t: any = await openalexGet(`/works?search=${encodeURIComponent(searchTerms(s.title))}&filter=from_publication_date:${sinceDate}&per_page=50&select=authorships`);
+            topic = t?.results ?? [];
+          } catch (e) { console.error("potential collaborators", e); }
+          s.potential = potentialCollaborators({ evidence: r?.results ?? [], topic, direct, second, ownIds, limit: DEFAULT_OPPORTUNITY_CONFIG.potentialLimit });
+        }
       } catch { s.pis = []; }
       if (data.mode === "network") {
         const owners = [...new Set(s.evidence.map((w) => w.owner).filter((o): o is string => !!o && o !== uid))];
