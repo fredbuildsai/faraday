@@ -1,5 +1,5 @@
 import { aiChat, parseJson } from "@/lib/ai-call.server";
-import { CHUNK_SIZE, DAILY_RUNS, LIMITS, chunk, clipWords, inputFingerprint, verifyClaims, type AnalysisWork } from "@/lib/analysis";
+import { CHUNK_SIZE, DAILY_RUNS, LIMITS, chunk, clipWords, enoughChunks, inputFingerprint, mergeClaims, verifyClaims, type AnalysisWork, type Claim } from "@/lib/analysis";
 
 const SYSTEM = `You analyse a researcher's published work. Use ONLY the given titles, keywords, topics and their own interests text.
 Return JSON: {"summary": string (max 80 words), "interests": [{"label": string, "evidence": [2 exact titles]}] (max 10),
@@ -52,20 +52,43 @@ export async function runAnalysisFor(uid: string, force = false) {
       return null;
     };
 
+    // 1) Analyse each batch on its own; validate its claims against that batch's titles.
     const parts = chunk(works, CHUNK_SIZE);
-    const partials: any[] = [];
-    for (const p of parts) {
-      const j = await call({ interests_text: interestsText, works: p });
-      if (!j) return fail("The AI could not analyse your publications right now.");
-      partials.push(j);
+    const titles = works.map((w) => w.title);
+    const found = { interests: [] as Claim[][], methods: [] as Claim[][], directions: [] as Claim[][] };
+    const summaries: string[] = [];
+    let ok = 0;
+    for (let n = 0; n < parts.length; n++) {
+      const p = parts[n];
+      await supabaseAdmin.from("profile_analysis").update({ error: `Analysing publications: ${n + 1} of ${parts.length} batches`, updated_at: new Date().toISOString() }).eq("user_id", uid);
+      const j: any = await call({ interests_text: interestsText, works: p });
+      if (!j) { if (aiStatus === 402 || aiStatus === 403) break; continue; }
+      ok++;
+      const pt = p.map((w) => w.title);
+      found.interests.push(verifyClaims(j.interests, pt, 50).kept);
+      found.methods.push(verifyClaims(j.methods, pt, 50).kept);
+      found.directions.push(verifyClaims(j.directions, pt, 50).kept);
+      if (j.summary) summaries.push(clipWords(String(j.summary), 60));
     }
-    let result = partials[0];
-    if (partials.length > 1) {
-      result = await call({ task: "Merge these partial analyses into one, keeping evidence titles exact.", interests_text: interestsText, partials });
-      if (!result) return fail("The AI could not combine the analysis right now.");
+    if (!enoughChunks(ok, parts.length)) return fail(`The AI could only analyse ${ok} of ${parts.length} batches of your publications. Please try again later.`);
+
+    // 2) Merge validated findings, then ask for one synthesis using only those compact findings.
+    const merged = { interests: mergeClaims(found.interests), methods: mergeClaims(found.methods), directions: mergeClaims(found.directions) };
+    let result: any = { summary: summaries[0] ?? "", ...merged };
+    if (parts.length > 1) {
+      const s: any = await call({
+        task: "Combine these validated findings from batches of one researcher's publications into one analysis. Keep evidence titles exact and only reuse given evidence.",
+        interests_text: interestsText, batch_summaries: summaries, findings: merged,
+      });
+      // Fall back to the deterministic merge if the synthesis fails or loses claims.
+      if (s) result = {
+        summary: s.summary || result.summary,
+        interests: verifyClaims(s.interests, titles, LIMITS.interests).kept.length ? s.interests : merged.interests,
+        methods: verifyClaims(s.methods, titles, LIMITS.methods).kept.length ? s.methods : merged.methods,
+        directions: verifyClaims(s.directions, titles, LIMITS.directions).kept.length ? s.directions : merged.directions,
+      };
     }
 
-    const titles = works.map((w) => w.title);
     const i = verifyClaims(result.interests, titles, LIMITS.interests);
     const m = verifyClaims(result.methods, titles, LIMITS.methods);
     const d = verifyClaims(result.directions, titles, LIMITS.directions);
