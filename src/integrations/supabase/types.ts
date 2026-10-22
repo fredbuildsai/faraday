@@ -14,6 +14,35 @@ export type Database = {
   }
   public: {
     Tables: {
+      analysis_batches: {
+        Row: {
+          batch_key: string
+          created_at: string
+          result: Json
+          user_id: string
+        }
+        Insert: {
+          batch_key: string
+          created_at?: string
+          result: Json
+          user_id: string
+        }
+        Update: {
+          batch_key?: string
+          created_at?: string
+          result?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analysis_batches_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       analysis_runs: {
         Row: {
           created_at: string
