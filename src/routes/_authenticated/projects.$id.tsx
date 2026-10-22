@@ -4,6 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Check, Download, History, MessageSquare, Search, Sparkles, Trash2, UserPlus, X } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Comments, CommentsButton, Contributors, Items, References } from "@/components/ProjectParts";
+import { exportProposal, type ExportFormat } from "@/lib/project-export";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,8 +20,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { OaBadge } from "@/components/OaBadge";
 import { PaperDialog } from "@/components/PaperDialog";
 import { OpenAlexDialog } from "@/components/OpenAlexDialog";
-import { projectQuery } from "@/lib/projects-queries";
-import { PROJECT_STATUSES, STATUS_LABEL, can, describeActivity, proposalMarkdown, type MemberRole, type MemberState, type ProjectStatus } from "@/lib/projects";
+import { projectQuery, type ProjectData } from "@/lib/projects-queries";
+import { MANUSCRIPT_KEYS, PROJECT_STATUSES, STATUS_LABEL, can, describeActivity, type MemberRole, type MemberState, type ProjectStatus } from "@/lib/projects";
 import { findSimilarPapers, inviteToProject, searchMemberPapers } from "@/lib/projects.functions";
 import { getOpportunityPeople } from "@/lib/opportunities.functions";
 
@@ -35,7 +38,8 @@ export const Route = createFileRoute("/_authenticated/projects/$id")({
   component: ProjectPage,
 });
 
-type Data = Awaited<ReturnType<ReturnType<typeof projectQuery>["queryFn"] & {}>>;
+type Data = ProjectData;
+const ORIGIN: Record<string, string> = { similar: "Found by similarity search", evidence: "Evidence from the saved opportunity", prior_art: "Closest existing work (whitespace check)", member: "From members’ publications" };
 const when = (d: string) => new Date(d).toLocaleString();
 
 function ProjectPage() {
@@ -61,11 +65,17 @@ function ProjectPage() {
     const { error } = await supabase.from("projects").update({ status }).eq("id", id);
     if (error) toast.error("Could not change status."); else await refresh();
   }
-  function exportDoc() {
-    const md = proposalMarkdown({ title: p.title, description: p.description, status: p.status as ProjectStatus, people: data.people.filter((x) => x.state === "accepted").map((x) => ({ name: x.name, role: x.role })), sections: data.sections, papers: data.papers });
-    const url = URL.createObjectURL(new Blob([md], { type: "text/markdown" }));
-    const a = Object.assign(document.createElement("a"), { href: url, download: `${p.title.slice(0, 60).replace(/[^\w-]+/g, "-")}.md` });
-    a.click(); URL.revokeObjectURL(url);
+  async function exportDoc(format: ExportFormat) {
+    const accepted = data.people.filter((x) => x.state === "accepted");
+    const ordered = [...data.sections.filter((x) => MANUSCRIPT_KEYS.includes(x.key)), ...data.sections.filter((x) => !MANUSCRIPT_KEYS.includes(x.key) && x.body.trim())];
+    const items = (k: string) => data.items.filter((i) => i.kind === k).map((i) => ({ title: i.title, body: i.body, resolved: i.resolved }));
+    try {
+      await exportProposal({
+        title: p.title, description: p.description, status: p.status as ProjectStatus,
+        people: accepted.map((x) => ({ name: x.name, role: x.role, contributions: data.contributions.filter((c) => c.user_id === x.user_id).map((c) => c.role) })),
+        sections: ordered, aims: items("aim"), questions: items("question"), references: data.references, papers: data.papers,
+      }, format);
+    } catch (e) { console.error(e); toast.error("Could not export the proposal."); }
   }
 
   return (
@@ -78,21 +88,38 @@ function ProjectPage() {
           <SelectContent>{PROJECT_STATUSES.map((s) => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}</SelectContent>
         </Select>
         {p.archived && <Badge variant="outline">Archived</Badge>}
-        <Button variant="outline" size="sm" onClick={exportDoc}><Download className="h-4 w-4" /> Export proposal</Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild><Button variant="outline" size="sm"><Download className="h-4 w-4" /> Export proposal</Button></DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={() => exportDoc("docx")}>Word document (.docx)</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => exportDoc("md")}>Markdown (.md)</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => exportDoc("txt")}>Plain text (.txt)</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      <Tabs defaultValue="proposal">
-        <TabsList className="flex-wrap">
-          <TabsTrigger value="proposal">Proposal</TabsTrigger>
-          <TabsTrigger value="papers">Papers ({data.papers.length})</TabsTrigger>
+      <Tabs defaultValue="draft">
+        <TabsList className="h-auto flex-wrap">
+          <TabsTrigger value="draft">Draft</TabsTrigger>
+          <TabsTrigger value="contributors">Contributors</TabsTrigger>
+          <TabsTrigger value="aims">Aims and questions ({data.items.filter((i) => !i.resolved).length})</TabsTrigger>
+          <TabsTrigger value="papers">Papers and references ({data.papers.length + data.references.length})</TabsTrigger>
           <TabsTrigger value="discussion">Discussion ({data.comments.filter((c) => !c.resolved).length})</TabsTrigger>
           <TabsTrigger value="tasks">Tasks ({data.tasks.filter((t) => !t.done).length})</TabsTrigger>
           <TabsTrigger value="people">People</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
-        <TabsContent value="proposal" className="space-y-4">{data.sections.map((s) => <SectionEditor key={s.id} s={s} data={data} editable={editable} nameOf={nameOf} onSaved={refresh} />)}</TabsContent>
-        <TabsContent value="papers"><Papers data={data} id={id} editable={editable} nameOf={nameOf} onSaved={refresh} /></TabsContent>
-        <TabsContent value="discussion"><Comments data={data} id={id} target={{}} nameOf={nameOf} onSaved={refresh} /></TabsContent>
+        <TabsContent value="draft" className="space-y-4">
+          {data.sections.filter((s) => MANUSCRIPT_KEYS.includes(s.key)).map((s) => <SectionEditor key={s.id} s={s} data={data} editable={editable} nameOf={nameOf} me={me} onSaved={refresh} />)}
+          {data.sections.some((s) => !MANUSCRIPT_KEYS.includes(s.key) && s.body.trim()) && <>
+            <h2 className="pt-4 font-serif text-xl text-muted-foreground">Earlier notes</h2>
+            {data.sections.filter((s) => !MANUSCRIPT_KEYS.includes(s.key) && s.body.trim()).map((s) => <SectionEditor key={s.id} s={s} data={data} editable={editable} nameOf={nameOf} me={me} onSaved={refresh} />)}
+          </>}
+        </TabsContent>
+        <TabsContent value="contributors"><Contributors data={data} id={id} editable={editable} onSaved={refresh} /></TabsContent>
+        <TabsContent value="aims" className="space-y-8"><Items data={data} id={id} kind="aim" editable={editable} nameOf={nameOf} me={me} onSaved={refresh} /><Items data={data} id={id} kind="question" editable={editable} nameOf={nameOf} me={me} onSaved={refresh} /></TabsContent>
+        <TabsContent value="papers" className="space-y-8"><References data={data} id={id} editable={editable} nameOf={nameOf} me={me} onSaved={refresh} /><div className="space-y-3"><h2 className="font-serif text-xl">Evidence papers</h2><Papers data={data} id={id} editable={editable} nameOf={nameOf} me={me} onSaved={refresh} /></div></TabsContent>
+        <TabsContent value="discussion"><Comments data={data} id={id} target={{}} nameOf={nameOf} me={me} onSaved={refresh} /></TabsContent>
         <TabsContent value="tasks"><Tasks data={data} id={id} nameOf={nameOf} onSaved={refresh} /></TabsContent>
         <TabsContent value="people"><People data={data} id={id} me={me} member={member} onSaved={refresh} /></TabsContent>
         <TabsContent value="history">
@@ -126,14 +153,13 @@ function Details({ data, id, editable, onSaved }: { data: Data; id: string; edit
   );
 }
 
-function SectionEditor({ s, data, editable, nameOf, onSaved }: { s: Data["sections"][number]; data: Data; editable: boolean; nameOf: (id: string | null) => string; onSaved: () => void }) {
+function SectionEditor({ s, data, editable, nameOf, me, onSaved }: { s: Data["sections"][number]; data: Data; editable: boolean; nameOf: (id: string | null) => string; me: string | null; onSaved: () => void }) {
   const [body, setBody] = useState(s.body);
   const [base, setBase] = useState(s.version);
   const [conflict, setConflict] = useState(false);
   const [busy, setBusy] = useState(false);
   useEffect(() => { if (body === s.body || base === s.version) { setBody(s.body); setBase(s.version); } }, [s.version]); // eslint-disable-line react-hooks/exhaustive-deps
   const dirty = body !== s.body || base !== s.version;
-  const comments = data.comments.filter((c) => c.section_id === s.id && !c.resolved).length;
 
   async function save(text = body, version = base) {
     setBusy(true);
@@ -149,7 +175,7 @@ function SectionEditor({ s, data, editable, nameOf, onSaved }: { s: Data["sectio
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           {s.version > 0 && <span>v{s.version} · {nameOf(s.updated_by)} · {when(s.updated_at)}</span>}
           <Versions section={s} nameOf={nameOf} editable={editable} onRestore={(text) => { setBody(text); }} />
-          <Dialog><DialogTrigger asChild><Button size="sm" variant="ghost"><MessageSquare className="h-4 w-4" />{comments || ""}</Button></DialogTrigger><DialogContent className="max-h-[85vh] max-w-xl overflow-y-auto"><DialogHeader><DialogTitle>Comments on “{s.title}”</DialogTitle></DialogHeader><Comments data={data} id={s.project_id} target={{ section_id: s.id }} nameOf={nameOf} onSaved={onSaved} /></DialogContent></Dialog>
+          <CommentsButton data={data} id={s.project_id} target={{ section_id: s.id }} title={s.title} nameOf={nameOf} me={me} onSaved={onSaved} />
         </div>
       </div>
       {editable ? <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={6} placeholder="Not written yet." /> : <p className="whitespace-pre-wrap text-sm">{s.body || "Not written yet."}</p>}
@@ -187,35 +213,7 @@ function Versions({ section, nameOf, editable, onRestore }: { section: Data["sec
   );
 }
 
-function Comments({ data, id, target, nameOf, onSaved }: { data: Data; id: string; target: { section_id?: string; paper_id?: string }; nameOf: (id: string | null) => string; onSaved: () => void }) {
-  const [text, setText] = useState("");
-  const [showResolved, setShowResolved] = useState(false);
-  const list = data.comments.filter((c) => (target.section_id ? c.section_id === target.section_id : target.paper_id ? c.paper_id === target.paper_id : true));
-  const shown = list.filter((c) => showResolved || !c.resolved);
-  const label = (c: Data["comments"][number]) => c.section_id ? data.sections.find((s) => s.id === c.section_id)?.title : c.paper_id ? data.papers.find((p) => p.id === c.paper_id)?.title : null;
-  async function add() {
-    const { data: u } = await supabase.auth.getUser();
-    const { error } = await supabase.from("project_comments").insert({ project_id: id, body: text.trim(), author_id: u.user!.id, ...target });
-    if (error) toast.error("Could not post."); else { setText(""); onSaved(); }
-  }
-  async function resolve(cid: string, resolved: boolean) { await supabase.from("project_comments").update({ resolved }).eq("id", cid); onSaved(); }
-  return (
-    <div className="space-y-3">
-      <div className="space-y-2"><Textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} placeholder="Write a comment" /><Button size="sm" onClick={add} disabled={!text.trim()}>Comment</Button></div>
-      {list.some((c) => c.resolved) && <label className="flex items-center gap-2 text-xs text-muted-foreground"><Checkbox checked={showResolved} onCheckedChange={(v) => setShowResolved(!!v)} /> Show resolved</label>}
-      <ul className="space-y-2">{shown.map((c) => (
-        <li key={c.id} className={`rounded-lg border p-3 text-sm ${c.resolved ? "opacity-60" : ""}`}>
-          <div className="mb-1 flex items-center justify-between gap-2 text-xs text-muted-foreground"><span><span className="font-medium text-foreground">{nameOf(c.author_id)}</span> · {when(c.created_at)}{!target.section_id && !target.paper_id && label(c) ? ` · on “${label(c)}”` : ""}</span>
-            <Button size="sm" variant="ghost" onClick={() => resolve(c.id, !c.resolved)}>{c.resolved ? "Reopen" : <><Check className="h-3.5 w-3.5" /> Resolve</>}</Button></div>
-          <p className="whitespace-pre-wrap">{c.body}</p>
-        </li>
-      ))}</ul>
-      {!shown.length && <p className="text-sm text-muted-foreground">No comments yet.</p>}
-    </div>
-  );
-}
-
-function Papers({ data, id, editable, nameOf, onSaved }: { data: Data; id: string; editable: boolean; nameOf: (id: string | null) => string; onSaved: () => void }) {
+function Papers({ data, id, editable, nameOf, me, onSaved }: { data: Data; id: string; editable: boolean; nameOf: (id: string | null) => string; me: string | null; onSaved: () => void }) {
   const search = useServerFn(searchMemberPapers);
   const similar = useServerFn(findSimilarPapers);
   const [q, setQ] = useState("");
@@ -246,9 +244,9 @@ function Papers({ data, id, editable, nameOf, onSaved }: { data: Data; id: strin
     <div className="space-y-5">
       <ul className="space-y-2">{data.papers.map((p) => (
         <li key={p.id} className="flex items-start justify-between gap-3 rounded-lg border bg-card p-3 text-sm">
-          <div><PaperDialog href={p.url ?? p.openalex_id} title={p.title} className="text-primary" /> {p.is_oa && <OaBadge />}<p className="text-xs text-muted-foreground">{p.origin === "similar" ? "Found by similarity search" : "From members’ publications"} · added by {nameOf(p.added_by)}</p></div>
+          <div><PaperDialog href={p.url ?? p.openalex_id} title={p.title} className="text-primary" /> {p.is_oa && <OaBadge />}<p className="text-xs text-muted-foreground">{ORIGIN[p.origin] ?? "From members’ publications"} · added by {nameOf(p.added_by)}</p></div>
           <div className="flex shrink-0">
-            <Dialog><DialogTrigger asChild><Button size="sm" variant="ghost" aria-label="Comments on paper"><MessageSquare className="h-4 w-4" />{data.comments.filter((c) => c.paper_id === p.id && !c.resolved).length || ""}</Button></DialogTrigger><DialogContent className="max-h-[85vh] max-w-xl overflow-y-auto"><DialogHeader><DialogTitle>Comments on this paper</DialogTitle></DialogHeader><Comments data={data} id={id} target={{ paper_id: p.id }} nameOf={nameOf} onSaved={onSaved} /></DialogContent></Dialog>
+            <CommentsButton data={data} id={id} target={{ paper_id: p.id }} title={p.title} nameOf={nameOf} me={me} onSaved={onSaved} />
             {editable && <Button size="sm" variant="ghost" aria-label="Remove paper" onClick={() => remove(p.id)}><X className="h-4 w-4" /></Button>}
           </div>
         </li>
