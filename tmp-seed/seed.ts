@@ -17,7 +17,7 @@ const PEOPLE = [
     ids: ["A5033675494"] },
 ];
 
-for (const p of PEOPLE) {
+for (const p of PEOPLE.filter((x) => x.first === "Raphaell")) {
   let { data: list } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
   let user = list?.users.find((u) => u.email === p.email);
   if (!user) {
