@@ -8,3 +8,7 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Pure business logic (matching maths, ORCID checks) lives in `src/lib/*.ts` with Vitest tests in `src/test/`; why: deterministic rules must stay testable without the backend.
+- `src/lib/matching.ts` is the user's verbatim reference implementation; only type-level tweaks allowed, never change the maths.
+- Signed-in pages live under `src/routes/_authenticated/`; `/` redirects to `/auth` or `/profile`.
