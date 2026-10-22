@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      analysis_runs: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       openalex_cache: {
         Row: {
           body: Json
@@ -29,6 +47,83 @@ export type Database = {
           body?: Json
           fetched_at?: string
           url?: string
+        }
+        Relationships: []
+      }
+      profile_analysis: {
+        Row: {
+          directions: Json
+          dropped_claims: Json
+          error: string | null
+          finished_at: string | null
+          input_hash: string | null
+          interests: Json
+          methods: Json
+          status: string
+          summary: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          directions?: Json
+          dropped_claims?: Json
+          error?: string | null
+          finished_at?: string | null
+          input_hash?: string | null
+          interests?: Json
+          methods?: Json
+          status?: string
+          summary?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          directions?: Json
+          dropped_claims?: Json
+          error?: string | null
+          finished_at?: string | null
+          input_hash?: string | null
+          interests?: Json
+          methods?: Json
+          status?: string
+          summary?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_analysis_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_analysis_edits: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          kind: string
+          user_id: string
+          value: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          kind: string
+          user_id: string
+          value: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          user_id?: string
+          value?: string
         }
         Relationships: []
       }

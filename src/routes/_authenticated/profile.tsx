@@ -10,6 +10,9 @@ import { importWorks, saveResearchInterests } from "@/lib/openalex.functions";
 import { draftResearchInterests, saveCustomTopics } from "@/lib/profile.functions";
 import { DEFAULT_PAGE_SIZE, PAGE_SIZES, paginate, sortWorks, type WorkSort } from "@/lib/paginate";
 import type { WorkTopic } from "@/lib/openalex-math";
+import { runAnalysis } from "@/lib/analysis.functions";
+import { AnalysisSection } from "@/components/AnalysisSection";
+import type { Edit } from "@/lib/analysis";
 import { Logo } from "@/components/Logo";
 import { ConfidentialNotice } from "@/components/ConfidentialNotice";
 import { Button } from "@/components/ui/button";
@@ -24,13 +27,15 @@ const profileQuery = queryOptions({
   queryFn: async () => {
     const { data: u } = await supabase.auth.getUser();
     const uid = u.user!.id;
-    const [{ data: profile, error }, { data: works }] = await Promise.all([
+    const [{ data: profile, error }, { data: works }, { data: analysis }, { data: edits }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
       supabase.from("works").select("id, title, venue, year, cited_by_count, type, topics, doi")
         .eq("user_id", uid).order("year", { ascending: false, nullsFirst: false }).limit(1000),
+      supabase.from("profile_analysis").select("status, summary, interests, methods, directions, error, finished_at").eq("user_id", uid).maybeSingle(),
+      supabase.from("profile_analysis_edits").select("kind, value, action").eq("user_id", uid),
     ]);
     if (error) throw error;
-    return { profile, works: works ?? [], email: u.user!.email ?? "" };
+    return { profile, works: works ?? [], analysis, edits: (edits ?? []) as Edit[], email: u.user!.email ?? "" };
   },
 });
 
@@ -61,6 +66,8 @@ function ProfilePage() {
   const save = useServerFn(saveResearchInterests);
   const saveTopics = useServerFn(saveCustomTopics);
   const draft = useServerFn(draftResearchInterests);
+  const analyse = useServerFn(runAnalysis);
+  const [analysing, setAnalysing] = useState(false);
   const p = data.profile;
   const [interests, setInterests] = useState(p?.research_interests ?? "");
   const [refreshing, setRefreshing] = useState(false);
@@ -112,6 +119,30 @@ function ProfilePage() {
     void generate(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.works.length, p?.research_interests]);
+
+  async function startAnalysis(force = false) {
+    setAnalysing(true);
+    try {
+      const r = await analyse({ data: { force } });
+      if (r.status === "limited" || (force && r.status === "skipped")) toast.info(r.reason);
+      if (r.status === "failed") toast.error(r.reason);
+    } catch {
+      toast.error("The analysis could not run.");
+    } finally {
+      setAnalysing(false);
+      await qc.invalidateQueries({ queryKey: ["my-profile"] });
+    }
+  }
+
+  // Analysis runs on its own after every import; the server skips it when nothing changed.
+  const analysedFor = useRef<string | null>(null);
+  useEffect(() => {
+    const key = `${data.works.length}-${p?.last_imported_at ?? ""}`;
+    if (!data.works.length || analysedFor.current === key) return;
+    analysedFor.current = key;
+    void startAnalysis(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.works.length, p?.last_imported_at]);
 
   async function persistTopics(next: string[]) {
     try {
@@ -238,6 +269,11 @@ function ProfilePage() {
               <Button size="sm" onClick={saveInterests} disabled={interests === (p?.research_interests ?? "")}>Save</Button>
             </div>
           </div>
+        </Section>
+
+        <Section title="Profile analysis">
+          <AnalysisSection analysis={data.analysis} edits={data.edits} running={analysing} hasWorks={data.works.length > 0}
+            onRetry={() => startAnalysis(true)} />
         </Section>
 
         <Section title="Publications" count={data.works.length}>
