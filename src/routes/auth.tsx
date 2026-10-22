@@ -24,11 +24,7 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-const features = [
-  ["Your profile, built for you", "We read your published work from OpenAlex."],
-  ["Complementary collaborators", "Similar topics, different methods."],
-  ["Research gaps", "Every suggestion backed by real papers."],
-];
+const features = ["Your profile, built for you", "Complementary collaborators", "Research gaps"];
 
 function AuthPage() {
   const navigate = useNavigate();
@@ -93,23 +89,20 @@ function AuthPage() {
   }
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
-      <section className="flex flex-col justify-between p-10 lg:p-16">
+    <div className="grid min-h-screen content-start lg:grid-cols-2 lg:content-stretch">
+      <section className="flex flex-col gap-4 px-6 pb-2 pt-6 lg:justify-between lg:gap-0 lg:p-16">
         <Logo tag />
-        <div className="my-12 max-w-md">
-          <h1 className="font-serif text-5xl leading-tight">Find the paper hiding in your drawer.</h1>
-          <ul className="mt-10 space-y-5">
-            {features.map(([t, d]) => (
-              <li key={t} className="border-l-2 border-primary pl-4">
-                <div className="font-medium">{t}</div>
-                <div className="text-sm text-muted-foreground">{d}</div>
-              </li>
+        <div className="max-w-md lg:my-12">
+          <h1 className="font-serif text-3xl leading-tight lg:text-5xl">Find the paper hiding in your drawer.</h1>
+          <ul className="mt-10 hidden space-y-5 lg:block">
+            {features.map((t) => (
+              <li key={t} className="border-l-2 border-primary pl-4 font-medium">{t}</li>
             ))}
           </ul>
         </div>
-        <p className="font-mono text-xs text-muted-foreground">Open science · Published data only</p>
+        <p className="hidden font-mono text-xs text-muted-foreground lg:block">Open science · Published data only</p>
       </section>
-      <section className="flex items-center justify-center p-6 lg:p-16">
+      <section className="flex items-start justify-center p-4 lg:items-center lg:p-16">
         <div className="w-full max-w-md space-y-6 rounded-2xl border bg-card p-8 shadow-sm">
           {sent ? (
             <div className="space-y-3 text-center">
