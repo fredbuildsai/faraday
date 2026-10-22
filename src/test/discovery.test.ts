@@ -23,8 +23,14 @@ describe("discovery", () => {
   it("puts collaborators of collaborators first, naming the shared co-author", () => {
     const r = pickDiscovery(me, [cand("int", ["I"]), cand("sec", ["S"], [["A1", "Ada Co"]])], new Set());
     expect(r[0]!.layer).toBe("second_degree");
-    expect(r[0]!.via).toBe("Ada Co");
+    expect(r[0]!.vias).toEqual(["Ada Co"]);
     expect(r[1]!.layer).toBe("interest");
+  });
+  it("names every shared co-author as a connection", () => {
+    const me2 = { profile: prof("me"), authorIds: ["A0"], coauthors: new Map([["A1", "Ada Co"], ["A2", "Al Doc"]]) };
+    const r = pickDiscovery(me2, [cand("sec", ["S"], [["A1", "Ada Co"], ["A2", "Al Doc"]])], new Set());
+    expect(r[0]!.layer).toBe("second_degree");
+    expect(r[0]!.vias).toEqual(["Ada Co", "Al Doc"]);
   });
   it("keeps the topic gate for collaborators of collaborators", () => {
     expect(pickDiscovery(me, [cand("far", ["F"], [["A1", "Ada"]], { other: 1 })], new Set())).toHaveLength(0);
