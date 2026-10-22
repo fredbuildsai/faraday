@@ -127,6 +127,13 @@
       "when": 1792704798806,
       "tag": "0017_multiple_connections",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792706187657,
+      "tag": "0018_personal_research_settings",
+      "breakpoints": true
     }
   ]
 }
