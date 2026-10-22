@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { aiChat, parseJson } from "@/lib/ai-call.server";
 import {
-  MAX_SUGGESTIONS, assessWhitespace, isFresh, principalInvestigators, sameSettings, verifySuggestions, workKey,
+  MAX_SUGGESTIONS, assessWhitespace, isFresh, principalInvestigators, sameSettings, searchTerms, verifySuggestions, workKey,
   type OaWork, type OppSettings,
 } from "@/lib/opportunities";
 
@@ -95,7 +95,8 @@ export const findOpportunities = createServerFn({ method: "POST" })
         s.collaborators = owners.map((id) => ({ id, name: names.get(id) ?? "Match" }));
       }
       // Whitespace: counts and closest existing papers for the proposed question.
-      const q = encodeURIComponent(s.title);
+      const terms = searchTerms(s.title);
+      const q = encodeURIComponent(terms);
       const rv = data.excludeReviews ? ",type:!review" : "";
       let totalCount: number | null = null, recentCount: number | null = null, closest: OaWork[] = [];
       try {
