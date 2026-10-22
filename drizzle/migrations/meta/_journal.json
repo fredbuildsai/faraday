@@ -134,6 +134,27 @@
       "when": 1792706187657,
       "tag": "0018_personal_research_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792707415337,
+      "tag": "0019_collaborative_projects",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792707432961,
+      "tag": "0020_restrict_actor_name",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1792707495177,
+      "tag": "0021_project_log_skip_deleted",
+      "breakpoints": true
     }
   ]
 }

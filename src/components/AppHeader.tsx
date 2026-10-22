@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { notificationsQuery } from "@/lib/projects-queries";
 import { LogOut, Menu } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "@/components/Logo";
@@ -21,6 +22,7 @@ const GROUPS = [
       { to: "/matches", label: "Matches" },
       { to: "/opportunities", label: "Opportunities" },
       { to: "/opportunities/manage", label: "Saved opportunities", sub: true },
+      { to: "/projects", label: "Shared opportunities", sub: true, badge: true },
     ],
   },
   { label: "Account", items: [{ to: "/settings", label: "Settings" }] },
@@ -31,6 +33,8 @@ export function AppHeader() {
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const notes = useQuery(notificationsQuery);
+  const unread = (notes.data ?? []).filter((n) => !n.read).length;
 
   async function signOut() {
     setOpen(false);
@@ -49,7 +53,7 @@ export function AppHeader() {
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" aria-label="Open menu">
-              <Menu className="h-5 w-5" />
+              <span className="relative"><Menu className="h-5 w-5" />{unread > 0 && <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-primary" aria-label={`${unread} unread updates`} />}</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="right" className="w-72">
@@ -70,7 +74,7 @@ export function AppHeader() {
                           className={`block rounded-md px-3 py-2 text-sm hover:bg-muted ${"sub" in it ? "ml-4 border-l pl-4" : ""}`}
                           activeProps={{ className: "bg-accent font-medium text-accent-foreground" }}
                         >
-                          {it.label}
+                          {it.label}{"badge" in it && unread > 0 && <span className="ml-2 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-medium text-primary-foreground">{unread}</span>}
                         </Link>
                       </li>
                     ))}
