@@ -4,13 +4,17 @@ import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Bookmark, BookmarkCheck, ChevronDown, Lightbulb, Mail, RotateCcw, X } from "lucide-react";
+import { Bookmark, BookmarkCheck, ChevronDown, Lightbulb, Mail, RotateCcw, Trash2, X } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Section } from "@/components/Section";
-import { computeMatches, saveMatchNotes, setInterest, setMatchState, writeMatchIdeas } from "@/lib/matching.functions";
+import { computeMatches, removeMatch, saveMatchNotes, setInterest, setMatchState, writeMatchIdeas } from "@/lib/matching.functions";
 import { Thumbs } from "@/components/Thumbs";
 import { feedbackQuery } from "./opportunities";
 import { SwipeDeck, type ScientistCard } from "@/components/SwipeDeck";
@@ -133,6 +137,15 @@ function MatchesPage() {
       await qc.invalidateQueries({ queryKey: ["match-states"] });
       toast.success(state === "saved" ? "Saved" : state === "dismissed" ? "Dismissed — find it under Dismissed" : "Restored");
     } catch { toast.error("Could not update. Please try again."); }
+  }
+
+  async function remove(id: string) {
+    try {
+      await removeMatchFn({ data: { matchId: id } });
+      setLastDecided((d) => (d === id ? null : d));
+      await Promise.all([qc.invalidateQueries({ queryKey: ["my-matches"] }), qc.invalidateQueries({ queryKey: ["match-states"] }), qc.invalidateQueries({ queryKey: ["match-cards"] })]);
+      toast.success("Removed permanently");
+    } catch { toast.error("Could not remove. Please try again."); }
   }
 
   async function find() {
