@@ -287,7 +287,7 @@ function ProfilePage() {
                 {paged.items.map((w) => (
                   <li key={w.id} className="flex items-start justify-between gap-4 py-3">
                     <div className="min-w-0">
-                      <div className="font-medium"><PaperDialog href={w.doi ?? w.openalex_id} title={w.title} /></div>
+                      <div className="font-medium"><PaperDialog href={w.doi} title={w.title} /></div>
                       <div className="text-sm text-muted-foreground">{[w.venue, w.year].filter(Boolean).join(" · ")}</div>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
