@@ -35,16 +35,19 @@ export async function runAnalysisFor(uid: string, force = false) {
 
     await supabaseAdmin.from("analysis_runs").insert({ user_id: uid });
     await supabaseAdmin.from("profile_analysis").upsert({ user_id: uid, status: "running", error: null, updated_at: new Date().toISOString() });
+    let aiStatus = 0;
     const fail = async (msg: string) => {
       await supabaseAdmin.from("profile_analysis").update({ status: "failed", error: msg, updated_at: new Date().toISOString() }).eq("user_id", uid);
-      return { status: "failed" as const, reason: msg };
+      return { status: "failed" as const, reason: msg, aiStatus };
     };
 
     const call = async (payload: unknown) => {
       for (let t = 0; t < 2; t++) {
         const r = await aiChat([{ role: "system", content: SYSTEM }, { role: "user", content: JSON.stringify(payload) }], { json: true });
+        aiStatus = r.status;
         const j = parseJson(r.text);
         if (j && typeof j === "object") return j;
+        if (r.status === 402 || r.status === 403) break;
       }
       return null;
     };
