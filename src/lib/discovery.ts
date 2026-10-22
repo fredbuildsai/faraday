@@ -15,7 +15,7 @@ export interface Candidate {
   coauthors: Map<string, string>;
 }
 
-export type Discovery = CollabMatch & { layer: Layer; via: string | null };
+export type Discovery = CollabMatch & { layer: Layer; /** Names of the shared co-authors who link you (2nd-degree connections). */ vias: string[] };
 
 /** Everyone on the given works except the person themselves (by their own OpenAlex ids). */
 export function coauthorsOf(works: { authors: Author[] }[], ownIds: string[]): Map<string, string> {
@@ -46,11 +46,14 @@ export function pickDiscovery(
     if (me.authorIds.some((a) => c.coauthors.has(a))) continue;
     const s = scoreCollaboration(me.profile, c.profile, weights);
     if (!s) continue;
-    const bridge = [...c.coauthors.keys()].find((k) => me.coauthors.has(k));
+    // Every shared co-author is a connection; several are possible.
+    const vias = [...c.coauthors.keys()].filter((k) => me.coauthors.has(k))
+      .map((k) => me.coauthors.get(k) || c.coauthors.get(k) || "")
+      .filter(Boolean);
     const base = me.profile.id < id
       ? { a: me.profile.id, b: id, ...s }
       : { a: id, b: me.profile.id, ...s, aOnly: s.bOnly, bOnly: s.aOnly };
-    out.push({ ...base, layer: bridge ? "second_degree" : "interest", via: bridge ? (me.coauthors.get(bridge) || c.coauthors.get(bridge) || null) : null });
+    out.push({ ...base, layer: vias.length ? "second_degree" : "interest", vias });
   }
   out.sort((x, y) => (x.layer === y.layer ? 0 : x.layer === "second_degree" ? -1 : 1) || y.score - x.score);
   return out.slice(0, size);
