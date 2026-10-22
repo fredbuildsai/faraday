@@ -4,9 +4,19 @@ import type { Profile } from "@/lib/matching";
 import { shortId } from "@/lib/openalex-math";
 
 /** How many of your most frequent co-authors are followed for collaborators of collaborators. */
-export const BRIDGE_COAUTHORS = 5;
+export const BRIDGE_COAUTHORS = 15;
 /** Most candidate authors looked up in detail per request. */
 export const MAX_LOOKUPS = 50;
+/** Topical result pages fetched per search; later pages are used as you see more people. */
+export const TOPICAL_PAGES = 2;
+/** OpenAlex pages cycled through before starting over. */
+export const MAX_TOPICAL_PAGE = 20;
+
+/** Which topical pages to fetch: page 1 plus a page that moves deeper the more people you've seen. */
+export function topicalPages(seenCount: number): number[] {
+  const deep = 2 + (Math.floor(seenCount / 20) % (MAX_TOPICAL_PAGE - 1));
+  return [...new Set([1, deep])].slice(0, TOPICAL_PAGES);
+}
 
 export type Layer = "second_degree" | "interest";
 export interface RawCandidate { id: string; name: string; layer: Layer; via: string | null; hits: number }
