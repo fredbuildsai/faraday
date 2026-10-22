@@ -29,6 +29,15 @@ const cardsQuery = queryOptions({
   },
 });
 
+const layersQuery = queryOptions({
+  queryKey: ["match-layers"],
+  queryFn: async () => {
+    const { data, error } = await supabase.from("matches").select("id, layer, via");
+    if (error) throw error;
+    return Object.fromEntries((data ?? []).map((r) => [r.id, r])) as Record<string, { layer: string; via: string | null }>;
+  },
+});
+
 const matchesQuery = queryOptions({
   queryKey: ["my-matches"],
   queryFn: async () => {
@@ -69,7 +78,7 @@ export const Route = createFileRoute("/_authenticated/matches")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(matchesQuery), context.queryClient.ensureQueryData(feedbackQuery), context.queryClient.ensureQueryData(statesQuery), context.queryClient.ensureQueryData(cardsQuery)]),
+  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(matchesQuery), context.queryClient.ensureQueryData(feedbackQuery), context.queryClient.ensureQueryData(statesQuery), context.queryClient.ensureQueryData(cardsQuery), context.queryClient.ensureQueryData(layersQuery)]),
   component: MatchesPage,
 });
 
@@ -86,12 +95,15 @@ function MatchesPage() {
   const [tab, setTab] = useState<Tab>("discover");
   const stateOf = (id: string) => states[id]?.state ?? "active";
   const { data: cardInfo } = useSuspenseQuery(cardsQuery);
+  const { data: layers } = useSuspenseQuery(layersQuery);
   const [lastDecided, setLastDecided] = useState<string | null>(null);
   const deck: ScientistCard[] = data.filter((m) => inDeck({ state: stateOf(m.id), i_am_interested: m.i_am_interested })).map((m) => {
     const c = cardInfo[m.other_id];
     return {
       id: m.id, name: m.other_name || "A researcher", institution: m.other_institution, score: m.score, t: m.t,
-      layer: "Your field · on Lattice Scout",
+      layer: layers[m.id]?.layer === "second_degree"
+        ? `Collaborator of a collaborator${layers[m.id]?.via ? ` · via ${layers[m.id]!.via}` : ""}`
+        : `Shared focus${m.shared_topics[0] ? ` · ${m.shared_topics[0]}` : ""}`,
       sharedTopics: m.shared_topics, interests: c?.interests ?? null,
       hIndex: c?.h_index ?? 0, citations: Number(c?.citations ?? 0), worksCount: c?.works_count ?? 0, recentWorks: c?.recent_works ?? 0,
       methods: c?.methods ?? [], directions: c?.directions ?? [],

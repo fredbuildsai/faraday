@@ -70,12 +70,14 @@ export async function computeMatchesFor(uid: string) {
 
     if (chosen.length) {
       // The unique pair index makes a simultaneous run by the other person harmless.
-      const { error } = await supabaseAdmin.from("matches").upsert(chosen.map((m) => ({
-        user_a: m.a, user_b: m.b, score: m.score, t: m.T, m: m.M, act: m.act,
-        shared_topics: m.sharedTopics.map(label), a_only: m.aOnly, b_only: m.bOnly, shared_methods: m.sharedMethods, formula: m.formula,
-        layer: m.layer, via: m.via,
-      })), { ignoreDuplicates: true });
-      if (error) { console.error("save matches", error); throw new Error("Could not save matches"); }
+      for (const m of chosen) {
+        const { error } = await supabaseAdmin.from("matches").insert({
+          user_a: m.a, user_b: m.b, score: m.score, t: m.T, m: m.M, act: m.act,
+          shared_topics: m.sharedTopics.map(label), a_only: m.aOnly, b_only: m.bOnly, shared_methods: m.sharedMethods, formula: m.formula,
+          layer: m.layer, via: m.via,
+        });
+        if (error && error.code !== "23505") { console.error("save matches", error); throw new Error("Could not save matches"); }
+      }
     }
     if (!chosen.length && rescored) return { added: 0, reason: `Updated ${rescored} existing match${rescored > 1 ? "es" : ""} to the new score. Dismissed ones are under Dismissed.` };
     return { added: chosen.length, reason: chosen.length ? null : "No new researchers fit you right now. Check back later." };
