@@ -26,7 +26,7 @@ describe("export and activity", () => {
   it("export lists sections and evidence", () => {
     const md = proposalMarkdown({ title: "T", description: "D", status: "drafting", people: [{ name: "A", role: "owner" }], sections: [{ title: "Aims", body: "" }], papers: [{ title: "P", url: "u" }] });
     expect(md).toContain("## Aims");
-    expect(md).toContain("[P](u)");
+    expect(md).toContain("- P (u)");
     expect(md).toContain("Status: Drafting");
   });
   it("describes a section edit with its version", () => { expect(describeActivity("section_edited", { section: "Aims", version: 2 })).toBe("edited “Aims” (version 2)"); });
