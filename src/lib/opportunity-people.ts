@@ -1,5 +1,6 @@
 export type OpportunityPerson = { id: string; name: string; mutual: boolean; collaborator: boolean };
 export type OpportunityMatch = { id: string; name: string; mutual: boolean; authorIds: string[] };
+export const OPPORTUNITY_COLLABORATOR_LIMIT = 15;
 
 /** Direct co-authors are eligible here even though discovery excludes them. */
 export function opportunityPeople(matches: OpportunityMatch[], works: { authors: { id: string; name: string }[] }[], ownIds: string[]): OpportunityPerson[] {
@@ -7,15 +8,26 @@ export function opportunityPeople(matches: OpportunityMatch[], works: { authors:
   const own = new Set(ownIds.map(short));
   const people = new Map<string, OpportunityPerson>(matches.map((m) => [m.id, { id: m.id, name: m.name, mutual: m.mutual, collaborator: false }]));
   const members = new Map(matches.flatMap((m) => m.authorIds.map((id) => [short(id), m.id] as const)));
-  for (const work of works) for (const author of work.authors ?? []) {
+  const frequency = new Map<string, number>();
+  const names = new Map<string, string>();
+  for (const work of works) {
+    const counted = new Set<string>();
+    for (const author of work.authors ?? []) {
     const id = short(author.id);
     if (!/^A\d+$/.test(id) || own.has(id) || !author.name.trim()) continue;
-    const memberId = members.get(id);
-    const member = memberId ? people.get(memberId) : undefined;
-    if (member) member.collaborator = true;
-    else people.set(id, { id, name: author.name, mutual: false, collaborator: true });
+    const key = members.get(id) ?? id;
+    names.set(key, author.name);
+    if (!counted.has(key)) frequency.set(key, (frequency.get(key) ?? 0) + 1);
+    counted.add(key);
+    }
   }
-  return [...people.values()].sort((a, b) => Number(b.collaborator) - Number(a.collaborator) || a.name.localeCompare(b.name));
+  const top = [...frequency.keys()].sort((a, b) => (frequency.get(b) ?? 0) - (frequency.get(a) ?? 0) || (names.get(a) ?? "").localeCompare(names.get(b) ?? "")).slice(0, OPPORTUNITY_COLLABORATOR_LIMIT);
+  for (const id of top) {
+    const member = people.get(id);
+    if (member) member.collaborator = true;
+    else people.set(id, { id, name: names.get(id) ?? "", mutual: false, collaborator: true });
+  }
+  return [...people.values()].sort((a, b) => Number(b.collaborator) - Number(a.collaborator) || (a.collaborator && b.collaborator ? (frequency.get(b.id) ?? 0) - (frequency.get(a.id) ?? 0) : 0) || a.name.localeCompare(b.name));
 }
 
 export function eligibleOpportunityPeople(people: OpportunityPerson[], mutualOnly: boolean) {
