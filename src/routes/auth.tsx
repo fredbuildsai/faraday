@@ -46,7 +46,10 @@ function AuthPage() {
 
   async function google() {
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (r.error) return toast.error("Google sign-in failed. Please try again.");
+    if (r.error) {
+      toast.error("Google sign-in failed. Please try again.");
+      return;
+    }
     if (r.redirected) return;
     navigate({ to: "/profile", replace: true });
   }
@@ -57,10 +60,13 @@ function AuthPage() {
     try {
       if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email: f.email, password: f.password });
-        if (error) return toast.error(error.message);
+        if (error) { toast.error(error.message); return; }
         navigate({ to: "/profile", replace: true });
       } else {
-        if (f.orcid && !isValidOrcid(f.orcid)) return toast.error("That ORCID doesn't look right. Check the digits.");
+        if (f.orcid && !isValidOrcid(f.orcid)) {
+          toast.error("That ORCID doesn't look right. Check the digits.");
+          return;
+        }
         const { error } = await supabase.auth.signUp({
           email: f.email,
           password: f.password,
@@ -74,7 +80,7 @@ function AuthPage() {
             },
           },
         });
-        if (error) return toast.error(error.message);
+        if (error) { toast.error(error.message); return; }
         setSent(true);
       }
     } finally {
