@@ -12,7 +12,7 @@ export async function computeMatchesFor(uid: string) {
       supabaseAdmin.from("profiles").select("id, topic_weights, activity, match_weights"),
       supabaseAdmin.from("profile_analysis").select("user_id, methods").eq("status", "done"),
       supabaseAdmin.from("profile_analysis_edits").select("user_id, value, action").eq("kind", "method"),
-      supabaseAdmin.from("matches").select("user_a, user_b, created_at"),
+      supabaseAdmin.from("matches").select("id, user_a, user_b, created_at, formula"),
       supabaseAdmin.from("works").select("topics").eq("user_id", uid).limit(2000),
     ]);
 
@@ -36,14 +36,26 @@ export async function computeMatchesFor(uid: string) {
     const me = all.find((p) => p.id === uid);
     if (!me) return { added: 0, reason: "Import your publications first so we know your research topics." };
 
-    const paired = new Set((existing ?? []).map((m) => `${m.user_a}|${m.user_b}`));
+    const current = (existing ?? []).filter((m) => m.formula === "v2");
+    const legacy = (existing ?? []).filter((m) => m.formula !== "v2" && uid === m.user_a || m.formula !== "v2" && uid === m.user_b);
+    const paired = new Set(current.map((m) => `${m.user_a}|${m.user_b}`));
     const weekAgo = Date.now() - 7 * 86400_000;
     const open: Record<string, number> = {};
-    for (const m of existing ?? []) if (new Date(m.created_at).getTime() >= weekAgo)
+    for (const m of current) if (new Date(m.created_at).getTime() >= weekAgo)
       for (const id of [m.user_a, m.user_b]) open[id] = (open[id] ?? 0) + 1;
 
     const myWeights = ((profiles ?? []).find((p: any) => p.id === uid)?.match_weights ?? {}) as Partial<MatchWeights>;
-    const candidates = collaborationMatchesFor(me, all, myWeights).filter((m) => !paired.has(`${m.a}|${m.b}`));
+    const scored = collaborationMatchesFor(me, all, myWeights);
+    // Rescore this user's old-formula matches in place (keeps notes, interest, saved state).
+    let rescored = 0;
+    for (const old of legacy) {
+      const n = scored.find((m) => m.a === old.user_a && m.b === old.user_b);
+      if (!n) continue;
+      await supabaseAdmin.from("matches").update({ score: n.score, t: n.T, m: n.M, act: n.act, a_only: n.aOnly, b_only: n.bOnly, shared_methods: n.sharedMethods, formula: n.formula }).eq("id", old.id);
+      paired.add(`${old.user_a}|${old.user_b}`); rescored++;
+    }
+    for (const old of legacy) paired.add(`${old.user_a}|${old.user_b}`);
+    const candidates = scored.filter((m) => !paired.has(`${m.a}|${m.b}`));
     const chosen = selectPairs(candidates as unknown as Match[], open, WEEKLY_CAP) as unknown as typeof candidates;
 
     const names = new Map<string, string>();
@@ -58,5 +70,6 @@ export async function computeMatchesFor(uid: string) {
       if (error) throw new Error("Could not save matches");
     }
     if (!chosen.length && (open[uid] ?? 0) >= WEEKLY_CAP) return { added: 0, reason: `You already have ${WEEKLY_CAP} new matches this week.` };
+    if (!chosen.length && rescored) return { added: 0, reason: `Updated ${rescored} existing match${rescored > 1 ? "es" : ""} to the new score. Dismissed ones are under Dismissed.` };
     return { added: chosen.length, reason: chosen.length ? null : "No new researchers fit you right now. Check back later." };
   }
