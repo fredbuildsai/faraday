@@ -325,6 +325,31 @@ function MatchesPage() {
            </div>
           </Section>
         ))}
+
+        {(tab === "saved" || tab === "dismissed") && external.some((e) => e.state === tab) && (
+          <div className="space-y-3">
+            <h2 className="font-serif text-xl">Not on Lattice Scout yet</h2>
+            <p className="text-sm text-muted-foreground">Found in the wider OpenAlex network. They can't see your interest until they join.</p>
+            {external.filter((e) => e.state === tab).map((e) => (
+              <Section key={e.id} title={e.name} subtitle={e.institution || "Institution not given"}
+                aside={<span className="rounded-full bg-accent px-3 py-1 font-mono text-sm text-accent-foreground">{Math.round(e.score * 100)}%</span>}>
+                <div className="space-y-3 text-sm">
+                  <p className="text-muted-foreground">{layerLabel(e.layer, e.via, e.shared_topics[0])}</p>
+                  <p><span className="font-medium">Shared research area:</span> {e.shared_topics.join(", ") || "—"}</p>
+                  <p className="text-muted-foreground">h-index {e.h_index} · {Number(e.citations).toLocaleString()} citations · {e.works_count} works</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={`https://openalex.org/${e.openalex_id}`} target="_blank" rel="noreferrer">View on OpenAlex</a>
+                    </Button>
+                    {tab === "saved"
+                      ? <Button size="sm" variant="ghost" onClick={() => setExternal(e.id, "dismissed").catch(() => toast.error("Could not update."))}><X className="mr-1 h-4 w-4" />Dismiss</Button>
+                      : <Button size="sm" variant="ghost" onClick={() => setExternal(e.id, "active").catch(() => toast.error("Could not update."))}><RotateCcw className="mr-1 h-4 w-4" />Restore</Button>}
+                  </div>
+                </div>
+              </Section>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
