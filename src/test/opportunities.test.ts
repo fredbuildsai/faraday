@@ -74,3 +74,21 @@ d2("settings cache", () => {
     e2(sameSettings({ ...s, excludeReviews: true }, s)).toBe(false);
   });
 });
+
+import { searchTerms as st, principalInvestigators as pi } from "@/lib/opportunities";
+describe("whitespace search terms", () => {
+  it("removes ? so OpenAlex accepts the search", () => {
+    const t = st("What is the role of Na⁺ substitution on early Ni‑mediated surface reconstruction?");
+    expect(t).not.toMatch(/[?*]/);
+    expect(t).toContain("substitution");
+  });
+});
+describe("likely PIs", () => {
+  it("keeps only last authors, not corresponding ones", () => {
+    const r = pi([{ authorships: [
+      { author_position: "first", is_corresponding: true, author: { id: "A1", display_name: "First" } },
+      { author_position: "last", author: { id: "A2", display_name: "Last" } },
+    ] }]);
+    expect(r.map((p) => p.name)).toEqual(["Last"]);
+  });
+});
