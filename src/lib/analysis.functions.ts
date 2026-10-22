@@ -31,7 +31,7 @@ export const runAnalysis = createServerFn({ method: "POST" })
     }));
     const interestsText = profile?.research_interests ?? "";
     const hash = inputFingerprint(works, interestsText);
-    if (current?.status === "running" && Date.now() - new Date(current.updated_at).getTime() < 5 * 60_000)
+    if (current?.status === "running" && Date.now() - new Date(current.updated_at).getTime() < 3 * 60_000)
       return { status: "running" as const };
     if (!data.force && current?.status === "done" && current.input_hash === hash) return { status: "skipped" as const, reason: "Nothing changed" };
 
