@@ -40,3 +40,13 @@ describe("wider OpenAlex discovery", () => {
     expect(rankExternal(me, raws, authors, {}, 2, 2026)).toHaveLength(2);
   });
 });
+
+describe("principal-investigator toggle", () => {
+  const works = [{ authorships: [au("F", "F", "first"), au("M", "M"), au("L", "L", "last")] }];
+  it("on by default: only last authors", () => {
+    expect(collectCandidates([{ via: "Bo", works }], works, new Set()).map((x) => x.id)).toEqual(["L"]);
+  });
+  it("off: every author", () => {
+    expect(collectCandidates([], works, new Set(), false).map((x) => x.id).sort()).toEqual(["F", "L", "M"]);
+  });
+});

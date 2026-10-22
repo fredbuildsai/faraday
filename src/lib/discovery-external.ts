@@ -25,12 +25,15 @@ export function topCoauthors(works: { authors: { id: string; name: string }[] }[
 /**
  * Collect candidate authors from OpenAlex works.
  * `bridged`: works of one of your co-authors (their co-authors become collaborators of collaborators).
- * `topical`: recent works in your topics (their last author, the likely PI, becomes a candidate).
+ * `topical`: recent works in your topics.
+ * With `piOnly`, only last authors (likely principal investigators) become candidates.
  */
 export function collectCandidates(
   bridged: { via: string; works: any[] }[],
   topical: any[],
   exclude: Set<string>,
+  /** Only principal investigators (last authors) — on by default. */
+  piOnly = true,
 ): RawCandidate[] {
   const out = new Map<string, RawCandidate>();
   const add = (id: string, name: string, layer: Layer, via: string | null) => {
@@ -39,12 +42,9 @@ export function collectCandidates(
     if (e) { e.hits++; if (layer === "second_degree" && e.layer !== layer) Object.assign(e, { layer, via }); }
     else out.set(id, { id, name, layer, via, hits: 1 });
   };
-  for (const b of bridged) for (const w of b.works) for (const a of w.authorships ?? [])
-    if (a?.author?.id) add(shortId(a.author.id), a.author.display_name ?? "", "second_degree", b.via);
-  for (const w of topical) {
-    const last = (w.authorships ?? []).find((a: any) => a.author_position === "last");
-    if (last?.author?.id) add(shortId(last.author.id), last.author.display_name ?? "", "interest", null);
-  }
+  const pick = (w: any) => (w.authorships ?? []).filter((a: any) => a?.author?.id && (!piOnly || a.author_position === "last"));
+  for (const b of bridged) for (const w of b.works) for (const a of pick(w)) add(shortId(a.author.id), a.author.display_name ?? "", "second_degree", b.via);
+  for (const w of topical) for (const a of pick(w)) add(shortId(a.author.id), a.author.display_name ?? "", "interest", null);
   return [...out.values()].sort((x, y) => (x.layer === y.layer ? 0 : x.layer === "second_degree" ? -1 : 1) || y.hits - x.hits);
 }
 
