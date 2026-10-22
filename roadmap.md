@@ -22,5 +22,18 @@
 
 ## Swipe discovery
 - [x] Discover deck on Matches: swipe right = interested + saved, left = dismissed, undo, keyboard arrows; cards show h-index, citations, recent papers, shared topics, methods, interests (platform members only)
-- [ ] 2nd-degree layer (co-authors of your co-authors on the platform): needs co-author lists stored at import
+- [x] Discovery layer: "Find new matches" returns up to 10 new platform members; excludes self, anyone already matched/saved/dismissed and direct co-authors; collaborators of collaborators first (card names the shared co-author), then shared-topic matches; topic gate applies to both
+- [ ] Global OpenAlex fill when fewer than 10 platform members qualify
 - [ ] Further-afield layer (3–5 degrees / exploratory cross-disciplinary)
+
+## Technical debt & scaling: matching concurrency and performance
+Issues
+- Race: double-clicks or two people searching at once could insert the same pair twice.
+- Full scans: matching reads every profile and every publication row on each request; cost grows with platform size, not with the user's own history. (The exclusion list itself is cheap: a few hundred ids in a set.)
+Done
+- Unique index on the unordered pair (LEAST/GREATEST of user_a, user_b); inserts ignore duplicate-pair errors, so races are harmless.
+- The user's own matches are read with a filter on user_a/user_b, backed by indexes.
+Proposed (not yet implemented)
+- Pre-filter candidates in the database: only profiles sharing at least one topic key with the user and not already matched, then score that subset in code.
+- Store co-author ids in their own indexed table (user_id, coauthor_id) instead of reading every publication row's author list.
+- Per-user short lock (or button disable) against repeated requests.
