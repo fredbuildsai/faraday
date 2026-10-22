@@ -85,6 +85,77 @@ export type Database = {
           },
         ]
       }
+      job_state: {
+        Row: {
+          last_result: Json | null
+          last_run_at: string | null
+          locked_until: string | null
+          name: string
+          paused_at: string | null
+          paused_reason: string | null
+        }
+        Insert: {
+          last_result?: Json | null
+          last_run_at?: string | null
+          locked_until?: string | null
+          name: string
+          paused_at?: string | null
+          paused_reason?: string | null
+        }
+        Update: {
+          last_result?: Json | null
+          last_run_at?: string | null
+          locked_until?: string | null
+          name?: string
+          paused_at?: string | null
+          paused_reason?: string | null
+        }
+        Relationships: []
+      }
+      match_user_state: {
+        Row: {
+          ideas: Json
+          ideas_at: string | null
+          match_id: string
+          notes: string
+          notes_updated_at: string | null
+          state: string
+          summary: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ideas?: Json
+          ideas_at?: string | null
+          match_id: string
+          notes?: string
+          notes_updated_at?: string | null
+          state?: string
+          summary?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ideas?: Json
+          ideas_at?: string | null
+          match_id?: string
+          notes?: string
+          notes_updated_at?: string | null
+          state?: string
+          summary?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_user_state_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           a_only: string[]
