@@ -45,3 +45,14 @@ Proposed (not yet implemented)
 
 - [x] Collaborative (shared) opportunities: create, invite matches, papers + similar search, sections with versions, comments, tasks, history, notifications, export
 - [ ] Later: live co-editing, attachments, email notifications
+
+## Shared opportunity workspace v2 (done)
+- [x] Export works; choose Word (.docx), Markdown (.md) or plain text (.txt)
+- [x] Draft tab with Abstract, Introduction, Experimental, Results and discussion, Conclusions (versions, conflicts, comments kept)
+- [x] Contributors tab: CRediT roles + custom roles saved per opportunity
+- [x] Aims and open questions as items with their own comments, resolve/reopen
+- [x] References: OpenAlex search (title/keywords/DOI) or manual entry; numbered in exports
+- [x] Discussion shows where each comment comes from (filter by source); @mentions notify tagged members
+- [x] Saved → shared opportunity keeps notes, whitespace, evidence + closest papers, suggested researchers
+- [x] Password reset (Forgot password? + /reset-password)
+- [x] Google logo on "Continue with Google"
