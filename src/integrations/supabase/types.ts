@@ -36,6 +36,7 @@ export type Database = {
         Row: {
           activity: number
           created_at: string
+          custom_topics: string[]
           first_name: string
           id: string
           institution: string | null
@@ -51,6 +52,7 @@ export type Database = {
         Insert: {
           activity?: number
           created_at?: string
+          custom_topics?: string[]
           first_name?: string
           id: string
           institution?: string | null
@@ -66,6 +68,7 @@ export type Database = {
         Update: {
           activity?: number
           created_at?: string
+          custom_topics?: string[]
           first_name?: string
           id?: string
           institution?: string | null
