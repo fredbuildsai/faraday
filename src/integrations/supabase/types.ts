@@ -537,6 +537,7 @@ export type Database = {
         Returns: {
           act: number
           created_at: string
+          formula: string
           i_am_interested: boolean
           id: string
           m: number
@@ -545,6 +546,7 @@ export type Database = {
           other_institution: string
           other_name: string
           score: number
+          shared_methods: string[]
           shared_topics: string[]
           t: number
           they_are_interested: boolean
