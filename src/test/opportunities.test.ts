@@ -71,6 +71,10 @@ d2("settings cache", () => {
     e2(sameSettings(s, s)).toBe(true);
     e2(sameSettings({ ...s, excludeReviews: true }, s)).toBe(false);
   });
+  i2("changing selected collaborators requires new opportunities", () => {
+    const s = { mode: "network" as const, excludeReviews: false, mutualOnly: false, matchIds: [], collaboratorIds: ["A2"] };
+    e2(sameSettings({ ...s, collaboratorIds: ["A3"] }, s)).toBe(false);
+  });
 });
 
 import { searchTerms as st, principalInvestigators as pi } from "@/lib/opportunities";
