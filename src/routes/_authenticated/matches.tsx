@@ -20,6 +20,7 @@ import { Thumbs } from "@/components/Thumbs";
 import { feedbackQuery } from "./opportunities";
 import { SwipeDeck, type ScientistCard } from "@/components/SwipeDeck";
 import { inDeck } from "@/lib/swipe";
+import { OpenAlexDialog } from "@/components/OpenAlexDialog";
 
 const cardsQuery = queryOptions({
   queryKey: ["match-cards"],
@@ -316,6 +317,7 @@ function MatchesPage() {
                   <Button size="sm" variant="ghost" onClick={() => mark(m.id, "dismissed")}><X className="mr-1 h-4 w-4" />Dismiss</Button>
                 </>
               )}
+              {cardInfo[m.other_id]?.openalex_ids?.[0] && <OpenAlexDialog authorId={cardInfo[m.other_id]!.openalex_ids[0]!} name={m.other_name || "Researcher"} />}
               <span className="flex-1" />
               {m.other_email ? (
                 <a href={`mailto:${m.other_email}`} className="inline-flex items-center gap-2 text-sm font-medium text-primary">
@@ -346,9 +348,7 @@ function MatchesPage() {
                   <p><span className="font-medium">Shared research area:</span> {e.shared_topics.join(", ") || "—"}</p>
                   <p className="text-muted-foreground">h-index {e.h_index} · {Number(e.citations).toLocaleString()} citations · {e.works_count} works</p>
                   <div className="flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline" asChild>
-                      <a href={`https://openalex.org/${e.openalex_id}`} target="_blank" rel="noreferrer">View on OpenAlex</a>
-                    </Button>
+                    <OpenAlexDialog authorId={e.openalex_id} name={e.name} />
                     {tab === "saved"
                       ? <Button size="sm" variant="ghost" onClick={() => setExternal(e.id, "dismissed").catch(() => toast.error("Could not update."))}><X className="mr-1 h-4 w-4" />Dismiss</Button>
                       : <Button size="sm" variant="ghost" onClick={() => setExternal(e.id, "active").catch(() => toast.error("Could not update."))}><RotateCcw className="mr-1 h-4 w-4" />Restore</Button>}

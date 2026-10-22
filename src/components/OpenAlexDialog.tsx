@@ -55,7 +55,7 @@ export function OpenAlexDialog({ authorId, name }: { authorId: string; name: str
                 {works.map((w) => (
                   <li key={w.id} className="rounded-lg border p-3">
                     <p className="font-medium">{w.doi ? <a className="text-primary hover:underline" href={w.doi} target="_blank" rel="noreferrer">{w.title}</a> : w.title}</p>
-                    <p className="text-xs text-muted-foreground">{w.publication_year} · {w.primary_location?.source?.display_name ?? "Unknown venue"} · {w.cited_by_count} citations {w.open_access?.is_oa && <OaBadge isOa />}</p>
+                    <p className="text-xs text-muted-foreground">{w.publication_year} · {w.primary_location?.source?.display_name ?? "Unknown venue"} · {w.cited_by_count} citations {w.open_access?.is_oa && <OaBadge />}</p>
                   </li>
                 ))}
               </ul>
