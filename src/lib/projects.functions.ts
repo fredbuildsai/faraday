@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { DEFAULT_SECTIONS, invitable } from "@/lib/projects";
 import { assessWhitespace, searchTerms, threeYearsAgo, workKey } from "@/lib/opportunities";
 
-const Paper = z.object({ openalexId: z.string().min(1).max(200), title: z.string().min(1).max(1000), url: z.string().max(1000).nullable(), isOa: z.boolean().default(false) });
+const Paper = z.object({ openalexId: z.string().min(1).max(200), title: z.string().min(1).max(1000), url: z.string().max(1000).nullable(), isOa: z.boolean().default(false), origin: z.enum(["member", "evidence", "prior_art", "similar"]).default("member") });
 const Person = z.object({ id: z.string().max(200), name: z.string().max(300) });
 
 async function myMatchIds(sb: any): Promise<string[]> {
@@ -20,17 +20,21 @@ export const createProject = createServerFn({ method: "POST" })
     title: z.string().trim().min(3).max(300), description: z.string().max(5000).default(""),
     memberIds: z.array(z.string().uuid()).max(30).default([]), suggested: z.array(Person).max(30).default([]),
     papers: z.array(Paper).max(100).default([]), source: z.record(z.string(), z.any()).default({}),
+    notes: z.string().max(5000).default(""), whitespace: z.record(z.string(), z.any()).nullable().default(null),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const uid = context.userId;
     const invite = invitable(data.memberIds, await myMatchIds(context.supabase), [], uid);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: p, error } = await supabaseAdmin.from("projects").insert({ owner_id: uid, title: data.title, description: data.description, suggested_people: data.suggested as any, source: data.source as any }).select("id").single();
+    // A saved opportunity's private notes come along, both in the record and as the first discussion post.
+    const source = { ...data.source, ...(data.notes.trim() ? { notes: data.notes } : {}) };
+    const { data: p, error } = await supabaseAdmin.from("projects").insert({ owner_id: uid, title: data.title, description: data.description, suggested_people: data.suggested as any, source: source as any, whitespace: data.whitespace as any }).select("id").single();
     if (error || !p) throw new Error("Could not create the opportunity.");
     await supabaseAdmin.from("project_members").insert({ project_id: p.id, user_id: uid, role: "owner", state: "accepted", invited_by: uid });
     if (invite.length) await supabaseAdmin.from("project_members").insert(invite.map((user_id) => ({ project_id: p.id, user_id, role: "editor", state: "invited", invited_by: uid })));
     await supabaseAdmin.from("project_sections").insert(DEFAULT_SECTIONS.map((s, i) => ({ project_id: p.id, key: s.key, title: s.title, position: i })));
-    if (data.papers.length) await supabaseAdmin.from("project_papers").upsert(data.papers.map((w) => ({ project_id: p.id, openalex_id: workKey(w.openalexId) || w.openalexId, title: w.title, url: w.url, is_oa: w.isOa, added_by: uid })), { onConflict: "project_id,openalex_id", ignoreDuplicates: true });
+    if (data.papers.length) await supabaseAdmin.from("project_papers").upsert(data.papers.map((w) => ({ project_id: p.id, openalex_id: workKey(w.openalexId) || w.openalexId, title: w.title, url: w.url, is_oa: w.isOa, origin: w.origin, added_by: uid })), { onConflict: "project_id,openalex_id", ignoreDuplicates: true });
+    if (data.notes.trim()) await supabaseAdmin.from("project_comments").insert({ project_id: p.id, author_id: uid, body: `Notes from my saved opportunity:\n\n${data.notes.trim()}` });
     return { id: p.id };
   });
 
