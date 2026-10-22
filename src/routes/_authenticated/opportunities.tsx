@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
@@ -7,9 +7,7 @@ import { Bookmark, BookmarkCheck, ThumbsDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { OpportunityCard } from "@/components/OpportunityCard";
 import { findOpportunities, getOpportunityPeople } from "@/lib/opportunities.functions";
 import { eligibleOpportunityPeople } from "@/lib/opportunity-people";
@@ -73,9 +71,7 @@ function OpportunitiesPage() {
   const find = useServerFn(findOpportunities);
   const [busy, setBusy] = useState(false);
   const saved = (data?.settings ?? {}) as Partial<OppSettings>;
-  const [mode, setMode] = useState<"network" | "broad">(preferences.opportunityMode);
-  const [excludeReviews, setExcludeReviews] = useState(preferences.excludeReviews);
-  const [mutualOnly, setMutualOnly] = useState(preferences.mutualOnly);
+  const { opportunityMode: mode, excludeReviews, mutualOnly } = preferences;
   const [picked, setPicked] = useState<Set<string>>(new Set([...(saved.matchIds ?? []), ...(saved.collaboratorIds ?? [])]));
   const list = (data?.suggestions as unknown as Suggestion[]) ?? [];
   const shownMatches = eligibleOpportunityPeople(matches, mutualOnly);
@@ -119,23 +115,9 @@ function OpportunitiesPage() {
           <Button onClick={() => run(list.length > 0)} disabled={busy}>{busy ? "Looking…" : list.length ? "Refresh" : "Find opportunities"}</Button>
         </div>
 
-        <section className="space-y-4 rounded-xl border bg-card p-5">
-          <div className="flex flex-wrap gap-6">
-            <div className="flex items-center gap-2">
-              <Switch id="mode" checked={mode === "network"} onCheckedChange={(v) => setMode(v ? "network" : "broad")} />
-              <Label htmlFor="mode">Only my, my collaborators’ and my matches’ published research</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch id="reviews" checked={excludeReviews} onCheckedChange={setExcludeReviews} />
-              <Label htmlFor="reviews">Exclude review articles</Label>
-            </div>
-          </div>
-          {mode === "network" && (
-            <div className="space-y-3 border-t pt-4">
-              <div className="flex items-center gap-2">
-                <Switch id="mutual" checked={mutualOnly} onCheckedChange={setMutualOnly} />
-                <Label htmlFor="mutual">Mutual-interest matches only</Label>
-              </div>
+        {mode === "network" && (
+          <section className="space-y-3">
+              <h2 className="font-serif text-xl">Collaborators and matches</h2>
               {shownMatches.length ? (
                 <div className="flex flex-wrap gap-4">
                   {shownMatches.map((m) => (
@@ -146,10 +128,8 @@ function OpportunitiesPage() {
                   ))}
                 </div>
               ) : <p className="text-sm text-muted-foreground">{mutualOnly ? "No collaborators or mutual-interest matches yet." : "No collaborators or matches found yet."}</p>}
-            </div>
-          )}
-          <p className="text-xs text-muted-foreground">Changing these and pressing {list.length ? "Refresh" : "Find opportunities"} looks again.</p>
-        </section>
+          </section>
+        )}
 
         {busy && !visible.length ? (
           <div className="space-y-3"><Skeleton className="h-32 w-full" /><Skeleton className="h-32 w-full" /></div>
