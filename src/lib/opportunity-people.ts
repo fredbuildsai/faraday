@@ -4,7 +4,7 @@ export type OpportunityPerson = { id: string; name: string; mutual: boolean; col
 export type OpportunityMatch = { id: string; name: string; mutual: boolean; authorIds: string[]; score?: number };
 
 /** Direct co-authors are eligible here even though discovery excludes them. */
-export function opportunityPeople(matches: OpportunityMatch[], works: { authors: { id: string; name: string }[] }[], ownIds: string[], config = DEFAULT_OPPORTUNITY_CONFIG): OpportunityPerson[] {
+export function opportunityPeople(matches: OpportunityMatch[], works: { authors: { id: string; name: string }[] }[], ownIds: string[], config: { collaboratorLimit: number; matchLimit: number } = DEFAULT_OPPORTUNITY_CONFIG): OpportunityPerson[] {
   const short = (id: string) => id.split("/").pop() ?? "";
   const own = new Set(ownIds.map(short));
   // Matches are capped separately from collaborators: best score first, mutual interest breaking ties.
