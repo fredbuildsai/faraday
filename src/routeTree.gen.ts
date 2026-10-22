@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedConfirmRouteImport } from './routes/_authenticated/confirm'
+import { Route as AuthenticatedMatchesRouteImport } from './routes/_authenticated/matches'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 
 const IndexRoute = IndexRouteImport.update({
@@ -34,6 +35,11 @@ const AuthenticatedConfirmRoute = AuthenticatedConfirmRouteImport.update({
   path: '/confirm',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMatchesRoute = AuthenticatedMatchesRouteImport.update({
+  id: '/matches',
+  path: '/matches',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -44,12 +50,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/confirm': typeof AuthenticatedConfirmRoute
+  '/matches': typeof AuthenticatedMatchesRoute
   '/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/confirm': typeof AuthenticatedConfirmRoute
+  '/matches': typeof AuthenticatedMatchesRoute
   '/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRoutesById {
@@ -58,19 +66,21 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/confirm': typeof AuthenticatedConfirmRoute
+  '/_authenticated/matches': typeof AuthenticatedMatchesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/confirm' | '/profile'
+  fullPaths: '/' | '/auth' | '/confirm' | '/matches' | '/profile'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/confirm' | '/profile'
+  to: '/' | '/auth' | '/confirm' | '/matches' | '/profile'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/confirm'
+    | '/_authenticated/matches'
     | '/_authenticated/profile'
   fileRoutesById: FileRoutesById
 }
@@ -110,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfirmRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/matches': {
+      id: '/_authenticated/matches'
+      path: '/matches'
+      fullPath: '/matches'
+      preLoaderRoute: typeof AuthenticatedMatchesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -122,11 +139,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedConfirmRoute: typeof AuthenticatedConfirmRoute
+  AuthenticatedMatchesRoute: typeof AuthenticatedMatchesRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedConfirmRoute: AuthenticatedConfirmRoute,
+  AuthenticatedMatchesRoute: AuthenticatedMatchesRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
 }
 
