@@ -37,6 +37,21 @@ export const setMatchState = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Permanently remove a match (verifies the caller is part of it, then deletes it for both sides). */
+export const removeMatch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ matchId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: m } = await context.supabase.from("matches").select("id").eq("id", data.matchId).maybeSingle();
+    if (!m) throw new Error("Match not found");
+    // The matches table has no DELETE policy, so the row is removed with the
+    // privileged client after the authenticated membership check above.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("matches").delete().eq("id", data.matchId);
+    if (error) throw new Error("Could not remove");
+    return { ok: true };
+  });
+
 /** Private notes on a match. */
 export const saveMatchNotes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
