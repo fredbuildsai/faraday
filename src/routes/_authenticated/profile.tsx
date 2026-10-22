@@ -88,8 +88,16 @@ function ProfilePage() {
     setDrafting(true);
     try {
       const r = await draft();
-      if (r.text) { setInterests(r.text); setAiDrafted(true); }
-      else if (manual) toast.error(r.error ?? "Could not write a draft");
+      if (r.text) {
+        setInterests(r.text);
+        setAiDrafted(true);
+        // First-time user: keep the automatic draft so it is there next visit.
+        if (!manual) {
+          await save({ data: { text: r.text } });
+          await qc.invalidateQueries({ queryKey: ["my-profile"] });
+        }
+      } else if (manual) toast.error(r.error ?? "Could not write a draft");
+      else toast.info("We couldn't write your research interests yet. Press “Write with AI” to try again.");
     } catch {
       if (manual) toast.error("Could not write a draft");
     } finally {
@@ -97,12 +105,13 @@ function ProfilePage() {
     }
   }
 
+  // Draft automatically for a first-time user as soon as publications are available.
   useEffect(() => {
-    if (autoTried.current) return;
+    if (autoTried.current || p?.research_interests || !data.works.length) return;
     autoTried.current = true;
-    if (!p?.research_interests && data.works.length) void generate(false);
+    void generate(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [data.works.length, p?.research_interests]);
 
   async function persistTopics(next: string[]) {
     try {
