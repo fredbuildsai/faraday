@@ -75,24 +75,28 @@ export function sameSettings(a: Partial<OppSettings> | null | undefined, b: OppS
   return a.mode === b.mode && !!a.excludeReviews === b.excludeReviews && !!a.mutualOnly === b.mutualOnly && ids(a.matchIds) === ids(b.matchIds);
 }
 
-/** Last author and corresponding authors of each paper, merged by author id. */
+/** Last author of each paper, merged by author id. */
 export function principalInvestigators(papers: { authorships?: any[] }[]): Person[] {
   const out = new Map<string, Person>();
   for (const p of papers) {
     for (const a of p.authorships ?? []) {
-      const roles: Person["roles"] = [];
-      if (a?.author_position === "last") roles.push("last");
-      if (a?.is_corresponding === true) roles.push("corresponding");
-      if (!roles.length) continue;
+      if (a?.author_position !== "last") continue;
       const id = String(a?.author?.id ?? a?.author?.display_name ?? "").trim();
       const name = String(a?.author?.display_name ?? a?.raw_author_name ?? "").trim();
       if (!id || !name) continue;
-      const cur: Person = out.get(id) ?? { id, name, institution: a?.institutions?.[0]?.display_name ?? null, roles: [] };
-      for (const r of roles) if (!cur.roles.includes(r)) cur.roles.push(r);
-      out.set(id, cur);
+      if (!out.has(id)) out.set(id, { id, name, institution: a?.institutions?.[0]?.display_name ?? null, roles: ["last"] });
     }
   }
   return [...out.values()];
+}
+
+const STOP = new Set("a an the and or of in on for to with by from at as is are be can does do how what which why when whether role effect effects affect impact using use via into during between their its this that these those than under over".split(" "));
+
+/** Turn a question-style title into plain key terms OpenAlex can search (no wildcards like ? or *). */
+export function searchTerms(title: string, max = 10): string {
+  const words = title.normalize("NFKC").replace(/[\u2010-\u2015]/g, "-").replace(/[^\p{L}\p{N}\- ]+/gu, " ")
+    .split(/\s+/).map((w) => w.replace(/^-+|-+$/g, "")).filter((w) => w.length > 1 && !STOP.has(w.toLowerCase()));
+  return [...new Set(words)].slice(0, max).join(" ");
 }
 
 /** Word-set (Jaccard) similarity between two titles, 0..1. */

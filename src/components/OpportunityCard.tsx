@@ -26,17 +26,16 @@ export function OpportunityCard({ s, actions, children }: { s: Suggestion; actio
       <p className="text-sm">{s.description}</p>
 
       {!!s.collaborators?.length && (
-        <div className="text-sm"><span className="font-medium">With your matches: </span>{s.collaborators.map((c) => c.name).join(", ")}</div>
+        <div className="text-sm"><span className="font-medium">Matches whose papers are cited here: </span>{s.collaborators.map((c) => c.name).join(", ")}</div>
       )}
       <div className="text-sm">
-        <p className="font-medium">Likely principal investigators</p>
+        <p className="font-medium">Likely principal investigators <span className="font-normal text-muted-foreground">(last author of each evidence paper)</span></p>
         {s.pis?.length ? (
           <ul className="mt-1 space-y-0.5 text-muted-foreground">
             {s.pis.map((p) => (
               <li key={p.id}>
                 <a href={p.id.startsWith("http") ? p.id : undefined} target="_blank" rel="noreferrer" className="text-foreground">{p.name}</a>
                 {p.institution ? ` · ${p.institution}` : ""}
-                <span className="font-mono text-xs"> ({p.roles.map((r) => (r === "last" ? "last author" : "corresponding author")).join(", ")})</span>
               </li>
             ))}
           </ul>

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { aiChat, parseJson } from "@/lib/ai-call.server";
 import {
-  MAX_SUGGESTIONS, assessWhitespace, isFresh, principalInvestigators, sameSettings, verifySuggestions, workKey,
+  MAX_SUGGESTIONS, assessWhitespace, isFresh, principalInvestigators, sameSettings, searchTerms, verifySuggestions, workKey,
   type OaWork, type OppSettings,
 } from "@/lib/opportunities";
 
@@ -95,7 +95,8 @@ export const findOpportunities = createServerFn({ method: "POST" })
         s.collaborators = owners.map((id) => ({ id, name: names.get(id) ?? "Match" }));
       }
       // Whitespace: counts and closest existing papers for the proposed question.
-      const q = encodeURIComponent(s.title);
+      const terms = searchTerms(s.title);
+      const q = encodeURIComponent(terms);
       const rv = data.excludeReviews ? ",type:!review" : "";
       let totalCount: number | null = null, recentCount: number | null = null, closest: OaWork[] = [];
       try {
@@ -104,9 +105,9 @@ export const findOpportunities = createServerFn({ method: "POST" })
         closest = (all?.results ?? []).map((w: any) => ({ id: workKey(w.id), title: String(w.display_name ?? ""), url: w.doi || w.id })).filter((w: OaWork) => w.title);
         const recent: any = await openalexGet(`/works?search=${q}&filter=publication_year:>${since - 1}${rv}&per_page=1&select=id`);
         recentCount = Number(recent?.meta?.count ?? 0);
-      } catch { /* leave unknown */ }
+      } catch (e) { console.error("whitespace count", terms, e); }
       s.novelty = totalCount;
-      s.whitespace = assessWhitespace({ query: s.title, sinceYear: since, totalCount, recentCount, closest });
+      s.whitespace = assessWhitespace({ query: terms, sinceYear: since, totalCount, recentCount, closest });
     }
     await supabaseAdmin.from("opportunities").upsert({ user_id: uid, suggestions: kept as any, dropped_claims: dropped as any, settings: settings as any, created_at: new Date().toISOString() });
     return { status: "done" as const };

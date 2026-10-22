@@ -39,17 +39,15 @@ import { assessWhitespace, principalInvestigators, sameSettings } from "@/lib/op
 import { describe as d2, it as i2, expect as e2 } from "vitest";
 
 d2("principal investigators", () => {
-  i2("lists last and corresponding authors, merged by id", () => {
+  i2("lists each paper's last author once, merged by id", () => {
     const pis = principalInvestigators([
       { authorships: [
-        { author_position: "first", is_corresponding: false, author: { id: "A1", display_name: "First" } },
         { author_position: "middle", is_corresponding: true, author: { id: "A2", display_name: "Corr" } },
-        { author_position: "last", is_corresponding: false, author: { id: "A3", display_name: "Senior" } },
+        { author_position: "last", author: { id: "A3", display_name: "Senior" } },
       ] },
-      { authorships: [{ author_position: "last", is_corresponding: true, author: { id: "A2", display_name: "Corr" } }] },
+      { authorships: [{ author_position: "last", author: { id: "A3", display_name: "Senior" } }] },
     ]);
-    e2(pis.map((p) => p.name)).toEqual(["Corr", "Senior"]);
-    e2(pis[0]!.roles.sort()).toEqual(["corresponding", "last"]);
+    e2(pis.map((p) => p.name)).toEqual(["Senior"]);
   });
 });
 
@@ -72,5 +70,23 @@ d2("settings cache", () => {
     const s = { mode: "broad" as const, excludeReviews: false, mutualOnly: false, matchIds: [] };
     e2(sameSettings(s, s)).toBe(true);
     e2(sameSettings({ ...s, excludeReviews: true }, s)).toBe(false);
+  });
+});
+
+import { searchTerms as st, principalInvestigators as pi } from "@/lib/opportunities";
+describe("whitespace search terms", () => {
+  it("removes ? so OpenAlex accepts the search", () => {
+    const t = st("What is the role of Na⁺ substitution on early Ni‑mediated surface reconstruction?");
+    expect(t).not.toMatch(/[?*]/);
+    expect(t).toContain("substitution");
+  });
+});
+describe("likely PIs", () => {
+  it("keeps only last authors, not corresponding ones", () => {
+    const r = pi([{ authorships: [
+      { author_position: "first", is_corresponding: true, author: { id: "A1", display_name: "First" } },
+      { author_position: "last", author: { id: "A2", display_name: "Last" } },
+    ] }]);
+    expect(r.map((p) => p.name)).toEqual(["Last"]);
   });
 });
