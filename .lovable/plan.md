@@ -43,6 +43,14 @@
 - **Double opt-in**: "I'm interested" button. Both emails appear only once both people clicked it, enforced in the database, not just on screen.
 - Seed profiles get analyses and methods so matches show up right away.
 
+## Opportunities page
+- Header gains an "Opportunities" link.
+- Uses the user's finished analysis (interests, methods, emerging directions) to search OpenAlex for related works from the last 3 years (25 results).
+- Mistral suggests up to 3 research gaps: title, description (max 60 words), and evidence work ids.
+- Each evidence id is checked against the OpenAlex results; only suggestions with at least 2 verified works are shown, each work with title and link. Dropped suggestions are stored hidden.
+- Novelty comes from an OpenAlex count of works matching the combined topic terms, never from the AI.
+- Results cached per user for 7 days.
+
 ## Seed data
 - Invites: 3 example researchers (example.edu) plus your email (please send it).
 - 3 example profiles with synthetic works, topic weights and activity.
@@ -57,4 +65,5 @@
 - Analysis: "Edge Function `analyze-profile`" implemented as a server function started in the background after `importWorks`, calling the Mistral API directly with secret `MISTRAL_API_KEY`. Tables `profile_analysis(user_id, status, summary, research_interests, methods, emerging_directions, evidence, dropped_claims, model, input_hash, created_at)`, `profile_analysis_edits(user_id, kind, value, action add/remove)` for user edits, `llm_calls(user_id, tokens, ms, ok)`. RLS own rows only; `dropped_claims` excluded from client reads (served via a view/server function). Daily limit counted from `profile_analysis` rows. Evidence verification, input hash and edit-merge logic in a pure module with unit tests.
 - Matching: TypeScript server function `computeMatches(userId)` (pure scoring module with unit tests for T, M, act, score, complementarity skip, threshold, 7-day cap) run after analysis reaches done. Setting table `app_settings(match_threshold default 0.11)`. Table `matches(user_a, user_b, score, t, m, act, shared_topics, a_only, b_only, formula 'c2', explanation jsonb, created_at)`; RLS readable only by its two users; no email column. `explainMatch` server function calls Mistral (JSON schema, max 60-word summary, max 2 ideas) with only topics, methods and up to 5 titles each; result cached in `matches.explanation`; logged in `llm_calls`.
 - Double opt-in: table `interests(from_user, to_user)` (insert own only). View `match_reveal_v` (security barrier, filtered to auth.uid()) returns the other user's email only when both interest rows exist; email is never readable any other way.
+- Opportunities: server function `findOpportunities` (the brief's Edge Function) reusing the cached, rate-limited OpenAlex client. Table `opportunities(user_id pk, suggestions jsonb, dropped_claims jsonb, created_at)`; RLS own row; `dropped_claims` not exposed to clients. Evidence-id verification and novelty query building in the pure module with unit tests.
 - Seed via migration INSERTs (synthetic auth users for the 3 examples).
