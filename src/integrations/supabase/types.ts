@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          activity: number
+          created_at: string
+          first_name: string
+          id: string
+          institution: string | null
+          last_imported_at: string | null
+          last_name: string
+          openalex_author_id: string | null
+          orcid: string | null
+          research_interests: string | null
+          topic_weights: Json
+          updated_at: string
+          works_truncated: boolean
+        }
+        Insert: {
+          activity?: number
+          created_at?: string
+          first_name?: string
+          id: string
+          institution?: string | null
+          last_imported_at?: string | null
+          last_name?: string
+          openalex_author_id?: string | null
+          orcid?: string | null
+          research_interests?: string | null
+          topic_weights?: Json
+          updated_at?: string
+          works_truncated?: boolean
+        }
+        Update: {
+          activity?: number
+          created_at?: string
+          first_name?: string
+          id?: string
+          institution?: string | null
+          last_imported_at?: string | null
+          last_name?: string
+          openalex_author_id?: string | null
+          orcid?: string | null
+          research_interests?: string | null
+          topic_weights?: Json
+          updated_at?: string
+          works_truncated?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
