@@ -43,6 +43,7 @@ export type Database = {
           last_imported_at: string | null
           last_name: string
           openalex_author_id: string | null
+          openalex_author_ids: string[]
           orcid: string | null
           research_interests: string | null
           topic_weights: Json
@@ -59,6 +60,7 @@ export type Database = {
           last_imported_at?: string | null
           last_name?: string
           openalex_author_id?: string | null
+          openalex_author_ids?: string[]
           orcid?: string | null
           research_interests?: string | null
           topic_weights?: Json
@@ -75,6 +77,7 @@ export type Database = {
           last_imported_at?: string | null
           last_name?: string
           openalex_author_id?: string | null
+          openalex_author_ids?: string[]
           orcid?: string | null
           research_interests?: string | null
           topic_weights?: Json
