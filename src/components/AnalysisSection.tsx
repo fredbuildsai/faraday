@@ -31,7 +31,7 @@ export function AnalysisSection({ analysis, edits, running, hasWorks, onRetry }:
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3">
-        <span className={`rounded-full px-3 py-0.5 font-mono text-xs ${CHIP[status] ?? CHIP.pending}`}>{status}</span>
+        <span className={`rounded-full px-3 py-0.5 font-mono text-xs ${CHIP[status] ?? CHIP["pending"]}`}>{status}</span>
         <Button size="sm" variant="outline" onClick={onRetry} disabled={running}>
           <RotateCw className="mr-1 h-4 w-4" />{status === "failed" ? "Retry" : "Run again"}
         </Button>
