@@ -127,7 +127,8 @@ function MatchesPage() {
     const c = cardInfo[m.other_id];
     return {
       id: m.id, name: m.other_name || "A researcher", institution: m.other_institution, score: m.score, t: m.t,
-      layer: layerLabel(layers[m.id]?.layer ?? "interest", layers[m.id]?.via ?? null, m.shared_topics[0]),
+      layer: layers[m.id]?.layer === "second_degree" ? "In your network" : "Shared focus",
+      connection: layers[m.id]?.layer === "second_degree" ? layers[m.id]?.via ?? null : null,
       sharedTopics: m.shared_topics, interests: c?.interests ?? null,
       hIndex: c?.h_index ?? 0, citations: Number(c?.citations ?? 0), worksCount: c?.works_count ?? 0, recentWorks: c?.recent_works ?? 0,
       methods: c?.methods ?? [], directions: c?.directions ?? [], openalexId: c?.openalex_ids?.[0] ?? null,
@@ -135,7 +136,8 @@ function MatchesPage() {
     };
   }).concat(external.filter((e) => e.state === "active").map((e) => ({
     id: EXT + e.id, name: e.name, institution: e.institution, score: e.score, t: e.t,
-    layer: `Not on Lattice Scout · ${layerLabel(e.layer, e.via, e.shared_topics[0])}`,
+    layer: `Not on Lattice Scout · ${e.layer === "second_degree" ? "In your network" : "Shared focus"}`,
+    connection: e.layer === "second_degree" ? e.via : null,
     sharedTopics: e.shared_topics, interests: null, hIndex: e.h_index, citations: Number(e.citations), worksCount: e.works_count, recentWorks: e.recent_works ?? 0, openalexId: e.openalex_id,
     methods: [], directions: [],
     member: false,

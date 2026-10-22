@@ -12,6 +12,8 @@ export type ScientistCard = {
   score: number;
   t: number;
   layer: string;
+  /** Shared co-author who links you, when found through your network. */
+  connection?: string | null;
   sharedTopics: string[];
   interests: string | null;
   hIndex: number;
@@ -126,7 +128,7 @@ function CardBody({ c }: { c: ScientistCard }) {
               )}
             </div>
           )}
-          <p className="mb-1 inline-block rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">{c.layer}</p>
+          <p className="mb-1 inline-block rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">{c.layer}</p>
           <h2 className="truncate font-serif text-2xl">{c.name}</h2>
           <p className="truncate text-sm text-muted-foreground">{c.institution || "Institution not given"}</p>
         </div>
@@ -139,6 +141,14 @@ function CardBody({ c }: { c: ScientistCard }) {
         <Stat label="papers, 3 yrs" value={c.recentWorks} />
       </div>
       {c.openalexId && <div><OpenAlexDialog authorId={c.openalexId} name={c.name} /></div>}
+
+      {c.connection && (
+        <div>
+          <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">Common connection</p>
+          <span className="rounded-full border px-2.5 py-0.5 text-xs">{c.connection}</span>
+        </div>
+      )}
+
 
       {c.sharedTopics.length > 0 && (
         <div>
