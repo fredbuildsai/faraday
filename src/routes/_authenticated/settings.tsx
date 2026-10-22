@@ -27,16 +27,17 @@ function SettingsPage() {
   const { data } = useSuspenseQuery(researchSettingsQuery);
   const [settings, setSettings] = useState(data);
   const [limit, setLimit] = useState(String(data.collaboratorLimit));
+  const [papers, setPapers] = useState(String(data.paperLimit));
   const [busy, setBusy] = useState(false);
   const save = useServerFn(saveResearchSettings);
   const qc = useQueryClient();
-  const valid = Number.isSafeInteger(Number(limit)) && Number(limit) > 0;
+  const valid = Number.isSafeInteger(Number(limit)) && Number(limit) > 0 && Number.isSafeInteger(Number(papers)) && Number(papers) >= 2 && Number(papers) <= 200;
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!valid) return;
     setBusy(true);
     try {
-      await save({ data: { ...settings, collaboratorLimit: Number(limit) } });
+      await save({ data: { ...settings, collaboratorLimit: Number(limit), paperLimit: Number(papers) } });
       await Promise.all([qc.invalidateQueries({ queryKey: ["research-settings"] }), qc.invalidateQueries({ queryKey: ["opportunity-people"] })]);
       toast.success("Settings saved");
     } catch { toast.error("Could not save settings. Please try again."); }
@@ -48,6 +49,7 @@ function SettingsPage() {
       <section className="space-y-5 border-b pb-8">
         <h2 className="font-serif text-xl">Opportunities</h2>
         <div className="flex flex-wrap items-center justify-between gap-4"><Label htmlFor="collaborator-limit">Most frequent collaborators</Label><Input id="collaborator-limit" type="number" min={1} step={1} value={limit} onChange={(event) => setLimit(event.target.value)} className="w-24" /></div>
+        <div className="flex flex-wrap items-center justify-between gap-4"><div><Label htmlFor="paper-limit">Recent papers per person</Label><p className="text-xs text-muted-foreground">How many of your (and each selected person’s) latest papers are read, 2–200.</p></div><Input id="paper-limit" type="number" min={2} max={200} step={1} value={papers} onChange={(event) => setPapers(event.target.value)} className="w-24" /></div>
         <div className="flex items-center justify-between gap-4"><Label htmlFor="default-network">Use only my network’s published research</Label><Switch id="default-network" checked={settings.opportunityMode === "network"} onCheckedChange={(value) => setSettings({ ...settings, opportunityMode: value ? "network" : "broad" })} /></div>
         <div className="flex items-center justify-between gap-4"><Label htmlFor="default-reviews">Exclude reviews</Label><Switch id="default-reviews" checked={settings.excludeReviews} onCheckedChange={(value) => setSettings({ ...settings, excludeReviews: value })} /></div>
         <div className="flex items-center justify-between gap-4"><Label htmlFor="default-mutual">Mutual-interest matches only</Label><Switch id="default-mutual" checked={settings.mutualOnly} onCheckedChange={(value) => setSettings({ ...settings, mutualOnly: value })} /></div>

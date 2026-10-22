@@ -13,6 +13,8 @@ Return JSON: {"suggestions": [{"title": string (phrased as a specific research q
 Never invent work ids. No names, no invented facts.`;
 const NETWORK_HINT = " The works come from the researcher and selected collaborators; prefer gaps that combine works from different owners.";
 
+const SOLO_HINT = " The works are all the researcher's own; suggest natural extensions and unexplored gaps within this body of work.";
+
 const labels = (v: unknown) => (Array.isArray(v) ? v : []).map((x: any) => String(x?.label ?? "")).filter(Boolean);
 
 const Input = z.object({
@@ -50,7 +52,6 @@ export const findOpportunities = createServerFn({ method: "POST" })
       for (const person of allowed) names.set(person.id, person.name);
       matchIds = data.matchIds.filter((id) => names.has(id));
       collaboratorIds = data.collaboratorIds.filter((id) => names.has(id));
-      if (!matchIds.length && !collaboratorIds.length) return { status: "error" as const, reason: "Choose at least one collaborator or match to include." };
     }
     const settings: OppSettings = { mode: data.mode, excludeReviews: data.excludeReviews, mutualOnly: data.mutualOnly, matchIds, collaboratorIds };
 
@@ -62,6 +63,11 @@ export const findOpportunities = createServerFn({ method: "POST" })
     const terms = [...labels(a.directions), ...labels(a.interests)].slice(0, 4);
     const methods = labels(a.methods).slice(0, 3);
     if (!terms.length) return { status: "error" as const, reason: "Your analysis has no interests yet." };
+
+    const { data: prof } = await context.supabase.from("profiles").select("research_settings").eq("id", uid).maybeSingle();
+    const { resolveResearchSettings } = await import("@/lib/research-settings");
+    const paperLimit = resolveResearchSettings(prof?.research_settings).paperLimit;
+    const solo = data.mode === "network" && !matchIds.length && !collaboratorIds.length;
 
     const sinceDate = threeYearsAgo(new Date());
     const since = Number(sinceDate.slice(0, 4));
@@ -75,7 +81,7 @@ export const findOpportunities = createServerFn({ method: "POST" })
       } else {
         names.set(uid, "you");
         for (const owner of [uid, ...matchIds]) {
-          let q = supabaseAdmin.from("works").select("openalex_id, title, doi, type, is_oa").eq("user_id", owner).order("year", { ascending: false }).limit(30);
+          let q = supabaseAdmin.from("works").select("openalex_id, title, doi, type, is_oa").eq("user_id", owner).order("year", { ascending: false }).limit(paperLimit);
           if (data.excludeReviews) q = q.neq("type", "review");
           const { data: rows } = await q;
           for (const r of rows ?? []) {
@@ -85,7 +91,7 @@ export const findOpportunities = createServerFn({ method: "POST" })
         }
         for (const owner of collaboratorIds) {
           const filter = `author.id:${owner}${data.excludeReviews ? ",type:!review" : ""}`;
-          const res: any = await openalexGet(`/works?filter=${filter}&sort=publication_date:desc&per_page=30&select=id,display_name,doi,open_access`);
+          const res: any = await openalexGet(`/works?filter=${filter}&sort=publication_date:desc&per_page=${Math.min(paperLimit, 200)}&select=id,display_name,doi,open_access`);
           for (const paper of res?.results ?? []) {
             const id = workKey(paper.id);
             if (id && paper.display_name && !works.some((w) => w.id === id)) works.push({ id, title: paper.display_name, url: paper.doi || paper.id, owner, isOa: !!paper.open_access?.is_oa });
@@ -96,7 +102,7 @@ export const findOpportunities = createServerFn({ method: "POST" })
     if (works.length < 2) return { status: "error" as const, reason: "Not enough published work found." };
 
     const ai = await aiChat([
-      { role: "system", content: SYSTEM + (data.mode === "network" ? NETWORK_HINT : "") },
+      { role: "system", content: SYSTEM + (solo ? SOLO_HINT : data.mode === "network" ? NETWORK_HINT : "") },
       { role: "user", content: JSON.stringify({ interests: terms, methods, works: works.map((w) => ({ id: w.id, title: w.title, owner: w.owner ? (w.owner === uid ? "self" : "collaborator") : undefined })) }) },
     ], { json: true });
     const j = parseJson(ai.text);
