@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Logo } from "@/components/Logo";
+import { Section } from "@/components/Section";
 import { computeMatches, setInterest } from "@/lib/matching.functions";
 import { Thumbs } from "@/components/Thumbs";
 import { feedbackQuery } from "./opportunities";
@@ -87,15 +88,15 @@ function MatchesPage() {
           <div className="rounded-xl border border-dashed bg-card p-10 text-center text-muted-foreground">
             No matches yet. Run your profile analysis, then press "Find new matches".
           </div>
-        ) : data.map((m) => (
-          <article key={m.id} className="space-y-4 rounded-xl border bg-card p-6">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h2 className="font-serif text-xl">{m.other_name || "A researcher"}</h2>
-                <p className="text-sm text-muted-foreground">{m.other_institution || "Institution not given"}</p>
-              </div>
-              <div className="flex items-center gap-2"><Thumbs type="match" id={m.id} value={fb[`match:${m.id}`] ?? 0} /><span className="rounded-full bg-accent px-3 py-1 font-mono text-sm text-accent-foreground">{Math.round(m.score * 100)}%</span></div>
-            </div>
+        ) : data.map((m, i) => (
+          <Section
+            key={m.id}
+            defaultOpen={i === 0}
+            title={m.other_name || "A researcher"}
+            subtitle={m.other_institution || "Institution not given"}
+            aside={<><Thumbs type="match" id={m.id} value={fb[`match:${m.id}`] ?? 0} /><span className="rounded-full bg-accent px-3 py-1 font-mono text-sm text-accent-foreground">{Math.round(m.score * 100)}%</span></>}
+          >
+           <div className="space-y-4">
             {m.shared_topics.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {m.shared_topics.map((t) => <span key={t} className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">{t}</span>)}
@@ -130,7 +131,8 @@ function MatchesPage() {
                 <Button size="sm" onClick={() => toggle(m.id, true)}>I'm interested</Button>
               )}
             </div>
-          </article>
+           </div>
+          </Section>
         ))}
       </main>
     </div>

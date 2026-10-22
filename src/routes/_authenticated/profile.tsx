@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Section } from "@/components/Section";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const profileQuery = queryOptions({
@@ -323,18 +324,6 @@ function ProfilePage() {
   );
 }
 
-function Section({ title, count, defaultOpen = true, children }: { title: string; count?: number; defaultOpen?: boolean; children: React.ReactNode }) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <Collapsible open={open} onOpenChange={setOpen} className="rounded-xl border bg-card">
-      <CollapsibleTrigger className="flex w-full items-center justify-between p-6 text-left">
-        <h2 className="font-serif text-xl">{title}{count !== undefined && <span className="ml-2 font-mono text-sm text-muted-foreground">{count}</span>}</h2>
-        <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
-      </CollapsibleTrigger>
-      <CollapsibleContent className="px-6 pb-6">{children}</CollapsibleContent>
-    </Collapsible>
-  );
-}
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
