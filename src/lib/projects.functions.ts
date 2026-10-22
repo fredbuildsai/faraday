@@ -117,3 +117,31 @@ export const findSimilarPapers = createServerFn({ method: "POST" })
     await supabaseAdmin.from("projects").update({ whitespace: whitespace as any }).eq("id", data.projectId);
     return { query, papers: found, whitespace };
   });
+
+/** OpenAlex search for references: title/keywords, or a DOI. Members of the opportunity only. */
+export const searchReferences = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ projectId: z.string().uuid(), q: z.string().trim().min(2).max(300) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: ok } = await context.supabase.rpc("is_project_member", { _project: data.projectId, _user: context.userId });
+    if (!ok) throw new Error("Not allowed.");
+    const { openalexGet } = await import("@/lib/openalex.server");
+    const doi = data.q.match(/10\.\d{4,9}\/\S+/)?.[0];
+    const select = "id,display_name,doi,publication_year,authorships,primary_location";
+    const path = doi
+      ? `/works?filter=doi:${encodeURIComponent(doi.toLowerCase())}&select=${select}`
+      : `/works?search=${encodeURIComponent(searchTerms(data.q) || data.q)}&per_page=15&select=${select}`;
+    let rows: any[] = [];
+    try { rows = ((await openalexGet(path)) as any)?.results ?? []; } catch (e) { console.error("reference search", e); throw new Error("OpenAlex search failed."); }
+    return rows.map((w) => {
+      const names = (w.authorships ?? []).map((a: any) => String(a?.author?.display_name ?? "")).filter(Boolean);
+      return {
+        openalexId: workKey(w.id), title: String(w.display_name ?? ""),
+        authors: names.length > 3 ? `${names.slice(0, 3).join(", ")} et al.` : names.join(", "),
+        year: (w.publication_year ?? null) as number | null,
+        venue: String(w.primary_location?.source?.display_name ?? ""),
+        doi: w.doi ? String(w.doi).replace(/^https?:\/\/doi\.org\//i, "") : "",
+        url: (w.doi || w.id || null) as string | null,
+      };
+    }).filter((r) => r.openalexId && r.title);
+  });

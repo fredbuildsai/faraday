@@ -25,7 +25,7 @@ export function projectQuery(id: string) {
   return queryOptions({
     queryKey: ["project", id],
     queryFn: async () => {
-      const [project, people, sections, papers, comments, tasks, activity] = await Promise.all([
+      const [project, people, sections, papers, comments, tasks, activity, items, references, contributions] = await Promise.all([
         supabase.from("projects").select("*").eq("id", id).maybeSingle(),
         supabase.rpc("project_people", { _project: id }),
         supabase.from("project_sections").select("*").eq("project_id", id).order("position"),
@@ -33,9 +33,12 @@ export function projectQuery(id: string) {
         supabase.from("project_comments").select("*").eq("project_id", id).order("created_at"),
         supabase.from("project_tasks").select("*").eq("project_id", id).order("created_at"),
         supabase.from("project_activity").select("*").eq("project_id", id).order("created_at", { ascending: false }).limit(100),
+        supabase.from("project_items").select("*").eq("project_id", id).order("created_at"),
+        supabase.from("project_references").select("*").eq("project_id", id).order("created_at"),
+        supabase.from("project_contributions").select("*").eq("project_id", id).order("created_at"),
       ]);
       if (project.error) throw project.error;
-      return { project: project.data, people: people.data ?? [], sections: sections.data ?? [], papers: papers.data ?? [], comments: comments.data ?? [], tasks: tasks.data ?? [], activity: activity.data ?? [] };
+      return { project: project.data, people: people.data ?? [], sections: sections.data ?? [], papers: papers.data ?? [], comments: comments.data ?? [], tasks: tasks.data ?? [], activity: activity.data ?? [], items: items.data ?? [], references: references.data ?? [], contributions: contributions.data ?? [] };
     },
   });
 }
