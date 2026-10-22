@@ -15,6 +15,7 @@ import {
 import { ConfidentialNotice } from "@/components/ConfidentialNotice";
 import { OpportunityCard } from "@/components/OpportunityCard";
 import type { Suggestion } from "@/lib/opportunities";
+import { fromSaved } from "@/lib/projects";
 
 const savedQuery = queryOptions({
   queryKey: ["saved-opportunities"],
@@ -83,7 +84,7 @@ function ManagePage() {
         ) : rows.map((r) => (
           <OpportunityCard key={r.id} s={r.snapshot as unknown as Suggestion} actions={
             <div className="flex gap-1">
-              {tab === "saved" && <NewProjectDialog trigger={<Button variant="ghost" size="sm"><Users className="h-4 w-4" /> Collaborate</Button>} initial={{ title: (r.snapshot as any)?.title, description: (r.snapshot as any)?.description, papers: (((r.snapshot as any)?.evidence ?? []) as any[]).map((w) => ({ openalexId: w.id, title: w.title, url: w.url ?? null, isOa: !!w.isOa })), source: { savedOpportunityId: r.id, snapshot: r.snapshot } }} />}
+              {tab === "saved" && <NewProjectDialog key={r.notes_updated_at ?? r.id} trigger={<Button variant="ghost" size="sm"><Users className="h-4 w-4" /> Collaborate</Button>} initial={fromSaved(r)} />}
               {tab === "saved"
                 ? <Button variant="ghost" size="sm" onClick={() => setState(r, "dismissed")}><ThumbsDown className="h-4 w-4" /> Dismiss</Button>
                 : <Button variant="ghost" size="sm" onClick={() => setState(r, "saved")}><RotateCcw className="h-4 w-4" /> Restore</Button>}
