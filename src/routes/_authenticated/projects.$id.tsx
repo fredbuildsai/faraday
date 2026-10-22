@@ -45,6 +45,8 @@ function ProjectPage() {
   const [me, setMe] = useState<string | null>(null);
   useEffect(() => { supabase.auth.getUser().then(({ data: u }) => setMe(u.user?.id ?? null)); }, []);
   const refresh = () => qc.invalidateQueries({ queryKey: ["project", id] });
+  // Opening the opportunity marks its updates as read.
+  useEffect(() => { supabase.from("notifications").update({ read: true }).eq("project_id", id).eq("read", false).then(() => qc.invalidateQueries({ queryKey: ["notifications"] })); }, [id, qc]);
 
   if (!data.project) return <main className="mx-auto max-w-5xl px-6 py-10"><p className="text-muted-foreground">This opportunity does not exist or you are not a member. <Link to="/projects" className="text-primary hover:underline">Back to shared opportunities</Link></p></main>;
   const p = data.project;
