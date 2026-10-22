@@ -191,9 +191,11 @@ export type Database = {
           act: number
           b_only: string[]
           created_at: string
+          formula: string
           id: string
           m: number
           score: number
+          shared_methods: string[]
           shared_topics: string[]
           t: number
           user_a: string
@@ -204,9 +206,11 @@ export type Database = {
           act: number
           b_only?: string[]
           created_at?: string
+          formula?: string
           id?: string
           m: number
           score: number
+          shared_methods?: string[]
           shared_topics?: string[]
           t: number
           user_a: string
@@ -217,9 +221,11 @@ export type Database = {
           act?: number
           b_only?: string[]
           created_at?: string
+          formula?: string
           id?: string
           m?: number
           score?: number
+          shared_methods?: string[]
           shared_topics?: string[]
           t?: number
           user_a?: string
@@ -379,6 +385,7 @@ export type Database = {
           institution: string | null
           last_imported_at: string | null
           last_name: string
+          match_weights: Json | null
           openalex_author_id: string | null
           openalex_author_ids: string[]
           orcid: string | null
@@ -397,6 +404,7 @@ export type Database = {
           institution?: string | null
           last_imported_at?: string | null
           last_name?: string
+          match_weights?: Json | null
           openalex_author_id?: string | null
           openalex_author_ids?: string[]
           orcid?: string | null
@@ -415,6 +423,7 @@ export type Database = {
           institution?: string | null
           last_imported_at?: string | null
           last_name?: string
+          match_weights?: Json | null
           openalex_author_id?: string | null
           openalex_author_ids?: string[]
           orcid?: string | null
@@ -528,6 +537,7 @@ export type Database = {
         Returns: {
           act: number
           created_at: string
+          formula: string
           i_am_interested: boolean
           id: string
           m: number
@@ -536,6 +546,7 @@ export type Database = {
           other_institution: string
           other_name: string
           score: number
+          shared_methods: string[]
           shared_topics: string[]
           t: number
           they_are_interested: boolean

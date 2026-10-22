@@ -1,3 +1,4 @@
+import { DEFAULT_WEIGHTS } from "@/lib/match-score";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -139,19 +140,26 @@ function MatchesPage() {
                 {m.shared_topics.map((t) => <span key={t} className="rounded-full bg-secondary px-3 py-1 text-xs text-secondary-foreground">{t}</span>)}
               </div>
             )}
-            <div className="grid gap-4 text-sm sm:grid-cols-2">
-              <div><p className="mb-1 font-medium">You bring</p><p className="text-muted-foreground">{m.you_bring.join(", ") || "—"}</p></div>
-              <div><p className="mb-1 font-medium">They bring</p><p className="text-muted-foreground">{m.they_bring.join(", ") || "—"}</p></div>
+            <div className="grid gap-3 text-sm sm:grid-cols-3">
+              <div><p className="mb-1 font-medium">Shared research area</p><p className="text-muted-foreground">{m.t >= 0.5 ? "Strong" : m.t >= 0.3 ? "Moderate" : "Some"} ({Math.round(m.t * 100)}%)</p></div>
+              <div><p className="mb-1 font-medium">Publication activity</p><p className="text-muted-foreground">{m.act >= 0.6 ? "Current" : m.act >= 0.3 ? "Moderate" : "Low"}</p></div>
+              <div><p className="mb-1 font-medium">Methods</p><p className="text-muted-foreground">{!m.you_bring.length && !m.they_bring.length && !(m.shared_methods ?? []).length ? "Still being established" : m.m >= 0.25 ? "Shared methodological ground" : "Different methodological perspectives"}</p></div>
+            </div>
+            <div className="grid gap-4 text-sm sm:grid-cols-3">
+              <div><p className="mb-1 font-medium">Methods you both use</p><p className="text-muted-foreground">{(m.shared_methods ?? []).join(", ") || "—"}</p></div>
+              <div><p className="mb-1 font-medium">Mainly yours</p><p className="text-muted-foreground">{m.you_bring.join(", ") || "—"}</p></div>
+              <div><p className="mb-1 font-medium">Mainly theirs</p><p className="text-muted-foreground">{m.they_bring.join(", ") || "—"}</p></div>
             </div>
             <Collapsible>
               <CollapsibleTrigger className="group flex items-center gap-1 text-sm text-primary">
                 Why this score <ChevronDown className="h-4 w-4 transition group-data-[state=open]:rotate-180" />
               </CollapsibleTrigger>
               <CollapsibleContent className="mt-2 space-y-1 font-mono text-xs text-muted-foreground">
-                <p>Topic overlap T = {m.t.toFixed(2)}</p>
-                <p>Method overlap M = {m.m.toFixed(2)} (lower is better)</p>
-                <p>Activity factor = {m.act.toFixed(2)}</p>
-                <p>Score = T × (1 − M)^1.5 × activity = {m.score.toFixed(2)}</p>
+                <p>Topic similarity T = {m.t.toFixed(2)}</p>
+                <p>Activity A = {m.act.toFixed(2)}</p>
+                {m.formula === "v2"
+                  ? <><p>Score = {DEFAULT_WEIGHTS.topic} × T + {DEFAULT_WEIGHTS.activity} × A = {m.score.toFixed(2)}</p><p>Methods are shown for context only and do not change the score.</p></>
+                  : <p>Older score (method overlap penalty) = {m.score.toFixed(2)}. Find new matches to use the new rule.</p>}
               </CollapsibleContent>
             </Collapsible>
             <MatchIdeas matchId={m.id} st={states[m.id]} />

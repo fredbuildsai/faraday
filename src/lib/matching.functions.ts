@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { WEEKLY_CAP, matchesFor, selectPairs, type Profile } from "@/lib/matching";
 import { tidyMethod } from "@/lib/method-synonyms";
 
 const topicKey = (id: unknown) => String(id ?? "").split("/").pop() ?? "";
@@ -71,7 +70,7 @@ export const writeMatchIdeas = createServerFn({ method: "POST" })
     };
     const [me, them] = await Promise.all([side(context.userId), side(other)]);
     const r = await aiChat([
-      { role: "system", content: `Two researchers were matched: shared topics, complementary methods. Using ONLY the given data, return JSON {"summary": string (max 60 words, why they fit together), "ideas": [{"title": string, "description": string (max 40 words)}] (max 2 concrete joint projects combining both methods)}. No names, no invented facts.` },
+      { role: "system", content: `Two researchers were matched because they work on shared research topics. Using ONLY the given data, return JSON {"summary": string (max 60 words, why they fit together), "ideas": [{"title": string, "description": string (max 40 words)}] (max 2 concrete joint projects on their shared topics)}. No names, no invented facts.` },
       { role: "user", content: JSON.stringify({ shared_topics: m.shared_topics, researcher_1: me, researcher_2: them }) },
     ], { json: true });
     const j = parseJson(r.text);
