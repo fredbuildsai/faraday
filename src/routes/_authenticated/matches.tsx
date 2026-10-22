@@ -213,6 +213,21 @@ function MatchesPage() {
     } catch { toast.error("Could not remove. Please try again."); }
   }
 
+  async function removeAllDismissed() {
+    const ids = data.filter((m) => stateOf(m.id) === "dismissed").map((m) => m.id);
+    const extIds = external.filter((e) => e.state === "dismissed").map((e) => e.id);
+    try {
+      for (const id of ids) await removeMatchFn({ data: { matchId: id } });
+      if (extIds.length) {
+        const { error } = await supabase.from("external_suggestions").delete().in("id", extIds);
+        if (error) throw error;
+      }
+      setLastDecided(null);
+      toast.success(`Removed ${ids.length + extIds.length} researchers`);
+    } catch { toast.error("Some could not be removed. Please try again."); }
+    await Promise.all(["my-matches", "match-states", "match-cards", "external-suggestions"].map((k) => qc.invalidateQueries({ queryKey: [k] })));
+  }
+
   async function find() {
     setBusy(true);
     try {
@@ -253,6 +268,32 @@ function MatchesPage() {
             <Button key={t.key} role="tab" aria-selected={tab === t.key} size="sm" variant={tab === t.key ? "default" : "outline"} onClick={() => setTab(t.key)}>{t.label}</Button>
           ))}
         </div>
+
+        {tab === "dismissed" && (shown.length > 0 || external.some((e) => e.state === "dismissed")) && (
+          <div className="flex justify-end">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button size="sm" variant="outline"><Trash2 className="mr-1 h-4 w-4" />Remove all</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Remove all dismissed researchers?</AlertDialogTitle>
+                  <AlertDialogDescription asChild>
+                    <div className="space-y-2">
+                      <p>This permanently deletes {shown.length + external.filter((e) => e.state === "dismissed").length} researchers from your Dismissed list, including any private notes and collaboration ideas you saved for them.</p>
+                      <p>They are not blocked: any of them may appear again in future "Find new matches" searches, as if you had never seen them.</p>
+                      <p>This cannot be undone.</p>
+                    </div>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Keep them</AlertDialogCancel>
+                  <AlertDialogAction onClick={removeAllDismissed}>Remove all</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
 
         {tab === "discover" ? (
           data.length || external.length ? <SwipeDeck cards={deck} onDecide={decide} onUndo={undo} canUndo={!!lastDecided} />
