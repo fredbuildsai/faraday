@@ -20,3 +20,4 @@
 
 - Discovery (`src/lib/discovery.ts`, batch of `BATCH_SIZE`) picks new matches: excludes already matched pairs and direct co-authors (`works.authors`), ranks collaborators-of-collaborators first; matches carry `layer`/`via`; why: one pure, tested rule for who may be suggested.
 - Match pairs are unique regardless of order (DB index); inserts tolerate duplicate-pair errors; why: concurrent searches must not duplicate matches.
+- Researchers outside the platform are stored per user in `external_suggestions` (OpenAlex id, state), never in `matches` (which needs two members); rules in `src/lib/discovery-external.ts`, fetching in `discovery-external.server.ts`; why: non-members cannot take part in double opt-in.
