@@ -57,6 +57,10 @@
 - Simple empty state for every list (works, topics, interests, methods, matches, opportunities).
 - Loading state (skeletons + "Analysing your profile…") while the analysis runs.
 
+## Monthly automatic update
+- Every user's publications are re-imported from OpenAlex about once a month, then their analysis and matches update automatically (analysis is skipped when nothing changed; the daily limit still applies).
+- Runs in small batches each day so it stays within OpenAlex and Mistral limits. Profile shows "Last updated" date.
+
 ## Seed data
 - Invites: 3 example researchers (example.edu) plus your email (please send it).
 - 3 example profiles with synthetic works, topic weights and activity.
@@ -73,4 +77,5 @@
 - Double opt-in: table `interests(from_user, to_user)` (insert own only). View `match_reveal_v` (security barrier, filtered to auth.uid()) returns the other user's email only when both interest rows exist; email is never readable any other way.
 - Opportunities: server function `findOpportunities` (the brief's Edge Function) reusing the cached, rate-limited OpenAlex client. Table `opportunities(user_id pk, suggestions jsonb, dropped_claims jsonb, created_at)`; RLS own row; `dropped_claims` not exposed to clients. Evidence-id verification and novelty query building in the pure module with unit tests.
 - Feedback: table `feedback(user_id, target_type 'match'|'opportunity', target_id, value -1|1, created_at, unique(user_id, target_type, target_id))`; RLS own rows; upsert on click.
+- Monthly refresh: daily pg_cron job calls `/api/public/cron/refresh` with a shared secret header (`CRON_SECRET`, generated). Picks up to 20 users whose `last_imported_at` is over 30 days old, runs import then analysis (skipped if input hash unchanged) then matching. Lease row in `job_locks` for single-flight; pauses and records reason on Mistral 402/403 or repeated 429.
 - Seed via migration INSERTs (synthetic auth users for the 3 examples).
