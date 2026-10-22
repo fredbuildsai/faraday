@@ -20,8 +20,8 @@ describe("analysis rules", () => {
   it("summary is clipped to 80 words", () => {
     expect(clipWords(Array(100).fill("w").join(" ")).split(" ")).toHaveLength(80);
   });
-  it("sends 100 works per call", () => {
-    expect(chunk(Array(250).fill(0)).map((c) => c.length)).toEqual([100, 100, 50]);
+  it("sends 40 works per batch", () => {
+    expect(chunk(Array(90).fill(0)).map((c) => c.length)).toEqual([40, 40, 10]);
   });
   it("same input gives same fingerprint, changed interests differ", () => {
     const w = [{ title: "a", year: 2020, keywords: [], topics: [] }];
