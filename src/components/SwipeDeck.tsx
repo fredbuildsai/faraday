@@ -3,6 +3,7 @@ import { Heart, Undo2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { swipeDecision } from "@/lib/swipe";
 import { OpenAlexDialog } from "@/components/OpenAlexDialog";
+import { LogoMark } from "@/components/Logo";
 
 export type ScientistCard = {
   id: string;
