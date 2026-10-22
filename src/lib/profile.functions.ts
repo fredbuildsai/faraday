@@ -40,7 +40,7 @@ export const draftResearchInterests = createServerFn({ method: "POST" })
       ],
     });
     // Try the chosen provider (with one retry on rate limit), then any other provider that has a key.
-    const others = (["mistral", "groq", "openrouter"] as const)
+    const others = (["openrouter", "mistral", "groq"] as const)
       .filter((p) => p !== cfg.provider)
       .map((p) => resolveAiConfig({ ...process.env, AI_PROVIDER: p }))
       .filter((c) => c.apiKey);

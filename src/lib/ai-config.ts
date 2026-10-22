@@ -5,11 +5,11 @@ export type AiProvider = "mistral" | "openrouter" | "groq";
 
 export const AI_PROVIDERS: Record<AiProvider, { baseUrl: string; keyEnv: string; modelEnv: string; defaultModel: string }> = {
   mistral: { baseUrl: "https://api.mistral.ai/v1", keyEnv: "MISTRAL_API_KEY", modelEnv: "MISTRAL_MODEL", defaultModel: "mistral-small-latest" },
-  openrouter: { baseUrl: "https://openrouter.ai/api/v1", keyEnv: "OPENROUTER_API_KEY", modelEnv: "OPENROUTER_MODEL", defaultModel: "mistralai/mistral-small-24b-instruct-2501" },
+  openrouter: { baseUrl: "https://openrouter.ai/api/v1", keyEnv: "OPENROUTER_API_KEY", modelEnv: "OPENROUTER_MODEL", defaultModel: "nvidia/nemotron-3.5-super-vl:free" },
   groq: { baseUrl: "https://api.groq.com/openai/v1", keyEnv: "GROQ_API_KEY", modelEnv: "GROQ_MODEL", defaultModel: "llama-3.3-70b-versatile" },
 };
 
-export const DEFAULT_PROVIDER: AiProvider = "mistral";
+export const DEFAULT_PROVIDER: AiProvider = "openrouter";
 
 export interface ResolvedAiConfig {
   provider: AiProvider;
