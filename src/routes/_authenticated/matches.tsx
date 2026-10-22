@@ -141,7 +141,7 @@ function MatchesPage() {
       const r = await compute();
       if (r.added) toast.success(`${r.added} new match${r.added > 1 ? "es" : ""}`);
       else toast.info(r.reason ?? "No new matches");
-      await qc.invalidateQueries({ queryKey: ["my-matches"] });
+      await Promise.all([qc.invalidateQueries({ queryKey: ["my-matches"] }), qc.invalidateQueries({ queryKey: ["match-cards"] })]);
     } catch { toast.error("Could not look for matches. Please try again."); }
     finally { setBusy(false); }
   }
