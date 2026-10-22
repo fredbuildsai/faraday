@@ -42,3 +42,5 @@ export function projectQuery(id: string) {
     },
   });
 }
+
+export type ProjectData = Awaited<ReturnType<NonNullable<ReturnType<typeof projectQuery>["queryFn"]>>>;
