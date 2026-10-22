@@ -9,7 +9,7 @@ export const WHITESPACE_HIGH = 500;
 /** Title similarity at or above this means an existing paper already frames the question. */
 export const DUPLICATE_SIMILARITY = 0.6;
 
-export type OaWork = { id: string; title: string; url: string; owner?: string };
+export type OaWork = { id: string; title: string; url: string; owner?: string; isOa?: boolean };
 export type Person = { id: string; name: string; institution: string | null; roles: ("last" | "corresponding")[] };
 export type Whitespace = {
   query: string;

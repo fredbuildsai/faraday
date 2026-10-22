@@ -30,7 +30,7 @@ const profileQuery = queryOptions({
     const uid = u.user!.id;
     const [{ data: profile, error }, { data: works }, { data: analysis }, { data: edits }] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", uid).maybeSingle(),
-      supabase.from("works").select("id, title, venue, year, cited_by_count, type, topics, doi")
+      supabase.from("works").select("id, title, venue, year, cited_by_count, type, topics, doi, is_oa")
         .eq("user_id", uid).order("year", { ascending: false, nullsFirst: false }).limit(1000),
       supabase.from("profile_analysis").select("status, summary, interests, methods, directions, error, finished_at").eq("user_id", uid).maybeSingle(),
       supabase.from("profile_analysis_edits").select("kind, value, action").eq("user_id", uid),
@@ -300,6 +300,7 @@ function ProfilePage() {
                       <div className="text-sm text-muted-foreground">{[w.venue, w.year].filter(Boolean).join(" · ")}</div>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
+                      {w.is_oa && <OaBadge />}
                       {w.type && <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{w.type}</span>}
                       <span className="font-mono text-xs text-muted-foreground">{w.cited_by_count} cit.</span>
                     </div>

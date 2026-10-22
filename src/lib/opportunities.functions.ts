@@ -59,17 +59,17 @@ export const findOpportunities = createServerFn({ method: "POST" })
       if (data.mode === "broad") {
         const search = encodeURIComponent(terms.join(" "));
         const filter = `from_publication_date:${sinceDate}${data.excludeReviews ? ",type:!review" : ""}`;
-        const res: any = await openalexGet(`/works?search=${search}&filter=${filter}&per_page=25&select=id,display_name,doi,publication_year`);
-        works = (res?.results ?? []).map((w: any) => ({ id: workKey(w.id), title: String(w.display_name ?? ""), url: w.doi || w.id })).filter((w: OaWork) => w.id && w.title);
+        const res: any = await openalexGet(`/works?search=${search}&filter=${filter}&per_page=25&select=id,display_name,doi,publication_year,open_access`);
+        works = (res?.results ?? []).map((w: any) => ({ id: workKey(w.id), title: String(w.display_name ?? ""), url: w.doi || w.id, isOa: !!w.open_access?.is_oa })).filter((w: OaWork) => w.id && w.title);
       } else {
         names.set(uid, "you");
         for (const owner of [uid, ...matchIds]) {
-          let q = supabaseAdmin.from("works").select("openalex_id, title, doi, type").eq("user_id", owner).order("year", { ascending: false }).limit(30);
+          let q = supabaseAdmin.from("works").select("openalex_id, title, doi, type, is_oa").eq("user_id", owner).order("year", { ascending: false }).limit(30);
           if (data.excludeReviews) q = q.neq("type", "review");
           const { data: rows } = await q;
           for (const r of rows ?? []) {
             const id = workKey(r.openalex_id);
-            if (id && r.title && !works.some((w) => w.id === id)) works.push({ id, title: r.title, url: r.doi ? `https://doi.org/${r.doi.replace(/^https?:\/\/doi.org\//, "")}` : `https://openalex.org/${id}`, owner });
+            if (id && r.title && !works.some((w) => w.id === id)) works.push({ id, title: r.title, url: r.doi ? `https://doi.org/${r.doi.replace(/^https?:\/\/doi.org\//, "")}` : `https://openalex.org/${id}`, owner, isOa: !!r.is_oa });
           }
         }
       }
