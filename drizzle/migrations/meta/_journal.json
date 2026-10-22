@@ -15,6 +15,13 @@
       "when": 1792665569536,
       "tag": "0001_works_and_cache",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792666590108,
+      "tag": "0002_profile_custom_topics",
+      "breakpoints": true
     }
   ]
 }
