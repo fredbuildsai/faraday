@@ -38,6 +38,17 @@ const layersQuery = queryOptions({
   },
 });
 
+type External = { id: string; openalex_id: string; name: string; institution: string | null; score: number; t: number; layer: string; via: string | null; shared_topics: string[]; h_index: number; citations: number; works_count: number; state: string };
+const externalQuery = queryOptions({
+  queryKey: ["external-suggestions"],
+  queryFn: async () => {
+    const { data, error } = await supabase.from("external_suggestions").select("id, openalex_id, name, institution, score, t, layer, via, shared_topics, h_index, citations, works_count, state").order("score", { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as External[];
+  },
+});
+const EXT = "ext:";
+
 const matchesQuery = queryOptions({
   queryKey: ["my-matches"],
   queryFn: async () => {
@@ -78,7 +89,7 @@ export const Route = createFileRoute("/_authenticated/matches")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(matchesQuery), context.queryClient.ensureQueryData(feedbackQuery), context.queryClient.ensureQueryData(statesQuery), context.queryClient.ensureQueryData(cardsQuery), context.queryClient.ensureQueryData(layersQuery)]),
+  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(matchesQuery), context.queryClient.ensureQueryData(feedbackQuery), context.queryClient.ensureQueryData(statesQuery), context.queryClient.ensureQueryData(cardsQuery), context.queryClient.ensureQueryData(layersQuery), context.queryClient.ensureQueryData(externalQuery)]),
   component: MatchesPage,
 });
 
@@ -96,21 +107,41 @@ function MatchesPage() {
   const stateOf = (id: string) => states[id]?.state ?? "active";
   const { data: cardInfo } = useSuspenseQuery(cardsQuery);
   const { data: layers } = useSuspenseQuery(layersQuery);
+  const { data: external } = useSuspenseQuery(externalQuery);
+  const layerLabel = (layer: string, via: string | null, topic?: string) => layer === "second_degree"
+    ? `Collaborator of a collaborator${via ? ` · via ${via}` : ""}`
+    : `Shared focus${topic ? ` · ${topic}` : ""}`;
+  async function setExternal(id: string, state: string) {
+    const { error } = await supabase.from("external_suggestions").update({ state, updated_at: new Date().toISOString() }).eq("id", id);
+    if (error) throw error;
+    await qc.invalidateQueries({ queryKey: ["external-suggestions"] });
+  }
   const [lastDecided, setLastDecided] = useState<string | null>(null);
-  const deck: ScientistCard[] = data.filter((m) => inDeck({ state: stateOf(m.id), i_am_interested: m.i_am_interested })).map((m) => {
+  const deck: ScientistCard[] = data.filter((m) => inDeck({ state: stateOf(m.id), i_am_interested: m.i_am_interested })).map((m): ScientistCard => {
     const c = cardInfo[m.other_id];
     return {
       id: m.id, name: m.other_name || "A researcher", institution: m.other_institution, score: m.score, t: m.t,
-      layer: layers[m.id]?.layer === "second_degree"
-        ? `Collaborator of a collaborator${layers[m.id]?.via ? ` · via ${layers[m.id]!.via}` : ""}`
-        : `Shared focus${m.shared_topics[0] ? ` · ${m.shared_topics[0]}` : ""}`,
+      layer: layerLabel(layers[m.id]?.layer ?? "interest", layers[m.id]?.via ?? null, m.shared_topics[0]),
       sharedTopics: m.shared_topics, interests: c?.interests ?? null,
       hIndex: c?.h_index ?? 0, citations: Number(c?.citations ?? 0), worksCount: c?.works_count ?? 0, recentWorks: c?.recent_works ?? 0,
       methods: c?.methods ?? [], directions: c?.directions ?? [],
     };
-  });
+  }).concat(external.filter((e) => e.state === "active").map((e) => ({
+    id: EXT + e.id, name: e.name, institution: e.institution, score: e.score, t: e.t,
+    layer: `Not on Lattice Scout · ${layerLabel(e.layer, e.via, e.shared_topics[0])}`,
+    sharedTopics: e.shared_topics, interests: null, hIndex: e.h_index, citations: Number(e.citations), worksCount: e.works_count, recentWorks: 0,
+    methods: [], directions: [],
+  })));
 
   async function decide(id: string, d: "like" | "pass") {
+    if (id.startsWith(EXT)) {
+      try {
+        await setExternal(id.slice(EXT.length), d === "like" ? "saved" : "dismissed");
+        if (d === "like") toast.success("Saved. They're not on Lattice Scout yet, so find them under Saved.");
+        setLastDecided(id);
+      } catch { toast.error("Could not save your choice. Please try again."); }
+      return;
+    }
     try {
       if (d === "like") {
         await interest({ data: { matchId: id, interested: true } });
@@ -128,6 +159,10 @@ function MatchesPage() {
 
   async function undo() {
     if (!lastDecided) return;
+    if (lastDecided.startsWith(EXT)) {
+      try { await setExternal(lastDecided.slice(EXT.length), "active"); setLastDecided(null); } catch { toast.error("Could not undo."); }
+      return;
+    }
     try {
       await interest({ data: { matchId: lastDecided, interested: false } });
       await changeState({ data: { matchId: lastDecided, state: "active" } });
@@ -167,7 +202,7 @@ function MatchesPage() {
       const r = await compute();
       if (r.added) toast.success(`${r.added} new match${r.added > 1 ? "es" : ""}`);
       else toast.info(r.reason ?? "No new matches");
-      await Promise.all([qc.invalidateQueries({ queryKey: ["my-matches"] }), qc.invalidateQueries({ queryKey: ["match-cards"] }), qc.invalidateQueries({ queryKey: ["match-layers"] })]);
+      await Promise.all([qc.invalidateQueries({ queryKey: ["my-matches"] }), qc.invalidateQueries({ queryKey: ["match-cards"] }), qc.invalidateQueries({ queryKey: ["match-layers"] }), qc.invalidateQueries({ queryKey: ["external-suggestions"] })]);
     } catch { toast.error("Could not look for matches. Please try again."); }
     finally { setBusy(false); }
   }
@@ -197,7 +232,7 @@ function MatchesPage() {
         </div>
 
         {tab === "discover" ? (
-          data.length ? <SwipeDeck cards={deck} onDecide={decide} onUndo={undo} canUndo={!!lastDecided} />
+          data.length || external.length ? <SwipeDeck cards={deck} onDecide={decide} onUndo={undo} canUndo={!!lastDecided} />
           : <div className="rounded-xl border border-dashed bg-card p-10 text-center text-muted-foreground">No matches yet. Run your profile analysis, then press "Find new matches".</div>
         ) : !data.length ? (
           <div className="rounded-xl border border-dashed bg-card p-10 text-center text-muted-foreground">
@@ -290,6 +325,31 @@ function MatchesPage() {
            </div>
           </Section>
         ))}
+
+        {(tab === "saved" || tab === "dismissed") && external.some((e) => e.state === tab) && (
+          <div className="space-y-3">
+            <h2 className="font-serif text-xl">Not on Lattice Scout yet</h2>
+            <p className="text-sm text-muted-foreground">Found in the wider OpenAlex network. They can't see your interest until they join.</p>
+            {external.filter((e) => e.state === tab).map((e) => (
+              <Section key={e.id} title={e.name} subtitle={e.institution || "Institution not given"}
+                aside={<span className="rounded-full bg-accent px-3 py-1 font-mono text-sm text-accent-foreground">{Math.round(e.score * 100)}%</span>}>
+                <div className="space-y-3 text-sm">
+                  <p className="text-muted-foreground">{layerLabel(e.layer, e.via, e.shared_topics[0])}</p>
+                  <p><span className="font-medium">Shared research area:</span> {e.shared_topics.join(", ") || "—"}</p>
+                  <p className="text-muted-foreground">h-index {e.h_index} · {Number(e.citations).toLocaleString()} citations · {e.works_count} works</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={`https://openalex.org/${e.openalex_id}`} target="_blank" rel="noreferrer">View on OpenAlex</a>
+                    </Button>
+                    {tab === "saved"
+                      ? <Button size="sm" variant="ghost" onClick={() => setExternal(e.id, "dismissed").catch(() => toast.error("Could not update."))}><X className="mr-1 h-4 w-4" />Dismiss</Button>
+                      : <Button size="sm" variant="ghost" onClick={() => setExternal(e.id, "active").catch(() => toast.error("Could not update."))}><RotateCcw className="mr-1 h-4 w-4" />Restore</Button>}
+                  </div>
+                </div>
+              </Section>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

@@ -61,6 +61,71 @@ export type Database = {
         }
         Relationships: []
       }
+      external_suggestions: {
+        Row: {
+          citations: number
+          created_at: string
+          h_index: number
+          id: string
+          institution: string | null
+          layer: string
+          name: string
+          openalex_id: string
+          score: number
+          shared_topics: string[]
+          state: string
+          t: number
+          updated_at: string
+          user_id: string
+          via: string | null
+          works_count: number
+        }
+        Insert: {
+          citations?: number
+          created_at?: string
+          h_index?: number
+          id?: string
+          institution?: string | null
+          layer?: string
+          name: string
+          openalex_id: string
+          score: number
+          shared_topics?: string[]
+          state?: string
+          t: number
+          updated_at?: string
+          user_id: string
+          via?: string | null
+          works_count?: number
+        }
+        Update: {
+          citations?: number
+          created_at?: string
+          h_index?: number
+          id?: string
+          institution?: string | null
+          layer?: string
+          name?: string
+          openalex_id?: string
+          score?: number
+          shared_topics?: string[]
+          state?: string
+          t?: number
+          updated_at?: string
+          user_id?: string
+          via?: string | null
+          works_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_suggestions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback: {
         Row: {
           created_at: string

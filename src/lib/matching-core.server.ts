@@ -1,6 +1,6 @@
 import type { Profile } from "@/lib/matching";
 import { collaborationMatchesFor, type MatchWeights } from "@/lib/match-score";
-import { coauthorsOf, pickDiscovery, type Author, type Candidate } from "@/lib/discovery";
+import { BATCH_SIZE, coauthorsOf, pickDiscovery, type Author, type Candidate } from "@/lib/discovery";
 import { tidyMethod } from "@/lib/method-synonyms";
 
 const topicKey = (id: unknown) => String(id ?? "").split("/").pop() ?? "";
@@ -90,6 +90,17 @@ export async function computeMatchesFor(uid: string) {
         if (error && error.code !== "23505") { console.error("save matches", error); throw new Error("Could not save matches"); }
       }
     }
-    if (!chosen.length && rescored) return { added: 0, reason: `Updated ${rescored} existing match${rescored > 1 ? "es" : ""} to the new score. Dismissed ones are under Dismissed.` };
-    return { added: chosen.length, reason: chosen.length ? null : "No new researchers fit you right now. Check back later." };
+    // Fewer than a full batch from members: fill the rest from the wider OpenAlex network.
+    let external = 0;
+    try {
+      const { findExternalFor } = await import("@/lib/discovery-external.server");
+      external = await findExternalFor({
+        uid, me: meC.profile, myAuthorIds: meC.authorIds, myWorks: worksBy.get(uid) ?? [],
+        memberAuthorIds: candidates.flatMap((c) => c.authorIds), weights: myWeights, needed: BATCH_SIZE - chosen.length,
+      });
+    } catch (e) { console.error("external discovery", e); }
+    const added = chosen.length + external;
+    if (added) return { added, reason: null, members: chosen.length, external };
+    if (rescored) return { added: 0, reason: `Updated ${rescored} existing match${rescored > 1 ? "es" : ""} to the new score. Dismissed ones are under Dismissed.` };
+    return { added: 0, reason: "No new researchers fit you right now. Check back later.", members: 0, external: 0 };
   }
