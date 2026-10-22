@@ -57,6 +57,13 @@
       "when": 1792675060824,
       "tag": "0007_opportunity_modes_saved",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792679007067,
+      "tag": "0008_match_management_refresh",
+      "breakpoints": true
     }
   ]
 }

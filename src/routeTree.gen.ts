@@ -17,6 +17,7 @@ import { Route as AuthenticatedMatchesRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedOpportunitiesRouteImport } from './routes/_authenticated/opportunities'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedOpportunitiesManageRouteImport } from './routes/_authenticated/opportunities_.manage'
+import { Route as ApiPublicCronRefreshRouteImport } from './routes/api/public/cron/refresh'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -59,6 +60,11 @@ const AuthenticatedOpportunitiesManageRoute =
     path: '/opportunities/manage',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicCronRefreshRoute = ApiPublicCronRefreshRouteImport.update({
+  id: '/api/public/cron/refresh',
+  path: '/api/public/cron/refresh',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/opportunities/manage': typeof AuthenticatedOpportunitiesManageRoute
+  '/api/public/cron/refresh': typeof ApiPublicCronRefreshRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/opportunities/manage': typeof AuthenticatedOpportunitiesManageRoute
+  '/api/public/cron/refresh': typeof ApiPublicCronRefreshRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/_authenticated/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/opportunities_/manage': typeof AuthenticatedOpportunitiesManageRoute
+  '/api/public/cron/refresh': typeof ApiPublicCronRefreshRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/opportunities'
     | '/profile'
     | '/opportunities/manage'
+    | '/api/public/cron/refresh'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/opportunities'
     | '/profile'
     | '/opportunities/manage'
+    | '/api/public/cron/refresh'
   id:
     | '__root__'
     | '/'
@@ -118,12 +129,14 @@ export interface FileRouteTypes {
     | '/_authenticated/opportunities'
     | '/_authenticated/profile'
     | '/_authenticated/opportunities_/manage'
+    | '/api/public/cron/refresh'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicCronRefreshRoute: typeof ApiPublicCronRefreshRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOpportunitiesManageRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/cron/refresh': {
+      id: '/api/public/cron/refresh'
+      path: '/api/public/cron/refresh'
+      fullPath: '/api/public/cron/refresh'
+      preLoaderRoute: typeof ApiPublicCronRefreshRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -210,6 +230,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicCronRefreshRoute: ApiPublicCronRefreshRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
