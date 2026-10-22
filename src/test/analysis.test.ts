@@ -20,8 +20,8 @@ describe("analysis rules", () => {
   it("summary is clipped to 80 words", () => {
     expect(clipWords(Array(100).fill("w").join(" ")).split(" ")).toHaveLength(80);
   });
-  it("sends 100 works per call", () => {
-    expect(chunk(Array(250).fill(0)).map((c) => c.length)).toEqual([100, 100, 50]);
+  it("sends 40 works per batch", () => {
+    expect(chunk(Array(90).fill(0)).map((c) => c.length)).toEqual([40, 40, 10]);
   });
   it("same input gives same fingerprint, changed interests differ", () => {
     const w = [{ title: "a", year: 2020, keywords: [], topics: [] }];
@@ -33,5 +33,19 @@ describe("analysis rules", () => {
       [{ kind: "method", value: "nmr", action: "remove" }, { kind: "method", value: "Cryo-EM", action: "add" }], "method");
     expect(out.map((c) => c.label)).toEqual(["MS", "Cryo-EM"]);
     expect(out[1]!.byUser).toBe(true);
+  });
+});
+
+import { mergeClaims, enoughChunks } from "@/lib/analysis";
+describe("chunked analysis merge", () => {
+  it("merges same method across batches and combines evidence", () => {
+    const out = mergeClaims([[{ label: "NMR spectroscopy", evidence: ["a", "b"] }], [{ label: "nmr  Spectroscopy", evidence: ["b", "c"] }, { label: "XRD", evidence: ["d", "e"] }]]);
+    expect(out[0]).toEqual({ label: "NMR spectroscopy", evidence: ["a", "b", "c"] });
+    expect(out).toHaveLength(2);
+  });
+  it("needs at least half the batches to succeed", () => {
+    expect(enoughChunks(3, 6)).toBe(true);
+    expect(enoughChunks(2, 6)).toBe(false);
+    expect(enoughChunks(0, 0)).toBe(false);
   });
 });

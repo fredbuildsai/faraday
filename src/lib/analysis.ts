@@ -4,7 +4,28 @@ export const MAX_SUMMARY_WORDS = 80;
 export const LIMITS = { interests: 10, methods: 8, directions: 5 } as const;
 export const MIN_EVIDENCE = 2;
 export const DAILY_RUNS = 3;
-export const CHUNK_SIZE = 100;
+export const CHUNK_SIZE = 40;
+/** Share of batches that must succeed before we save a combined result. */
+export const MIN_CHUNK_SUCCESS = 0.5;
+
+/** Merge validated claims from several batches: same label (case/space/trailing-s) merges evidence. */
+export function mergeClaims(lists: Claim[][]): Claim[] {
+  const key = (l: string) => l.toLowerCase().replace(/\s+/g, " ").trim().replace(/s$/, "");
+  const map = new Map<string, { label: string; evidence: string[]; hits: number }>();
+  for (const list of lists) for (const c of list) {
+    const k = key(c.label);
+    const cur = map.get(k) ?? { label: c.label, evidence: [], hits: 0 };
+    cur.hits++;
+    for (const e of c.evidence) if (!cur.evidence.includes(e)) cur.evidence.push(e);
+    map.set(k, cur);
+  }
+  return [...map.values()]
+    .sort((a, b) => b.hits - a.hits || b.evidence.length - a.evidence.length)
+    .map(({ label, evidence }) => ({ label, evidence }));
+}
+
+/** Enough batches succeeded to trust a combined result. */
+export const enoughChunks = (ok: number, total: number) => total > 0 && ok / total >= MIN_CHUNK_SUCCESS;
 
 export interface Claim { label: string; evidence: string[] }
 export interface AnalysisResult { summary: string; interests: Claim[]; methods: Claim[]; directions: Claim[] }

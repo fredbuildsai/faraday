@@ -16,3 +16,6 @@
 ## Later (do not implement yet)
 - [ ] Full text for open-access papers: for works with `is_oa`, fetch text via OpenAlex `best_oa_location.pdf_url` (parse PDF server-side), or pre-extracted text from CORE (`/outputs/{id}/text`, free key), Semantic Scholar (free key), Europe PMC (biomed), arXiv/bioRxiv. Possible uses: deeper profile analysis, full-text evidence checks in Opportunities. Mind API quotas; respect licences.
 - [x] Nightly refresh follows each researcher's own time zone
+
+## Chunked profile analysis (done)
+- Split works into batches, analyse each, validate evidence per batch, merge duplicates, synthesise final result (fallback: deterministic merge), show "batch X of Y" progress, save if ≥ half the batches succeed.
