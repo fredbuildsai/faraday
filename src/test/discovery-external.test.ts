@@ -46,6 +46,13 @@ describe("principal-investigator toggle", () => {
   it("on by default: only last authors", () => {
     expect(collectCandidates([{ via: "Bo", works }], works, new Set()).map((x) => x.id)).toEqual(["L"]);
   });
+  it("keeps every shared connection when several co-authors link the same person", () => {
+    const r = collectCandidates(
+      [{ via: "Bo", works: [{ authorships: [au("X", "Xi", "last")] }] }, { via: "Cy", works: [{ authorships: [au("X", "Xi", "last")] }] }],
+      [], new Set(),
+    );
+    expect(r[0]!.vias).toEqual(["Bo", "Cy"]);
+  });
   it("off: every author", () => {
     expect(collectCandidates([], works, new Set(), false).map((x) => x.id).sort()).toEqual(["F", "L", "M"]);
   });
