@@ -113,8 +113,8 @@ function MatchesPage() {
   const { data: layers } = useSuspenseQuery(layersQuery);
   const { data: external } = useSuspenseQuery(externalQuery);
   const layerLabel = (layer: string, via: string | null, topic?: string) => layer === "second_degree"
-    ? (via ? `Common connection: ${via}` : "Collaborator of a collaborator")
-    : `Shared focus${topic ? ` · ${topic}` : ""}`;
+    ? (via ? `2nd-degree · Common connection: ${via}` : "2nd-degree · Collaborator of a collaborator")
+    : `Beyond your network · Shared focus${topic ? ` · ${topic}` : ""}`;
   async function setExternal(id: string, state: string) {
     const { error } = await supabase.from("external_suggestions").update({ state, updated_at: new Date().toISOString() }).eq("id", id);
     if (error) throw error;
@@ -127,7 +127,7 @@ function MatchesPage() {
     const c = cardInfo[m.other_id];
     return {
       id: m.id, name: m.other_name || "A researcher", institution: m.other_institution, score: m.score, t: m.t,
-      layer: layers[m.id]?.layer === "second_degree" ? "In your network" : "Shared focus",
+      layer: layers[m.id]?.layer === "second_degree" ? "2nd-degree connection" : "Beyond your network · shared focus",
       connection: layers[m.id]?.layer === "second_degree" ? layers[m.id]?.via ?? null : null,
       sharedTopics: m.shared_topics, interests: c?.interests ?? null,
       hIndex: c?.h_index ?? 0, citations: Number(c?.citations ?? 0), worksCount: c?.works_count ?? 0, recentWorks: c?.recent_works ?? 0,
@@ -136,7 +136,7 @@ function MatchesPage() {
     };
   }).concat(external.filter((e) => e.state === "active").map((e) => ({
     id: EXT + e.id, name: e.name, institution: e.institution, score: e.score, t: e.t,
-    layer: `Not on Lattice Scout · ${e.layer === "second_degree" ? "In your network" : "Shared focus"}`,
+    layer: `Not on Lattice Scout · ${e.layer === "second_degree" ? "2nd-degree connection" : "Beyond your network · shared focus"}`,
     connection: e.layer === "second_degree" ? e.via : null,
     sharedTopics: e.shared_topics, interests: null, hIndex: e.h_index, citations: Number(e.citations), worksCount: e.works_count, recentWorks: e.recent_works ?? 0, openalexId: e.openalex_id,
     methods: [], directions: [],
