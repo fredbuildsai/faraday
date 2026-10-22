@@ -11,7 +11,7 @@ export function overlapCoefficient(x: Weights, y: Weights): number {
   const smaller = Math.min(sum(x), sum(y))
   if (!smaller) return 0
   let low = 0
-  for (const k of Object.keys(x)) if (k in y) low += Math.min(x[k], y[k])
+  for (const k of Object.keys(x)) if (k in y) low += Math.min(x[k]!, y[k]!)
   return Math.min(1, low / smaller)
 }
 
