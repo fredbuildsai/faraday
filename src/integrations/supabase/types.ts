@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      openalex_cache: {
+        Row: {
+          body: Json
+          fetched_at: string
+          url: string
+        }
+        Insert: {
+          body: Json
+          fetched_at?: string
+          url: string
+        }
+        Update: {
+          body?: Json
+          fetched_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           activity: number
@@ -59,6 +77,51 @@ export type Database = {
           topic_weights?: Json
           updated_at?: string
           works_truncated?: boolean
+        }
+        Relationships: []
+      }
+      works: {
+        Row: {
+          cited_by_count: number
+          created_at: string
+          doi: string | null
+          id: string
+          keywords: Json
+          openalex_id: string
+          title: string
+          topics: Json
+          type: string | null
+          user_id: string
+          venue: string | null
+          year: number | null
+        }
+        Insert: {
+          cited_by_count?: number
+          created_at?: string
+          doi?: string | null
+          id?: string
+          keywords?: Json
+          openalex_id: string
+          title: string
+          topics?: Json
+          type?: string | null
+          user_id: string
+          venue?: string | null
+          year?: number | null
+        }
+        Update: {
+          cited_by_count?: number
+          created_at?: string
+          doi?: string | null
+          id?: string
+          keywords?: Json
+          openalex_id?: string
+          title?: string
+          topics?: Json
+          type?: string | null
+          user_id?: string
+          venue?: string | null
+          year?: number | null
         }
         Relationships: []
       }
