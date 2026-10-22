@@ -7,6 +7,7 @@
 - [x] compute-matches server function, method synonyms, Matches page, double opt-in
 - [x] Opportunities, feedback, notices, empty/loading states
 - [x] Opportunity modes, review filter, likely PIs, whitespace check, save/dismiss + manage page with notes
+- [x] Include direct collaborators alongside matches in opportunity selection and published-work evidence
 - [x] Match management (save/dismiss, tabs, private notes, AI collaboration ideas)
 - [x] Monthly refresh cron (once a night at 01:00 UTC = 03:00 Madrid summer time, up to 5 due users per run, pauses on AI 402/403)
 - [ ] Seed test researchers Johan Foster (UBC email) & Raphaell Moreira (Bremen email), check their match

@@ -27,7 +27,7 @@ export function OpportunityCard({ s, actions, children }: { s: Suggestion; actio
       <p className="text-sm">{s.description}</p>
 
       {!!s.collaborators?.length && (
-        <div className="text-sm"><span className="font-medium">Matches whose papers are cited here: </span>{s.collaborators.map((c) => c.name).join(", ")}</div>
+        <div className="text-sm"><span className="font-medium">Collaborators and matches whose papers are cited here: </span>{s.collaborators.map((c) => c.name).join(", ")}</div>
       )}
       <div className="text-sm">
         <p className="font-medium">Likely principal investigators <span className="font-normal text-muted-foreground">(last author of each evidence paper)</span></p>
