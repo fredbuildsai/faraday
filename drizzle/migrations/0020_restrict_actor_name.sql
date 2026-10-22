@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.actor_name(uuid) FROM PUBLIC, anon, authenticated;
