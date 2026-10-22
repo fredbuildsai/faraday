@@ -58,11 +58,20 @@ export async function runAnalysisFor(uid: string, force = false) {
     const found = { interests: [] as Claim[][], methods: [] as Claim[][], directions: [] as Claim[][] };
     const summaries: string[] = [];
     let ok = 0;
+    // Batches already analysed with identical input are reused, so retries only redo failed batches.
+    const keys = parts.map((p) => inputFingerprint(p, interestsText));
+    const { data: cached } = await supabaseAdmin.from("analysis_batches").select("batch_key, result").eq("user_id", uid).in("batch_key", keys);
+    const done = new Map((cached ?? []).map((c) => [c.batch_key, c.result as any]));
     for (let n = 0; n < parts.length; n++) {
       const p = parts[n] ?? [];
-      await supabaseAdmin.from("profile_analysis").update({ error: `Analysing publications: ${n + 1} of ${parts.length} batches`, updated_at: new Date().toISOString() }).eq("user_id", uid);
-      const j: any = await call({ interests_text: interestsText, works: p });
-      if (!j) { if (aiStatus === 402 || aiStatus === 403) break; continue; }
+      const key = keys[n]!;
+      let j: any = done.get(key);
+      if (!j) {
+        await supabaseAdmin.from("profile_analysis").update({ error: `Analysing publications: ${n + 1} of ${parts.length} batches`, updated_at: new Date().toISOString() }).eq("user_id", uid);
+        j = await call({ interests_text: interestsText, works: p });
+        if (!j) { if (aiStatus === 402 || aiStatus === 403) break; continue; }
+        await supabaseAdmin.from("analysis_batches").upsert({ user_id: uid, batch_key: key, result: j });
+      }
       ok++;
       const pt = p.map((w) => w.title);
       found.interests.push(verifyClaims(j.interests, pt, 50).kept);
@@ -70,6 +79,8 @@ export async function runAnalysisFor(uid: string, force = false) {
       found.directions.push(verifyClaims(j.directions, pt, 50).kept);
       if (j.summary) summaries.push(clipWords(String(j.summary), 60));
     }
+    // Forget batches that no longer match the current publication list.
+    await supabaseAdmin.from("analysis_batches").delete().eq("user_id", uid).not("batch_key", "in", `(${keys.map((k) => `"${k}"`).join(",")})`);
     if (!enoughChunks(ok, parts.length)) return fail(`The AI could only analyse ${ok} of ${parts.length} batches of your publications. Please try again later.`);
 
     // 2) Merge validated findings, then ask for one synthesis using only those compact findings.
