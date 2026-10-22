@@ -34,12 +34,17 @@
 - Skipped when works + interests text are unchanged. Max 3 analyses per user per day, with a notice when exceeded.
 - User can delete any interest/method and add their own (marked "added by you"); these edits survive re-analysis.
 
-## Matching (no AI in the score)
-- Runs automatically each time a profile analysis finishes, comparing the user with everyone else who has a finished analysis.
-- Score = topic similarity x (1 - method overlap)^1.5 x activity factor: "similar topics, different methods, both active".
-- Pairs where either side brings no method the other lacks are skipped. Minimum score 0.11 (adjustable setting). Max 5 new matches per user per 7 days, best first.
-- **Matches page**: header gains a "Matches" link. Cards show name, institution, score, shared topics, "you bring / they bring" methods, and a collapsible "Why this score" panel with each number. No email on cards.
-- **Match detail**: short AI summary (max 60 words) and up to 2 collaboration ideas, from shared topics, methods and up to 5 work titles each only; generated once and saved.
+## Matching (no AI anywhere in the score)
+- Uses each profile's topic weights, activity, and methods (the analysis methods plus the user's own edits).
+- Methods are tidied before comparing: lowercase, trimmed, single spaces, trailing "s" removed, then mapped through a synonym list (about 30 pairs, e.g. "nmr" -> "nuclear magnetic resonance spectroscopy", "scrna-seq" -> "single-cell rna sequencing"). Methods typed by hand get the same treatment.
+- Score = T x (1 - M)^1.5 x act, capped at 1:
+  - T = topic overlap (shared weight / smaller total)
+  - M = shared methods / all methods
+  - act = 0.5 + 0.5 x the lower of the two activity values
+- Pairs where either side brings no method the other lacks are skipped. Minimum score 0.11 (stored setting). Max 5 matches per user per rolling 7 days, best first, so both people stay under the cap. A and B share one match record.
+- Runs for a user when their profile or methods change, and for everyone once a day.
+- **Matches page**: header gains a "Matches" link. Cards show name, institution, score, shared topics, "you bring / they bring" methods, and a collapsible "Why this score" panel with T, M, activity and final score. No email, and no other raw profile data reaches the page.
+- **Match detail**: short AI summary (max 60 words) and up to 2 collaboration ideas, from shared topics, methods and up to 5 work titles each only; generated once and saved (separate from scoring).
 - **Double opt-in**: "I'm interested" button. Both emails appear only once both people clicked it, enforced in the database, not just on screen.
 - Seed profiles get analyses and methods so matches show up right away.
 
@@ -73,7 +78,12 @@
 - The brief's "Edge Function `import-works`" is implemented as server functions (`resolveAuthor`, `importWorks`) on this stack, authenticated as the user and using the service role server-side for cache writes. Secrets `OPENALEX_MAILTO` (required) and `OPENALEX_API_KEY` (optional) requested after approval.
 - ORCID checksum (ISO 7064 MOD 11-2) and the topic-weight / activity math in a pure module with unit tests.
 - Analysis: "Edge Function `analyze-profile`" implemented as a server function started in the background after `importWorks`, calling the Mistral API directly with secret `MISTRAL_API_KEY`. Tables `profile_analysis(user_id, status, summary, research_interests, methods, emerging_directions, evidence, dropped_claims, model, input_hash, created_at)`, `profile_analysis_edits(user_id, kind, value, action add/remove)` for user edits, `llm_calls(user_id, tokens, ms, ok)`. RLS own rows only; `dropped_claims` excluded from client reads (served via a view/server function). Daily limit counted from `profile_analysis` rows. Evidence verification, input hash and edit-merge logic in a pure module with unit tests.
-- Matching: TypeScript server function `computeMatches(userId)` (pure scoring module with unit tests for T, M, act, score, complementarity skip, threshold, 7-day cap) run after analysis reaches done. Setting table `app_settings(match_threshold default 0.11)`. Table `matches(user_a, user_b, score, t, m, act, shared_topics, a_only, b_only, formula 'c2', explanation jsonb, created_at)`; RLS readable only by its two users; no email column. `explainMatch` server function calls Mistral (JSON schema, max 60-word summary, max 2 ideas) with only topics, methods and up to 5 titles each; result cached in `matches.explanation`; logged in `llm_calls`.
+- Matching: the user's reference implementation is copied verbatim into `src/lib/matching.ts` (the brief's `supabase/functions/_shared/matching.ts`; only imports adapted, maths unchanged): `overlapCoefficient`, `methodJaccard`, `normaliseMethod`, `scorePair`, `selectPairs`, `matchesFor`, constants MIN_SCORE 0.11, ALPHA 1.0, BETA 1.5, WEEKLY_CAP 5.
+- The brief's Edge Function `compute-matches` is a server function `computeMatches(userId)` using the service role server-side: loads normalised profiles, calls `matchesFor`, counts each user's matches from the last 7 days as `openCounts`, calls `selectPairs`, upserts on the ordered pair. Triggered after analysis done or method edits; daily all-users run via the existing pg_cron route (`/api/public/cron/matches`, `CRON_SECRET`).
+- Table `method_synonyms(variant pk, canonical)` seeded with ~30 pairs; not client-readable. Methods normalised on save and before scoring.
+- Setting `app_settings(match_threshold default 0.11)`. Table `matches(user_a, user_b, score, t, m, act, shared_topics, a_only, b_only, formula 'c2', explanation jsonb, created_at, unique(user_a, user_b), check user_a < user_b)`; RLS readable only by its two users; no email column. Page reads match rows plus the other person's name and institution through a narrow view.
+- Vitest tests exactly as specified: A/B example (T=0.5, M=0.333, score≈0.272, shared ['t1']), identical methods null, subset null, threshold 0.3 null, `normaliseMethod(' NMR ', ...)` full name and 'Mass  Spectrometers' -> 'mass spectrometer', 6 candidates -> 5 kept, `matchesFor(A,[B])` equals `matchesFor(B,[A])`.
+- `explainMatch` server function calls Mistral (JSON schema, max 60-word summary, max 2 ideas) with only topics, methods and up to 5 titles each; result cached in `matches.explanation`; logged in `llm_calls`. Never affects the score.
 - Double opt-in: table `interests(from_user, to_user)` (insert own only). View `match_reveal_v` (security barrier, filtered to auth.uid()) returns the other user's email only when both interest rows exist; email is never readable any other way.
 - Opportunities: server function `findOpportunities` (the brief's Edge Function) reusing the cached, rate-limited OpenAlex client. Table `opportunities(user_id pk, suggestions jsonb, dropped_claims jsonb, created_at)`; RLS own row; `dropped_claims` not exposed to clients. Evidence-id verification and novelty query building in the pure module with unit tests.
 - Feedback: table `feedback(user_id, target_type 'match'|'opportunity', target_id, value -1|1, created_at, unique(user_id, target_type, target_id))`; RLS own rows; upsert on click.
