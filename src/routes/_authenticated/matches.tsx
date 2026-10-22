@@ -128,12 +128,14 @@ function MatchesPage() {
       sharedTopics: m.shared_topics, interests: c?.interests ?? null,
       hIndex: c?.h_index ?? 0, citations: Number(c?.citations ?? 0), worksCount: c?.works_count ?? 0, recentWorks: c?.recent_works ?? 0,
       methods: c?.methods ?? [], directions: c?.directions ?? [], openalexId: c?.openalex_ids?.[0] ?? null,
+      member: true,
     };
   }).concat(external.filter((e) => e.state === "active").map((e) => ({
     id: EXT + e.id, name: e.name, institution: e.institution, score: e.score, t: e.t,
     layer: `Not on Lattice Scout · ${layerLabel(e.layer, e.via, e.shared_topics[0])}`,
     sharedTopics: e.shared_topics, interests: null, hIndex: e.h_index, citations: Number(e.citations), worksCount: e.works_count, recentWorks: e.recent_works ?? 0, openalexId: e.openalex_id,
     methods: [], directions: [],
+    member: false,
   })));
 
   async function decide(id: string, d: "like" | "pass") {
