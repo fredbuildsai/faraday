@@ -11,9 +11,9 @@ Return JSON: {"summary": string (max 80 words), "interests": [{"label": string, 
 Evidence must be copied character-for-character from the given titles. No names, no institutions, no invented facts.`;
 
 const PEOPLE = [
-  { email: "johan.foster@test.latticescout.app", first: "Johan", last: "Foster", inst: "University of British Columbia",
+  { email: "johan.foster@ubc.ca", first: "Johan", last: "Foster", inst: "University of British Columbia",
     ids: ["A5059588273", "A5159112419", "A5030450974", "A5140167166", "A5138740368"] },
-  { email: "raphaell.moreira@test.latticescout.app", first: "Raphaell", last: "Moreira", inst: "University of British Columbia",
+  { email: "raphaell@uni-bremen.de", first: "Raphaell", last: "Moreira", inst: "University of Bremen",
     ids: ["A5033675494"] },
 ];
 
