@@ -10,6 +10,7 @@
 - [x] Include direct collaborators alongside matches in opportunity selection and published-work evidence
 - [x] Limit opportunity collaborator choices using configurable settings (default: 10 most frequent)
 - [x] Add personal Settings for collaborator limit and default match/opportunity search switches
+- [x] Remove duplicated search preference controls from Matches and Opportunities; use saved Settings and keep participant selection on Opportunities
 - [x] Add fourth scientist-card metric: open-access percentage over the rolling last three years
 - [x] Match management (save/dismiss, tabs, private notes, AI collaboration ideas)
 - [x] Monthly refresh cron (once a night at 01:00 UTC = 03:00 Madrid summer time, up to 5 due users per run, pauses on AI 402/403)

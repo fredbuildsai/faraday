@@ -48,11 +48,11 @@ function SettingsPage() {
       <section className="space-y-5 border-b pb-8">
         <h2 className="font-serif text-xl">Opportunities</h2>
         <div className="flex flex-wrap items-center justify-between gap-4"><Label htmlFor="collaborator-limit">Most frequent collaborators</Label><Input id="collaborator-limit" type="number" min={1} step={1} value={limit} onChange={(event) => setLimit(event.target.value)} className="w-24" /></div>
-        <div className="flex items-center justify-between gap-4"><Label htmlFor="default-network">Use my network’s published research by default</Label><Switch id="default-network" checked={settings.opportunityMode === "network"} onCheckedChange={(value) => setSettings({ ...settings, opportunityMode: value ? "network" : "broad" })} /></div>
-        <div className="flex items-center justify-between gap-4"><Label htmlFor="default-reviews">Exclude reviews by default</Label><Switch id="default-reviews" checked={settings.excludeReviews} onCheckedChange={(value) => setSettings({ ...settings, excludeReviews: value })} /></div>
-        <div className="flex items-center justify-between gap-4"><Label htmlFor="default-mutual">Mutual-interest matches only by default</Label><Switch id="default-mutual" checked={settings.mutualOnly} onCheckedChange={(value) => setSettings({ ...settings, mutualOnly: value })} /></div>
+        <div className="flex items-center justify-between gap-4"><Label htmlFor="default-network">Use only my network’s published research</Label><Switch id="default-network" checked={settings.opportunityMode === "network"} onCheckedChange={(value) => setSettings({ ...settings, opportunityMode: value ? "network" : "broad" })} /></div>
+        <div className="flex items-center justify-between gap-4"><Label htmlFor="default-reviews">Exclude reviews</Label><Switch id="default-reviews" checked={settings.excludeReviews} onCheckedChange={(value) => setSettings({ ...settings, excludeReviews: value })} /></div>
+        <div className="flex items-center justify-between gap-4"><Label htmlFor="default-mutual">Mutual-interest matches only</Label><Switch id="default-mutual" checked={settings.mutualOnly} onCheckedChange={(value) => setSettings({ ...settings, mutualOnly: value })} /></div>
       </section>
-      <section className="space-y-5"><h2 className="font-serif text-xl">Match discovery</h2><div className="flex items-center justify-between gap-4"><Label htmlFor="default-pi">Principal investigators only by default</Label><Switch id="default-pi" checked={settings.piOnly} onCheckedChange={(value) => setSettings({ ...settings, piOnly: value })} /></div></section>
+      <section className="space-y-5"><h2 className="font-serif text-xl">Match discovery</h2><div className="flex items-center justify-between gap-4"><Label htmlFor="default-pi">Principal investigators only</Label><Switch id="default-pi" checked={settings.piOnly} onCheckedChange={(value) => setSettings({ ...settings, piOnly: value })} /></div></section>
       <Button type="submit" disabled={busy || !valid}><Save className="h-4 w-4" />{busy ? "Saving…" : "Save settings"}</Button>
     </form>
   </main>;
