@@ -145,4 +145,3 @@ export function byFewestRecent<T extends { whitespace?: { recentCount: number | 
   const n = (s: T) => s.whitespace?.recentCount ?? Number.POSITIVE_INFINITY;
   return [...list].sort((a, b) => n(a) - n(b));
 }
-}
