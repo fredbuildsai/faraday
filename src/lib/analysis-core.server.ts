@@ -59,7 +59,7 @@ export async function runAnalysisFor(uid: string, force = false) {
     const summaries: string[] = [];
     let ok = 0;
     for (let n = 0; n < parts.length; n++) {
-      const p = parts[n];
+      const p = parts[n] ?? [];
       await supabaseAdmin.from("profile_analysis").update({ error: `Analysing publications: ${n + 1} of ${parts.length} batches`, updated_at: new Date().toISOString() }).eq("user_id", uid);
       const j: any = await call({ interests_text: interestsText, works: p });
       if (!j) { if (aiStatus === 402 || aiStatus === 403) break; continue; }
