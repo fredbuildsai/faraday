@@ -121,7 +121,9 @@ function MatchesPage() {
     await qc.invalidateQueries({ queryKey: ["external-suggestions"] });
   }
   const [lastDecided, setLastDecided] = useState<string | null>(null);
-  const deck: ScientistCard[] = data.filter((m) => inDeck({ state: stateOf(m.id), i_am_interested: m.i_am_interested })).map((m): ScientistCard => {
+  const [passedNow, setPassedNow] = useState<Set<string>>(new Set());
+  const rank = (c: ScientistCard) => (c.member ? (c.dismissed ? 1 : 0) : 2);
+  const deck: ScientistCard[] = data.filter((m) => inDeck({ state: stateOf(m.id), i_am_interested: m.i_am_interested }, passedNow.has(m.id))).map((m): ScientistCard => {
     const c = cardInfo[m.other_id];
     return {
       id: m.id, name: m.other_name || "A researcher", institution: m.other_institution, score: m.score, t: m.t,
@@ -129,7 +131,7 @@ function MatchesPage() {
       sharedTopics: m.shared_topics, interests: c?.interests ?? null,
       hIndex: c?.h_index ?? 0, citations: Number(c?.citations ?? 0), worksCount: c?.works_count ?? 0, recentWorks: c?.recent_works ?? 0,
       methods: c?.methods ?? [], directions: c?.directions ?? [], openalexId: c?.openalex_ids?.[0] ?? null,
-      member: true,
+      member: true, dismissed: stateOf(m.id) === "dismissed",
     };
   }).concat(external.filter((e) => e.state === "active").map((e) => ({
     id: EXT + e.id, name: e.name, institution: e.institution, score: e.score, t: e.t,
@@ -137,7 +139,7 @@ function MatchesPage() {
     sharedTopics: e.shared_topics, interests: null, hIndex: e.h_index, citations: Number(e.citations), worksCount: e.works_count, recentWorks: e.recent_works ?? 0, openalexId: e.openalex_id,
     methods: [], directions: [],
     member: false,
-  }))).sort((a, b) => (a.member === b.member ? b.score - a.score : a.member ? -1 : 1));
+  }))).sort((a, b) => rank(a) - rank(b) || b.score - a.score);
   async function removeExternal(id: string) {
     const { error } = await supabase.from("external_suggestions").delete().eq("id", id);
     if (error) { toast.error("Could not remove."); return; }
