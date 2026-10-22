@@ -137,7 +137,13 @@ function MatchesPage() {
     sharedTopics: e.shared_topics, interests: null, hIndex: e.h_index, citations: Number(e.citations), worksCount: e.works_count, recentWorks: e.recent_works ?? 0, openalexId: e.openalex_id,
     methods: [], directions: [],
     member: false,
-  })));
+  }))).sort((a, b) => (a.member === b.member ? b.score - a.score : a.member ? -1 : 1));
+  async function removeExternal(id: string) {
+    const { error } = await supabase.from("external_suggestions").delete().eq("id", id);
+    if (error) { toast.error("Could not remove."); return; }
+    toast.success("Removed");
+    await qc.invalidateQueries({ queryKey: ["external-suggestions"] });
+  }
 
   async function decide(id: string, d: "like" | "pass") {
     if (id.startsWith(EXT)) {
@@ -354,7 +360,24 @@ function MatchesPage() {
                     <OpenAlexDialog authorId={e.openalex_id} name={e.name} />
                     {tab === "saved"
                       ? <Button size="sm" variant="ghost" onClick={() => setExternal(e.id, "dismissed").catch(() => toast.error("Could not update."))}><X className="mr-1 h-4 w-4" />Dismiss</Button>
-                      : <Button size="sm" variant="ghost" onClick={() => setExternal(e.id, "active").catch(() => toast.error("Could not update."))}><RotateCcw className="mr-1 h-4 w-4" />Restore</Button>}
+                      : <>
+                        <Button size="sm" variant="outline" onClick={() => setExternal(e.id, "active").catch(() => toast.error("Could not update."))}><RotateCcw className="mr-1 h-4 w-4" />Restore</Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="ghost"><Trash2 className="mr-1 h-4 w-4" />Remove</Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remove this researcher permanently?</AlertDialogTitle>
+                              <AlertDialogDescription>This deletes {e.name} from your list for good. This cannot be undone.</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Keep</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => removeExternal(e.id)}>Remove</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </>}
                   </div>
                 </div>
               </Section>
