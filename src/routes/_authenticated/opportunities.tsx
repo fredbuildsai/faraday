@@ -3,13 +3,14 @@ import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { AlertTriangle, Bookmark, BookmarkCheck, ThumbsDown } from "lucide-react";
+import { Plus, AlertTriangle, Bookmark, BookmarkCheck, ThumbsDown } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { OpportunityCard } from "@/components/OpportunityCard";
+import { NewProjectDialog } from "@/components/NewProjectDialog";
 import { findOpportunities, getOpportunityPeople } from "@/lib/opportunities.functions";
 import { eligibleOpportunityPeople } from "@/lib/opportunity-people";
 import { researchSettingsQuery } from "@/lib/research-settings.functions";
@@ -113,7 +114,8 @@ function OpportunitiesPage() {
             <p className="text-muted-foreground">Possible research gaps, each backed by at least two published papers.</p>
             {data?.created_at && <p className="text-xs text-muted-foreground">Last updated {new Date(data.created_at).toLocaleDateString()}</p>}
           </div>
-          <Button onClick={() => run(list.length > 0)} disabled={busy}>{busy ? "Looking…" : list.length ? "Refresh" : "Find opportunities"}</Button>
+          <div className="flex gap-2"><NewProjectDialog trigger={<Button variant="outline"><Plus className="h-4 w-4" /> New opportunity</Button>} />
+          <Button onClick={() => run(list.length > 0)} disabled={busy}>{busy ? "Looking…" : list.length ? "Refresh" : "Find opportunities"}</Button></div>
         </div>
 
         {mode === "network" && (

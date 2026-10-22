@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { RotateCcw, Trash2, ThumbsDown } from "lucide-react";
+import { RotateCcw, Trash2, ThumbsDown, Users } from "lucide-react";
+import { NewProjectDialog } from "@/components/NewProjectDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -82,6 +83,7 @@ function ManagePage() {
         ) : rows.map((r) => (
           <OpportunityCard key={r.id} s={r.snapshot as unknown as Suggestion} actions={
             <div className="flex gap-1">
+              {tab === "saved" && <NewProjectDialog trigger={<Button variant="ghost" size="sm"><Users className="h-4 w-4" /> Collaborate</Button>} initial={{ title: (r.snapshot as any)?.title, description: (r.snapshot as any)?.description, papers: (((r.snapshot as any)?.evidence ?? []) as any[]).map((w) => ({ openalexId: w.id, title: w.title, url: w.url ?? null, isOa: !!w.isOa })), source: { savedOpportunityId: r.id, snapshot: r.snapshot } }} />}
               {tab === "saved"
                 ? <Button variant="ghost" size="sm" onClick={() => setState(r, "dismissed")}><ThumbsDown className="h-4 w-4" /> Dismiss</Button>
                 : <Button variant="ghost" size="sm" onClick={() => setState(r, "saved")}><RotateCcw className="h-4 w-4" /> Restore</Button>}
