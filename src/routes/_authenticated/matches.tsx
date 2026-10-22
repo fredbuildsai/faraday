@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Logo } from "@/components/Logo";
 import { computeMatches, setInterest } from "@/lib/matching.functions";
+import { Thumbs } from "@/components/Thumbs";
+import { feedbackQuery } from "./opportunities";
 
 const matchesQuery = queryOptions({
   queryKey: ["my-matches"],
@@ -30,12 +32,13 @@ export const Route = createFileRoute("/_authenticated/matches")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(matchesQuery),
+  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(matchesQuery), context.queryClient.ensureQueryData(feedbackQuery)]),
   component: MatchesPage,
 });
 
 function MatchesPage() {
   const { data } = useSuspenseQuery(matchesQuery);
+  const { data: fb } = useSuspenseQuery(feedbackQuery);
   const qc = useQueryClient();
   const compute = useServerFn(computeMatches);
   const interest = useServerFn(setInterest);
@@ -67,6 +70,7 @@ function MatchesPage() {
           <nav className="flex gap-4 text-sm">
             <Link to="/profile" className="text-muted-foreground hover:text-foreground">Profile</Link>
             <Link to="/matches" className="font-medium text-foreground">Matches</Link>
+            <Link to="/opportunities" className="text-muted-foreground hover:text-foreground">Opportunities</Link>
           </nav>
         </div>
       </header>
@@ -90,7 +94,7 @@ function MatchesPage() {
                 <h2 className="font-serif text-xl">{m.other_name || "A researcher"}</h2>
                 <p className="text-sm text-muted-foreground">{m.other_institution || "Institution not given"}</p>
               </div>
-              <span className="rounded-full bg-accent px-3 py-1 font-mono text-sm text-accent-foreground">{Math.round(m.score * 100)}%</span>
+              <div className="flex items-center gap-2"><Thumbs type="match" id={m.id} value={fb[`match:${m.id}`] ?? 0} /><span className="rounded-full bg-accent px-3 py-1 font-mono text-sm text-accent-foreground">{Math.round(m.score * 100)}%</span></div>
             </div>
             {m.shared_topics.length > 0 && (
               <div className="flex flex-wrap gap-2">

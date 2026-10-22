@@ -193,6 +193,7 @@ function ProfilePage() {
           <Logo />
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/matches" })}>Matches</Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/opportunities" })}>Opportunities</Button>
             <Button variant="outline" size="sm" onClick={signOut}>Sign out</Button>
           </div>
         </div>

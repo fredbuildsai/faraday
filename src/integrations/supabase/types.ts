@@ -32,6 +32,33 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          created_at: string
+          id: string
+          target_id: string
+          target_type: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          target_id: string
+          target_type: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          target_id?: string
+          target_type?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: []
+      }
       interests: {
         Row: {
           created_at: string
@@ -132,6 +159,35 @@ export type Database = {
           url?: string
         }
         Relationships: []
+      }
+      opportunities: {
+        Row: {
+          created_at: string
+          dropped_claims: Json
+          suggestions: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dropped_claims?: Json
+          suggestions?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dropped_claims?: Json
+          suggestions?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_analysis: {
         Row: {
