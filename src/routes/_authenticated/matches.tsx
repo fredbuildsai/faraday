@@ -165,6 +165,7 @@ function MatchesPage() {
         else toast.success("Saved. They'll see your interest.");
       } else {
         await changeState({ data: { matchId: id, state: "dismissed" } });
+        setPassedNow((s) => new Set(s).add(id));
       }
       setLastDecided(id);
       await Promise.all([qc.invalidateQueries({ queryKey: ["my-matches"] }), qc.invalidateQueries({ queryKey: ["match-states"] })]);
