@@ -90,13 +90,11 @@ function AuthPage() {
 
   return (
     <div className="grid min-h-screen content-start lg:grid-cols-2 lg:content-stretch">
-      <section className="flex flex-col gap-4 px-6 pb-2 pt-6 lg:justify-between lg:gap-0 lg:p-16">
-        <div className="flex justify-center">
-          <Logo tag size="large" />
-        </div>
+      <section className="flex flex-col items-center gap-4 px-6 pb-2 pt-6 text-center lg:justify-between lg:gap-0 lg:p-16">
+        <Logo tag size="large" />
         <div className="max-w-md lg:my-12">
           <h1 className="font-serif text-2xl leading-tight lg:text-3xl">Connect. Innovate. Publish.</h1>
-          <ul className="mt-10 hidden space-y-5 lg:block">
+          <ul className="mx-auto mt-10 hidden max-w-xs space-y-5 text-left lg:block">
             {features.map((t) => (
               <li key={t} className="border-l-2 border-primary pl-4 font-medium">{t}</li>
             ))}
@@ -114,7 +112,7 @@ function AuthPage() {
             </div>
           ) : (
             <>
-              <div>
+              <div className="text-center">
                 <h2 className="font-serif text-2xl">{mode === "signin" ? "Welcome back" : mode === "forgot" ? "Reset your password" : "Create your account"}</h2>
                 <p className="text-sm text-muted-foreground">
                   {mode === "signin" ? "Sign in to continue." : mode === "forgot" ? "Enter your email and we will send you a reset link." : "Your profile builds itself from your publications."}
