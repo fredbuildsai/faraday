@@ -35,3 +35,11 @@ describe("opportunity collaborators", () => {
     expect(resolveOpportunityConfig({ OPPORTUNITY_COLLABORATOR_LIMIT: "invalid" }).collaboratorLimit).toBe(10);
   });
 });
+describe("match list for opportunities", () => {
+  it("offers only the 10 best-scoring matches, separate from collaborators", () => {
+    const matches = Array.from({ length: 14 }, (_, i) => ({ id: `m${i}`, name: `M${i}`, mutual: false, authorIds: [], score: i / 100 }));
+    const r = opportunityPeople(matches, [], []);
+    expect(r.filter((p) => p.match)).toHaveLength(10);
+    expect(r.some((p) => p.id === "m0")).toBe(false);
+  });
+});
