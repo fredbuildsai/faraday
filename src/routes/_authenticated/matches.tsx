@@ -117,7 +117,7 @@ function MatchesPage() {
     await qc.invalidateQueries({ queryKey: ["external-suggestions"] });
   }
   const [lastDecided, setLastDecided] = useState<string | null>(null);
-  const deck: ScientistCard[] = data.filter((m) => inDeck({ state: stateOf(m.id), i_am_interested: m.i_am_interested })).map((m) => {
+  const deck: ScientistCard[] = data.filter((m) => inDeck({ state: stateOf(m.id), i_am_interested: m.i_am_interested })).map((m): ScientistCard => {
     const c = cardInfo[m.other_id];
     return {
       id: m.id, name: m.other_name || "A researcher", institution: m.other_institution, score: m.score, t: m.t,
