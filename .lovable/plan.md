@@ -7,9 +7,10 @@
 - Logo: blue lattice square + "Lattice Scout" wordmark, "BY LATTICE PRESS" tag on sign-in.
 
 ## Screens
-1. **Sign in / Create account** (W0): split layout, headline + three feature lines on the left, card on the right. Email + password sign-in, and a "Create account" view with first name, last name, institution, ORCID (optional, checksum-validated). Only invited emails can register. ORCID / Institutional / Google buttons are left out (not in spec).
-2. **Confirm profile** (W1, simplified): "Is this you, {first}?" header.
+1. **Sign in / Create account** (W0): split layout, headline + three feature lines on the left, card on the right. "Continue with Google" button plus email + password sign-in, and a "Create account" view with first name, last name, institution, ORCID (optional, checksum-validated). Google users get their name from their Google account and can add institution/ORCID on the confirm step. Only invited emails can register (applies to Google too). ORCID / Institutional buttons are left out.
+2. **Confirm profile** (W1, simplified): "Is this you, {first}?" header. Runs automatically on first entry so the profile builds itself.
    - With ORCID: author is found automatically; if ORCID not found in OpenAlex, a notice appears and it falls back to name search.
+   - Single high-confidence name match (exact name + matching institution): shown pre-selected with a one-click "Yes, that's me".
    - Without ORCID: up to 10 candidate cards (name, institution, works count, top 3 topics) plus "None of these". Never auto-picked.
    - After import: lavender banner "Imported N works" (plus truncation notice above 2,000), left profile card (name, institution, ORCID), publications list (title, venue, year, citations, type badge), "Research topics" chips from the top topics.
    - Stepper, uncertain-works checkboxes, Sources panel, matching settings are omitted (NOT NOW).
@@ -29,7 +30,7 @@
 - 3 example profiles with synthetic works, topic weights and activity.
 
 ## Technical details
-- Enable Lovable Cloud; email/password auth with auto-confirm off by default (confirmation email).
+- Enable Lovable Cloud; email/password auth (confirmation email) plus managed Google sign-in.
 - Tables: `invites(email)`, `profiles(id→auth.users, first_name, last_name, institution, orcid, research_interests ≤500, openalex_author_id, topic_weights jsonb, activity numeric, works_truncated bool, last_imported_at)`, `works(user_id, openalex_id, doi, title, year, type, cited_by_count, topics jsonb, keywords jsonb, venue, unique(user_id, openalex_id))`, `openalex_cache(url pk, body jsonb, fetched_at)`.
 - RLS on all; users read/write only own profile and works; `invites` and `openalex_cache` not readable by clients. Grants per table.
 - Invite check: a security-definer function `is_invited(email)` plus a trigger on `auth.users` that rejects non-invited signups and creates the profile row from signup metadata.
