@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { WEEKLY_CAP, matchesFor, selectPairs, type Profile } from "@/lib/matching";
 import { tidyMethod } from "@/lib/method-synonyms";
 
 const topicKey = (id: unknown) => String(id ?? "").split("/").pop() ?? "";
