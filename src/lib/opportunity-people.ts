@@ -1,13 +1,15 @@
 import { DEFAULT_OPPORTUNITY_CONFIG } from "@/lib/opportunity-config";
 
-export type OpportunityPerson = { id: string; name: string; mutual: boolean; collaborator: boolean };
-export type OpportunityMatch = { id: string; name: string; mutual: boolean; authorIds: string[] };
+export type OpportunityPerson = { id: string; name: string; mutual: boolean; collaborator: boolean; match: boolean };
+export type OpportunityMatch = { id: string; name: string; mutual: boolean; authorIds: string[]; score?: number };
 
 /** Direct co-authors are eligible here even though discovery excludes them. */
 export function opportunityPeople(matches: OpportunityMatch[], works: { authors: { id: string; name: string }[] }[], ownIds: string[], config = DEFAULT_OPPORTUNITY_CONFIG): OpportunityPerson[] {
   const short = (id: string) => id.split("/").pop() ?? "";
   const own = new Set(ownIds.map(short));
-  const people = new Map<string, OpportunityPerson>(matches.map((m) => [m.id, { id: m.id, name: m.name, mutual: m.mutual, collaborator: false }]));
+  // Matches are capped separately from collaborators: best score first, mutual interest breaking ties.
+  const topMatches = [...matches].sort((a, b) => (b.score ?? 0) - (a.score ?? 0) || Number(b.mutual) - Number(a.mutual) || a.name.localeCompare(b.name)).slice(0, config.matchLimit);
+  const people = new Map<string, OpportunityPerson>(topMatches.map((m) => [m.id, { id: m.id, name: m.name, mutual: m.mutual, collaborator: false, match: true }]));
   const members = new Map(matches.flatMap((m) => m.authorIds.map((id) => [short(id), m.id] as const)));
   const frequency = new Map<string, number>();
   const names = new Map<string, string>();
@@ -26,7 +28,7 @@ export function opportunityPeople(matches: OpportunityMatch[], works: { authors:
   for (const id of top) {
     const member = people.get(id);
     if (member) member.collaborator = true;
-    else people.set(id, { id, name: names.get(id) ?? "", mutual: false, collaborator: true });
+    else people.set(id, { id, name: names.get(id) ?? "", mutual: false, collaborator: true, match: false });
   }
   return [...people.values()].sort((a, b) => Number(b.collaborator) - Number(a.collaborator) || (a.collaborator && b.collaborator ? (frequency.get(b.id) ?? 0) - (frequency.get(a.id) ?? 0) : 0) || a.name.localeCompare(b.name));
 }

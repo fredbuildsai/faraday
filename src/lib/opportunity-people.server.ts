@@ -25,5 +25,5 @@ export async function loadOpportunityPeople(sb: SupabaseClient<Database>, uid: s
   if (error) throw new Error("Could not load your collaborators.");
   const ids = (p: { openalex_author_id: string | null; openalex_author_ids: string[] | null }) => p.openalex_author_ids?.length ? p.openalex_author_ids : p.openalex_author_id ? [p.openalex_author_id] : [];
   const config = resolveResearchSettings(profile.research_settings, { ...DEFAULT_RESEARCH_SETTINGS, ...resolveOpportunityConfig({ OPPORTUNITY_COLLABORATOR_LIMIT: process.env["OPPORTUNITY_COLLABORATOR_LIMIT"] }) });
-  return opportunityPeople((matches ?? []).map((m) => ({ id: m.other_id, name: m.other_name, mutual: !!(m.i_am_interested && m.they_are_interested), authorIds: ids(members?.find((p) => p.id === m.other_id) ?? { openalex_author_id: null, openalex_author_ids: [] }) })), works, ids(profile), config);
+  return opportunityPeople((matches ?? []).map((m) => ({ id: m.other_id, name: m.other_name, mutual: !!(m.i_am_interested && m.they_are_interested), score: Number(m.score ?? 0), authorIds: ids(members?.find((p) => p.id === m.other_id) ?? { openalex_author_id: null, openalex_author_ids: [] }) })), works, ids(profile), config);
 }
