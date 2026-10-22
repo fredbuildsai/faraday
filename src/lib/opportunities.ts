@@ -15,7 +15,7 @@ export type Whitespace = {
   query: string;
   sinceYear: number;
   /** Start of the rolling window (YYYY-MM-DD), exactly 3 years before the search. */
-  sinceDate?: string;
+  sinceDate?: string | undefined;
   totalCount: number | null;
   recentCount: number | null;
   closest: { id: string; title: string; url: string; similarity: number }[];
