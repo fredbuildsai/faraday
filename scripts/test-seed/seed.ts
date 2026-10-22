@@ -38,6 +38,7 @@ for (const p of PEOPLE.filter((x) => !only.length || only.includes(x.last.toLowe
         type: w.type ?? null, cited_by_count: w.cited_by_count ?? 0,
         topics: (w.topics ?? []).map((t: any) => ({ id: shortId(t.id), name: t.display_name, score: t.score ?? 0 })),
         keywords: (w.keywords ?? []).map((k: any) => k.display_name), venue: w.primary_location?.source?.display_name ?? null,
+        authors: (w.authorships ?? []).filter((a: any) => a?.author?.id).slice(0, 100).map((a: any) => ({ id: shortId(a.author.id), name: a.author.display_name ?? "" })),
       });
     }
   }
