@@ -3,6 +3,7 @@ import { Heart, Undo2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { swipeDecision } from "@/lib/swipe";
 import { OpenAlexDialog } from "@/components/OpenAlexDialog";
+import { LogoMark } from "@/components/Logo";
 
 export type ScientistCard = {
   id: string;
@@ -20,6 +21,8 @@ export type ScientistCard = {
   methods: string[];
   directions: string[];
   openalexId?: string | null;
+  /** True when this researcher is a Lattice Scout member. */
+  member?: boolean;
 };
 
 type Props = {
@@ -112,6 +115,11 @@ function CardBody({ c }: { c: ScientistCard }) {
         <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-primary font-serif text-2xl text-primary-foreground">{initials(c.name)}</div>
         <div className="min-w-0 flex-1">
           <p className="mb-1 inline-block rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">{c.layer}</p>
+          {c.member && (
+            <p className="mb-1 ml-1 inline-flex items-center gap-1 rounded-full border bg-background px-2 py-0.5 text-xs font-medium" title="On Lattice Scout">
+              <LogoMark className="h-3.5 w-3.5" /> Lattice Scout
+            </p>
+          )}
           <h2 className="truncate font-serif text-2xl">{c.name}</h2>
           <p className="truncate text-sm text-muted-foreground">{c.institution || "Institution not given"}</p>
         </div>
