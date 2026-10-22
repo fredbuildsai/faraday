@@ -35,8 +35,12 @@ function MentionInput({ value, onChange, people, placeholder }: { value: string;
   const [caret, setCaret] = useState(0);
   const before = value.slice(0, caret);
   const m = before.match(/@([^@\n]{0,30})$/);
-  const term = m?.[1]?.toLowerCase() ?? "";
-  const options = m ? people.filter((p) => p.name.toLowerCase().split(/\s+/).some((w) => w.startsWith(term)) || p.name.toLowerCase().startsWith(term)).slice(0, 6) : [];
+  const raw = m?.[1]?.toLowerCase() ?? "";
+  // Once a full name was picked (or typed) and followed by text, the suggestion box closes.
+  const done = people.some((p) => raw.startsWith(p.name.toLowerCase() + " ") || raw === p.name.toLowerCase());
+  const open = !!m && !done && !/\s{2}|\s\S+\s/.test(raw);
+  const term = raw;
+  const options = open ? people.filter((p) => p.name.toLowerCase().split(/\s+/).some((w) => w.startsWith(term)) || p.name.toLowerCase().startsWith(term)).slice(0, 6) : [];
   const [active, setActive] = useState(0);
   function pick(name: string) {
     const start = caret - (m?.[0].length ?? 0);
@@ -62,7 +66,7 @@ function MentionInput({ value, onChange, people, placeholder }: { value: string;
           {options.map((p, i) => <li key={p.user_id}><button type="button" className={`w-full rounded px-2 py-1 text-left hover:bg-accent ${i === active ? "bg-accent" : ""}`} onMouseDown={(e) => { e.preventDefault(); pick(p.name); }}>@{p.name}</button></li>)}
         </ul>
       )}
-      {m && !options.length && <p className="absolute z-20 mt-1 rounded-md border bg-popover px-3 py-2 text-xs text-muted-foreground shadow-md">{people.length ? "No collaborator with that name." : "Invite people to this opportunity to tag them."}</p>}
+      {open && !raw.includes(" ") && !options.length && <p className="absolute z-20 mt-1 rounded-md border bg-popover px-3 py-2 text-xs text-muted-foreground shadow-md">{people.length ? "No collaborator with that name." : "Invite people to this opportunity to tag them."}</p>}
     </div>
   );
 }
