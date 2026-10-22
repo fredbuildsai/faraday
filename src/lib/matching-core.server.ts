@@ -85,7 +85,7 @@ export async function computeMatchesFor(uid: string, opts: { piOnly?: boolean } 
         const { error } = await supabaseAdmin.from("matches").insert({
           user_a: m.a, user_b: m.b, score: m.score, t: m.T, m: m.M, act: m.act,
           shared_topics: m.sharedTopics.map(label), a_only: m.aOnly, b_only: m.bOnly, shared_methods: m.sharedMethods, formula: m.formula,
-          layer: m.layer, via: m.via,
+          layer: m.layer, vias: m.vias,
         });
         if (error && error.code !== "23505") { console.error("save matches", error); throw new Error("Could not save matches"); }
       }

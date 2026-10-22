@@ -19,7 +19,7 @@ export function topicalPages(seenCount: number): number[] {
 }
 
 export type Layer = "second_degree" | "interest";
-export interface RawCandidate { id: string; name: string; layer: Layer; via: string | null; hits: number }
+export interface RawCandidate { id: string; name: string; layer: Layer; /** Names of the shared co-authors who link you (2nd-degree connections). */ vias: string[]; hits: number }
 
 /** Your co-authors ordered by how often you published together. */
 export function topCoauthors(works: { authors: { id: string; name: string }[] }[], ownIds: string[], n = BRIDGE_COAUTHORS) {
@@ -46,15 +46,18 @@ export function collectCandidates(
   piOnly = true,
 ): RawCandidate[] {
   const out = new Map<string, RawCandidate>();
-  const add = (id: string, name: string, layer: Layer, via: string | null) => {
+  const add = (id: string, name: string, layer: Layer, vias: string[]) => {
     if (!id || exclude.has(id)) return;
     const e = out.get(id);
-    if (e) { e.hits++; if (layer === "second_degree" && e.layer !== layer) Object.assign(e, { layer, via }); }
-    else out.set(id, { id, name, layer, via, hits: 1 });
+    if (e) {
+      e.hits++;
+      if (layer === "second_degree" && e.layer !== layer) { e.layer = layer; e.vias = vias; }
+      else if (layer === "second_degree") e.vias = [...new Set([...e.vias, ...vias])];
+    } else out.set(id, { id, name, layer, vias, hits: 1 });
   };
   const pick = (w: any) => (w.authorships ?? []).filter((a: any) => a?.author?.id && (!piOnly || a.author_position === "last"));
-  for (const b of bridged) for (const w of b.works) for (const a of pick(w)) add(shortId(a.author.id), a.author.display_name ?? "", "second_degree", b.via);
-  for (const w of topical) for (const a of pick(w)) add(shortId(a.author.id), a.author.display_name ?? "", "interest", null);
+  for (const b of bridged) for (const w of b.works) for (const a of pick(w)) add(shortId(a.author.id), a.author.display_name ?? "", "second_degree", [b.via]);
+  for (const w of topical) for (const a of pick(w)) add(shortId(a.author.id), a.author.display_name ?? "", "interest", []);
   return [...out.values()].sort((x, y) => (x.layer === y.layer ? 0 : x.layer === "second_degree" ? -1 : 1) || y.hits - x.hits);
 }
 
@@ -75,7 +78,7 @@ export function authorActivity(author: any, currentYear: number): number {
 
 export interface ExternalPick {
   openalex_id: string; name: string; institution: string | null; score: number; t: number;
-  layer: Layer; via: string | null; shared_topics: string[]; h_index: number; citations: number; works_count: number; recent_works: number;
+  layer: Layer; vias: string[]; shared_topics: string[]; h_index: number; citations: number; works_count: number; recent_works: number;
 }
 
 /** Score looked-up authors against you with the same rule as members; keep the best `size`. */
@@ -90,7 +93,7 @@ export function rankExternal(me: Profile, raws: RawCandidate[], authors: Map<str
     const topicNames = new Map((a.topics ?? []).map((x: any) => [shortId(x.id), x.display_name]));
     out.push({
       openalex_id: r.id, name: a.display_name || r.name, institution: a.last_known_institutions?.[0]?.display_name ?? null,
-      score: s.score, t: s.T, layer: r.layer, via: r.via, shared_topics: s.sharedTopics.map((k) => String(topicNames.get(k) ?? k)),
+      score: s.score, t: s.T, layer: r.layer, vias: r.vias, shared_topics: s.sharedTopics.map((k) => String(topicNames.get(k) ?? k)),
       h_index: a.summary_stats?.h_index ?? 0, citations: a.cited_by_count ?? 0, works_count: a.works_count ?? 0,
       recent_works: recentWorksCount(a, currentYear),
     });
