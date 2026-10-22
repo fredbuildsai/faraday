@@ -1,0 +1,2 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS openalex_author_ids text[] NOT NULL DEFAULT '{}';
+UPDATE public.profiles SET openalex_author_ids = ARRAY[openalex_author_id] WHERE openalex_author_id IS NOT NULL AND cardinality(openalex_author_ids) = 0;
