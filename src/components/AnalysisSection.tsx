@@ -41,7 +41,7 @@ export function AnalysisSection({ analysis, edits, running, hasWorks, onRetry }:
       {!hasResult && status === "running" ? (
         <div className="space-y-2">
           <Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-5/6" /><Skeleton className="h-4 w-2/3" />
-          <p className="text-sm text-muted-foreground">Analysing your profile…</p>
+          <p className="text-sm text-muted-foreground">{analysis?.status === "running" && analysis?.error ? `${analysis.error}…` : "Analysing your profile…"}</p>
         </div>
       ) : !hasResult ? (
         <p className="text-sm text-muted-foreground">No analysis yet. Press "Run analysis" when you're ready.</p>

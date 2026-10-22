@@ -35,3 +35,17 @@ describe("analysis rules", () => {
     expect(out[1]!.byUser).toBe(true);
   });
 });
+
+import { mergeClaims, enoughChunks } from "@/lib/analysis";
+describe("chunked analysis merge", () => {
+  it("merges same method across batches and combines evidence", () => {
+    const out = mergeClaims([[{ label: "NMR spectroscopy", evidence: ["a", "b"] }], [{ label: "nmr  Spectroscopy", evidence: ["b", "c"] }, { label: "XRD", evidence: ["d", "e"] }]]);
+    expect(out[0]).toEqual({ label: "NMR spectroscopy", evidence: ["a", "b", "c"] });
+    expect(out).toHaveLength(2);
+  });
+  it("needs at least half the batches to succeed", () => {
+    expect(enoughChunks(3, 6)).toBe(true);
+    expect(enoughChunks(2, 6)).toBe(false);
+    expect(enoughChunks(0, 0)).toBe(false);
+  });
+});
