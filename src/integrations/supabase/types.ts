@@ -32,6 +32,89 @@ export type Database = {
         }
         Relationships: []
       }
+      interests: {
+        Row: {
+          created_at: string
+          match_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          match_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          match_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interests_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matches: {
+        Row: {
+          a_only: string[]
+          act: number
+          b_only: string[]
+          created_at: string
+          id: string
+          m: number
+          score: number
+          shared_topics: string[]
+          t: number
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          a_only?: string[]
+          act: number
+          b_only?: string[]
+          created_at?: string
+          id?: string
+          m: number
+          score: number
+          shared_topics?: string[]
+          t: number
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          a_only?: string[]
+          act?: number
+          b_only?: string[]
+          created_at?: string
+          id?: string
+          m?: number
+          score?: number
+          shared_topics?: string[]
+          t?: number
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_user_a_fkey"
+            columns: ["user_a"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_user_b_fkey"
+            columns: ["user_b"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       openalex_cache: {
         Row: {
           body: Json
@@ -231,7 +314,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      my_matches: {
+        Args: never
+        Returns: {
+          act: number
+          created_at: string
+          i_am_interested: boolean
+          id: string
+          m: number
+          other_email: string
+          other_id: string
+          other_institution: string
+          other_name: string
+          score: number
+          shared_topics: string[]
+          t: number
+          they_are_interested: boolean
+          they_bring: string[]
+          you_bring: string[]
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

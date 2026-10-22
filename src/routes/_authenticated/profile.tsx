@@ -191,7 +191,10 @@ function ProfilePage() {
       <header className="border-b bg-card">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
           <Logo />
-          <Button variant="outline" size="sm" onClick={signOut}>Sign out</Button>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/matches" })}>Matches</Button>
+            <Button variant="outline" size="sm" onClick={signOut}>Sign out</Button>
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-5xl space-y-6 px-6 py-10">
