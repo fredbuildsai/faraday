@@ -11,3 +11,6 @@
 - [ ] Seed test researchers Johan Foster (UBC email) & Raphaell Moreira (Bremen email), check their match
 - [x] Test researchers Gasteiger, Dahn, Lucht (scripts/test-seed, rollback ready)
 - [ ] Remove test researchers when testing is done (run rollback)
+
+## Later (do not implement yet)
+- [ ] Full text for open-access papers: for works with `is_oa`, fetch text via OpenAlex `best_oa_location.pdf_url` (parse PDF server-side), or pre-extracted text from CORE (`/outputs/{id}/text`, free key), Semantic Scholar (free key), Europe PMC (biomed), arXiv/bioRxiv. Possible uses: deeper profile analysis, full-text evidence checks in Opportunities. Mind API quotas; respect licences.
