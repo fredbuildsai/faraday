@@ -18,6 +18,7 @@ import { Route as AuthenticatedOpportunitiesRouteImport } from './routes/_authen
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedOpportunitiesManageRouteImport } from './routes/_authenticated/opportunities_.manage'
+import { Route as AuthenticatedProjectsIndexRouteImport } from './routes/_authenticated/projects.index'
 import { Route as ApiPublicCronRefreshRouteImport } from './routes/api/public/cron/refresh'
 
 const IndexRoute = IndexRouteImport.update({
@@ -66,6 +67,12 @@ const AuthenticatedOpportunitiesManageRoute =
     path: '/opportunities/manage',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedProjectsIndexRoute =
+  AuthenticatedProjectsIndexRouteImport.update({
+    id: '/projects/',
+    path: '/projects/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicCronRefreshRoute = ApiPublicCronRefreshRouteImport.update({
   id: '/api/public/cron/refresh',
   path: '/api/public/cron/refresh',
@@ -81,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/opportunities/manage': typeof AuthenticatedOpportunitiesManageRoute
+  '/projects/': typeof AuthenticatedProjectsIndexRoute
   '/api/public/cron/refresh': typeof ApiPublicCronRefreshRoute
 }
 export interface FileRoutesByTo {
@@ -92,6 +100,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/opportunities/manage': typeof AuthenticatedOpportunitiesManageRoute
+  '/projects': typeof AuthenticatedProjectsIndexRoute
   '/api/public/cron/refresh': typeof ApiPublicCronRefreshRoute
 }
 export interface FileRoutesById {
@@ -105,6 +114,7 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/opportunities_/manage': typeof AuthenticatedOpportunitiesManageRoute
+  '/_authenticated/projects/': typeof AuthenticatedProjectsIndexRoute
   '/api/public/cron/refresh': typeof ApiPublicCronRefreshRoute
 }
 export interface FileRouteTypes {
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/opportunities/manage'
+    | '/projects/'
     | '/api/public/cron/refresh'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/opportunities/manage'
+    | '/projects'
     | '/api/public/cron/refresh'
   id:
     | '__root__'
@@ -141,6 +153,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/_authenticated/settings'
     | '/_authenticated/opportunities_/manage'
+    | '/_authenticated/projects/'
     | '/api/public/cron/refresh'
   fileRoutesById: FileRoutesById
 }
@@ -216,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOpportunitiesManageRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/projects/': {
+      id: '/_authenticated/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof AuthenticatedProjectsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/cron/refresh': {
       id: '/api/public/cron/refresh'
       path: '/api/public/cron/refresh'
@@ -233,6 +253,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedOpportunitiesManageRoute: typeof AuthenticatedOpportunitiesManageRoute
+  AuthenticatedProjectsIndexRoute: typeof AuthenticatedProjectsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -242,6 +263,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedOpportunitiesManageRoute: AuthenticatedOpportunitiesManageRoute,
+  AuthenticatedProjectsIndexRoute: AuthenticatedProjectsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
