@@ -81,6 +81,7 @@ function MatchesPage() {
   const interest = useServerFn(setInterest);
   const { data: states } = useSuspenseQuery(statesQuery);
   const changeState = useServerFn(setMatchState);
+  const removeMatchFn = useServerFn(removeMatch);
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<Tab>("discover");
   const stateOf = (id: string) => states[id]?.state ?? "active";
@@ -232,7 +233,26 @@ function MatchesPage() {
             <MatchNotes matchId={m.id} st={states[m.id]} />
             <div className="flex flex-wrap items-center gap-3 border-t pt-4">
               {stateOf(m.id) === "dismissed" ? (
-                <Button size="sm" variant="outline" onClick={() => mark(m.id, "active")}><RotateCcw className="mr-1 h-4 w-4" />Restore</Button>
+                <>
+                  <Button size="sm" variant="outline" onClick={() => mark(m.id, "active")}><RotateCcw className="mr-1 h-4 w-4" />Restore</Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="ghost"><Trash2 className="mr-1 h-4 w-4" />Remove</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Remove this match permanently?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This deletes {m.other_name || "this researcher"} from your matches for good. Any notes are lost and they will not appear again unless a new match is created. This cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Keep</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => remove(m.id)}>Remove</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
               ) : (
                 <>
                   {stateOf(m.id) === "saved"
