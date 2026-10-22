@@ -470,6 +470,7 @@ export type Database = {
           openalex_author_ids: string[]
           orcid: string | null
           research_interests: string | null
+          research_settings: Json
           timezone: string | null
           topic_weights: Json
           updated_at: string
@@ -489,6 +490,7 @@ export type Database = {
           openalex_author_ids?: string[]
           orcid?: string | null
           research_interests?: string | null
+          research_settings?: Json
           timezone?: string | null
           topic_weights?: Json
           updated_at?: string
@@ -508,6 +510,7 @@ export type Database = {
           openalex_author_ids?: string[]
           orcid?: string | null
           research_interests?: string | null
+          research_settings?: Json
           timezone?: string | null
           topic_weights?: Json
           updated_at?: string

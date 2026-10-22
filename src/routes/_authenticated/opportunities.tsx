@@ -11,7 +11,9 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { OpportunityCard } from "@/components/OpportunityCard";
-import { findOpportunities } from "@/lib/opportunities.functions";
+import { findOpportunities, getOpportunityPeople } from "@/lib/opportunities.functions";
+import { eligibleOpportunityPeople } from "@/lib/opportunity-people";
+import { researchSettingsQuery } from "@/lib/research-settings.functions";
 import { markOpportunity, type SavedState } from "@/lib/saved-opportunities";
 import type { OppSettings, Suggestion } from "@/lib/opportunities";
 
@@ -38,11 +40,8 @@ export const savedStatesQuery = queryOptions({
   },
 });
 const matchesQuery = queryOptions({
-  queryKey: ["my-matches-lite"],
-  queryFn: async () => {
-    const { data } = await supabase.rpc("my_matches");
-    return (data ?? []).map((m: any) => ({ id: m.other_id as string, name: m.other_name as string, mutual: !!(m.i_am_interested && m.they_are_interested) }));
-  },
+  queryKey: ["opportunity-people"],
+  queryFn: () => getOpportunityPeople(),
 });
 
 export const Route = createFileRoute("/_authenticated/opportunities")({
@@ -60,6 +59,7 @@ export const Route = createFileRoute("/_authenticated/opportunities")({
     context.queryClient.ensureQueryData(oppQuery),
     context.queryClient.ensureQueryData(savedStatesQuery),
     context.queryClient.ensureQueryData(matchesQuery),
+    context.queryClient.ensureQueryData(researchSettingsQuery),
   ]),
   component: OpportunitiesPage,
 });
@@ -68,26 +68,27 @@ function OpportunitiesPage() {
   const { data } = useSuspenseQuery(oppQuery);
   const { data: states } = useSuspenseQuery(savedStatesQuery);
   const { data: matches } = useSuspenseQuery(matchesQuery);
+  const { data: preferences } = useSuspenseQuery(researchSettingsQuery);
   const qc = useQueryClient();
   const find = useServerFn(findOpportunities);
   const [busy, setBusy] = useState(false);
   const saved = (data?.settings ?? {}) as Partial<OppSettings>;
-  const [mode, setMode] = useState<"network" | "broad">(saved.mode ?? "broad");
-  const [excludeReviews, setExcludeReviews] = useState(!!saved.excludeReviews);
-  const [mutualOnly, setMutualOnly] = useState(!!saved.mutualOnly);
-  const [picked, setPicked] = useState<Set<string>>(new Set(saved.matchIds ?? []));
+  const [mode, setMode] = useState<"network" | "broad">(preferences.opportunityMode);
+  const [excludeReviews, setExcludeReviews] = useState(preferences.excludeReviews);
+  const [mutualOnly, setMutualOnly] = useState(preferences.mutualOnly);
+  const [picked, setPicked] = useState<Set<string>>(new Set([...(saved.matchIds ?? []), ...(saved.collaboratorIds ?? [])]));
   const list = (data?.suggestions as unknown as Suggestion[]) ?? [];
-  const shownMatches = matches.filter((m) => !mutualOnly || m.mutual);
+  const shownMatches = eligibleOpportunityPeople(matches, mutualOnly);
 
   useEffect(() => {
-    if (mutualOnly) setPicked((p) => new Set([...p].filter((id) => matches.find((m) => m.id === id)?.mutual)));
+    if (mutualOnly) setPicked((p) => new Set([...p].filter((id) => eligibleOpportunityPeople(matches, true).some((m) => m.id === id))));
   }, [mutualOnly, matches]);
 
   async function run(force: boolean) {
     setBusy(true);
     const t = toast.loading("Looking for opportunities and checking the literature…");
     try {
-      const r = await find({ data: { force, mode, excludeReviews, mutualOnly, matchIds: [...picked] } });
+      const r = await find({ data: { force, mode, excludeReviews, mutualOnly, matchIds: [...picked].filter((id) => !id.startsWith("A")), collaboratorIds: [...picked].filter((id) => id.startsWith("A")) } });
       if (r.status === "error") toast.error(r.reason, { id: t });
       else if (r.status === "cached") toast.info("These are less than a week old. Showing saved results.", { id: t });
       else toast.success("Opportunities updated", { id: t });
@@ -122,7 +123,7 @@ function OpportunitiesPage() {
           <div className="flex flex-wrap gap-6">
             <div className="flex items-center gap-2">
               <Switch id="mode" checked={mode === "network"} onCheckedChange={(v) => setMode(v ? "network" : "broad")} />
-              <Label htmlFor="mode">Only my and my matches' published research</Label>
+              <Label htmlFor="mode">Only my, my collaborators’ and my matches’ published research</Label>
             </div>
             <div className="flex items-center gap-2">
               <Switch id="reviews" checked={excludeReviews} onCheckedChange={setExcludeReviews} />
@@ -133,18 +134,18 @@ function OpportunitiesPage() {
             <div className="space-y-3 border-t pt-4">
               <div className="flex items-center gap-2">
                 <Switch id="mutual" checked={mutualOnly} onCheckedChange={setMutualOnly} />
-                <Label htmlFor="mutual">Mutual interest only</Label>
+                <Label htmlFor="mutual">Mutual-interest matches only</Label>
               </div>
               {shownMatches.length ? (
                 <div className="flex flex-wrap gap-4">
                   {shownMatches.map((m) => (
                     <label key={m.id} className="flex items-center gap-2 text-sm">
                       <Checkbox checked={picked.has(m.id)} onCheckedChange={(v) => setPicked((p) => { const n = new Set(p); v ? n.add(m.id) : n.delete(m.id); return n; })} />
-                      {m.name}{m.mutual ? " · mutual" : ""}
+                      {m.name}{m.collaborator ? " · collaborator" : ""}{m.mutual ? " · mutual" : ""}
                     </label>
                   ))}
                 </div>
-              ) : <p className="text-sm text-muted-foreground">{mutualOnly ? "No matches with mutual interest yet." : "No matches yet. Find matches first."}</p>}
+              ) : <p className="text-sm text-muted-foreground">{mutualOnly ? "No collaborators or mutual-interest matches yet." : "No collaborators or matches found yet."}</p>}
             </div>
           )}
           <p className="text-xs text-muted-foreground">Changing these and pressing {list.length ? "Refresh" : "Find opportunities"} looks again.</p>

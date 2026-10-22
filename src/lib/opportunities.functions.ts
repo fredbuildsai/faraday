@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { aiChat, parseJson } from "@/lib/ai-call.server";
+import { eligibleOpportunityPeople } from "@/lib/opportunity-people";
 import {
   MAX_SUGGESTIONS, assessWhitespace, isFresh, principalInvestigators, sameSettings, searchTerms, threeYearsAgo, byFewestRecent, verifySuggestions, workKey,
   type OaWork, type OppSettings,
@@ -20,7 +21,15 @@ const Input = z.object({
   excludeReviews: z.boolean().default(false),
   mutualOnly: z.boolean().default(false),
   matchIds: z.array(z.string().uuid()).max(20).default([]),
+  collaboratorIds: z.array(z.string().regex(/^A\d+$/)).default([]),
 });
+
+export const getOpportunityPeople = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { loadOpportunityPeople } = await import("@/lib/opportunity-people.server");
+    return loadOpportunityPeople(context.supabase, context.userId);
+  });
 
 /** Find (or return cached) research-gap suggestions for the signed-in user. */
 export const findOpportunities = createServerFn({ method: "POST" })
@@ -33,15 +42,17 @@ export const findOpportunities = createServerFn({ method: "POST" })
 
     // Only matches the caller really has (and, if asked, with mutual interest).
     let matchIds: string[] = [];
+    let collaboratorIds: string[] = [];
     const names = new Map<string, string>();
     if (data.mode === "network") {
-      const { data: mine } = await context.supabase.rpc("my_matches");
-      const allowed = (mine ?? []).filter((m: any) => !data.mutualOnly || (m.i_am_interested && m.they_are_interested));
-      for (const m of allowed as any[]) names.set(m.other_id, m.other_name);
+      const { loadOpportunityPeople } = await import("@/lib/opportunity-people.server");
+      const allowed = eligibleOpportunityPeople(await loadOpportunityPeople(context.supabase, uid), data.mutualOnly);
+      for (const person of allowed) names.set(person.id, person.name);
       matchIds = data.matchIds.filter((id) => names.has(id));
-      if (!matchIds.length) return { status: "error" as const, reason: "Choose at least one match to include." };
+      collaboratorIds = data.collaboratorIds.filter((id) => names.has(id));
+      if (!matchIds.length && !collaboratorIds.length) return { status: "error" as const, reason: "Choose at least one collaborator or match to include." };
     }
-    const settings: OppSettings = { mode: data.mode, excludeReviews: data.excludeReviews, mutualOnly: data.mutualOnly, matchIds };
+    const settings: OppSettings = { mode: data.mode, excludeReviews: data.excludeReviews, mutualOnly: data.mutualOnly, matchIds, collaboratorIds };
 
     const { data: cached } = await supabaseAdmin.from("opportunities").select("created_at, settings").eq("user_id", uid).maybeSingle();
     if (!data.force && isFresh(cached?.created_at) && sameSettings(cached?.settings as any, settings)) return { status: "cached" as const };
@@ -70,6 +81,14 @@ export const findOpportunities = createServerFn({ method: "POST" })
           for (const r of rows ?? []) {
             const id = workKey(r.openalex_id);
             if (id && r.title && !works.some((w) => w.id === id)) works.push({ id, title: r.title, url: r.doi ? `https://doi.org/${r.doi.replace(/^https?:\/\/doi.org\//, "")}` : `https://openalex.org/${id}`, owner, isOa: !!r.is_oa });
+          }
+        }
+        for (const owner of collaboratorIds) {
+          const filter = `author.id:${owner}${data.excludeReviews ? ",type:!review" : ""}`;
+          const res: any = await openalexGet(`/works?filter=${filter}&sort=publication_date:desc&per_page=30&select=id,display_name,doi,open_access`);
+          for (const paper of res?.results ?? []) {
+            const id = workKey(paper.id);
+            if (id && paper.display_name && !works.some((w) => w.id === id)) works.push({ id, title: paper.display_name, url: paper.doi || paper.id, owner, isOa: !!paper.open_access?.is_oa });
           }
         }
       }

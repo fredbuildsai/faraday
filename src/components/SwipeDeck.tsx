@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { swipeDecision } from "@/lib/swipe";
 import { OpenAlexDialog } from "@/components/OpenAlexDialog";
 import { LogoMark } from "@/components/Logo";
+import { ScientistMetrics } from "@/components/ScientistMetrics";
 
 export type ScientistCard = {
   id: string;
@@ -23,6 +24,7 @@ export type ScientistCard = {
   methods: string[];
   directions: string[];
   openalexId?: string | null;
+  openalexIds?: string[];
   /** True when this researcher is a Lattice Scout member. */
   member?: boolean;
   /** True when the user dismissed this member before; they are proposed again with a note. */
@@ -135,11 +137,7 @@ function CardBody({ c }: { c: ScientistCard }) {
         <span className="font-mono text-lg text-primary">{Math.round(c.score * 100)}%</span>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 text-center">
-        <Stat label="h-index" value={c.hIndex} />
-        <Stat label="citations" value={c.citations.toLocaleString()} />
-        <Stat label="papers, 3 yrs" value={c.recentWorks} />
-      </div>
+      <ScientistMetrics authorIds={c.openalexIds ?? (c.openalexId ? [c.openalexId] : [])} hIndex={c.hIndex} citations={c.citations} recentWorks={c.recentWorks} />
       {c.openalexId && <div><OpenAlexDialog authorId={c.openalexId} name={c.name} /></div>}
 
       {c.connection && c.connection.length > 0 && (
@@ -176,11 +174,3 @@ function CardBody({ c }: { c: ScientistCard }) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div className="rounded-lg bg-secondary/60 py-2">
-      <p className="font-mono text-lg">{value}</p>
-      <p className="text-[11px] text-muted-foreground">{label}</p>
-    </div>
-  );
-}

@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN research_settings jsonb NOT NULL DEFAULT '{}'::jsonb;

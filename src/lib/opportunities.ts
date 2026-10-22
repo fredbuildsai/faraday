@@ -31,7 +31,7 @@ export type Suggestion = {
   collaborators?: { id: string; name: string }[];
   whitespace?: Whitespace;
 };
-export type OppSettings = { mode: "network" | "broad"; excludeReviews: boolean; matchIds: string[]; mutualOnly: boolean };
+export type OppSettings = { mode: "network" | "broad"; excludeReviews: boolean; matchIds: string[]; collaboratorIds?: string[]; mutualOnly: boolean };
 
 /** Normalise "https://openalex.org/W123" or "W123" to "W123". */
 export function workKey(id: unknown): string {
@@ -74,7 +74,7 @@ export function isFresh(createdAt: string | null | undefined, now = Date.now()):
 export function sameSettings(a: Partial<OppSettings> | null | undefined, b: OppSettings): boolean {
   if (!a) return false;
   const ids = (x?: string[]) => [...(x ?? [])].sort().join(",");
-  return a.mode === b.mode && !!a.excludeReviews === b.excludeReviews && !!a.mutualOnly === b.mutualOnly && ids(a.matchIds) === ids(b.matchIds);
+  return a.mode === b.mode && !!a.excludeReviews === b.excludeReviews && !!a.mutualOnly === b.mutualOnly && ids(a.matchIds) === ids(b.matchIds) && ids(a.collaboratorIds) === ids(b.collaboratorIds);
 }
 
 /** Last author of each paper, merged by author id. */
