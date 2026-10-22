@@ -31,28 +31,41 @@ export const draftResearchInterests = createServerFn({ method: "POST" })
       titles: works.map((w) => `${w.title}${w.year ? ` (${w.year})` : ""}`),
       topics: Array.from(topicSet).slice(0, 30),
     };
-    try {
-      const res = await fetch(`${cfg.baseUrl}/chat/completions`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${cfg.apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: cfg.model,
-          temperature: 0.2,
-          messages: [
-            { role: "system", content: "You write a researcher's 'research interests' statement in first person, max 70 words, plain prose, based only on the given published titles and topics. No invented facts, no names, no institutions." },
-            { role: "user", content: JSON.stringify(input) },
-          ],
-        }),
-      });
-      if (!res.ok) {
-        console.error("AI draft failed", res.status, await res.text());
-        return { text: null, error: res.status === 429 ? "AI is busy, try again shortly" : "AI request failed" };
+    const body = (model: string) => JSON.stringify({
+      model,
+      temperature: 0.2,
+      messages: [
+        { role: "system", content: "You write a researcher's 'research interests' statement in first person, max 70 words, plain prose, based only on the given published titles and topics. No invented facts, no names, no institutions." },
+        { role: "user", content: JSON.stringify(input) },
+      ],
+    });
+    // Try the chosen provider (with one retry on rate limit), then any other provider that has a key.
+    const others = (["mistral", "groq", "openrouter"] as const)
+      .filter((p) => p !== cfg.provider)
+      .map((p) => resolveAiConfig({ ...process.env, AI_PROVIDER: p }))
+      .filter((c) => c.apiKey);
+    const attempts = [cfg, cfg, ...others];
+    let lastStatus = 0;
+    for (let i = 0; i < attempts.length; i++) {
+      const c = attempts[i]!;
+      if (i === 1) { if (lastStatus !== 429) continue; await new Promise((r) => setTimeout(r, 2000)); }
+      try {
+        const res = await fetch(`${c.baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${c.apiKey}`, "Content-Type": "application/json" },
+          body: body(c.model),
+        });
+        if (!res.ok) {
+          lastStatus = res.status;
+          console.error("AI draft failed", c.provider, res.status, await res.text());
+          continue;
+        }
+        const j: any = await res.json();
+        const text = String(j.choices?.[0]?.message?.content ?? "").trim().slice(0, 500);
+        if (text) return { text, error: null };
+      } catch (e) {
+        console.error("AI draft error", c.provider, e);
       }
-      const j: any = await res.json();
-      const text = String(j.choices?.[0]?.message?.content ?? "").trim().slice(0, 500);
-      return { text: text || null, error: text ? null : "Empty AI answer" };
-    } catch (e) {
-      console.error("AI draft error", e);
-      return { text: null, error: "AI request failed" };
     }
+    return { text: null, error: lastStatus === 429 ? "AI is busy, try again shortly" : "AI request failed" };
   });
