@@ -189,7 +189,7 @@ function MatchesPage() {
   );
 }
 
-function MatchIdeas({ matchId, st }: { matchId: string; st?: MatchState }) {
+function MatchIdeas({ matchId, st }: { matchId: string; st?: MatchState | undefined }) {
   const write = useServerFn(writeMatchIdeas);
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false);
@@ -220,7 +220,7 @@ function MatchIdeas({ matchId, st }: { matchId: string; st?: MatchState }) {
   );
 }
 
-function MatchNotes({ matchId, st }: { matchId: string; st?: MatchState }) {
+function MatchNotes({ matchId, st }: { matchId: string; st?: MatchState | undefined }) {
   const save = useServerFn(saveMatchNotes);
   const [text, setText] = useState(st?.notes ?? "");
   const [at, setAt] = useState(st?.notes_updated_at ?? null);
