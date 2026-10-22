@@ -127,7 +127,7 @@ function MatchesPage() {
     const c = cardInfo[m.other_id];
     return {
       id: m.id, name: m.other_name || "A researcher", institution: m.other_institution, score: m.score, t: m.t,
-      layer: layers[m.id]?.layer === "second_degree" ? "2nd-degree connection" : "Beyond your network · shared focus",
+      layer: layers[m.id]?.layer === "second_degree" ? "In your network" : "Beyond your network · shared focus",
       connection: layers[m.id]?.layer === "second_degree" ? layers[m.id]?.vias ?? [] : [],
       sharedTopics: m.shared_topics, interests: c?.interests ?? null,
       hIndex: c?.h_index ?? 0, citations: Number(c?.citations ?? 0), worksCount: c?.works_count ?? 0, recentWorks: c?.recent_works ?? 0,
@@ -136,7 +136,7 @@ function MatchesPage() {
     };
   }).concat(external.filter((e) => e.state === "active").map((e) => ({
     id: EXT + e.id, name: e.name, institution: e.institution, score: e.score, t: e.t,
-    layer: `Not on Lattice Scout · ${e.layer === "second_degree" ? "2nd-degree connection" : "Beyond your network · shared focus"}`,
+    layer: `Not on Lattice Scout · ${e.layer === "second_degree" ? "In your network" : "Beyond your network · shared focus"}`,
     connection: e.layer === "second_degree" ? e.vias ?? [] : [],
     sharedTopics: e.shared_topics, interests: null, hIndex: e.h_index, citations: Number(e.citations), worksCount: e.works_count, recentWorks: e.recent_works ?? 0, openalexId: e.openalex_id,
     methods: [], directions: [],
