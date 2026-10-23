@@ -69,6 +69,7 @@ export async function importWorksFor(userId: string, requested?: string[]) {
         activity: computeActivity(works, new Date().getUTCFullYear()),
         works_truncated: truncated,
         last_imported_at: new Date().toISOString(),
+        import_status: "done",
       })
       .eq("id", userId);
     if (upErr) throw new Error("Could not update profile");

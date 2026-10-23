@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { importWorks, resolveAuthor } from "@/lib/openalex.functions";
+import { importWorks, resolveAuthor, startImport } from "@/lib/openalex.functions";
 import type { AuthorCandidate } from "@/lib/openalex-math";
 import { ConfidentialNotice } from "@/components/ConfidentialNotice";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ export const Route = createFileRoute("/_authenticated/confirm")({
 function ConfirmPage() {
   const resolve = useServerFn(resolveAuthor);
   const doImport = useServerFn(importWorks);
+  const start = useServerFn(startImport);
   const navigate = useNavigate();
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["resolve-author"], queryFn: () => resolve(), staleTime: Infinity, retry: false });
@@ -44,15 +45,24 @@ function ConfirmPage() {
   async function confirmSelected() {
     if (!selected.size) return;
     setImporting(true);
+    const authorIds = Array.from(selected);
     try {
-      const r = await doImport({ data: { authorIds: Array.from(selected) } });
-      toast.success(`Imported ${r.imported} works from ${r.profiles} profile${r.profiles > 1 ? "s" : ""}${r.truncated ? " (stopped at 2,000)" : ""}`);
-      await qc.invalidateQueries();
-      navigate({ to: "/profile" });
+      await start({ data: { authorIds } });
     } catch {
-      toast.error("Import failed. Please try again.");
+      toast.error("Could not start the import. Please try again.");
       setImporting(false);
+      return;
     }
+    // The import keeps running while the user explores the app.
+    void doImport({ data: { authorIds } })
+      .then((r) => {
+        toast.success(`Your publications are ready: ${r.imported} works imported${r.truncated ? " (stopped at 2,000)" : ""}.`);
+      })
+      .catch(() => toast.error("Importing your publications failed. Use “Refresh from OpenAlex” on your profile to try again."))
+      .finally(() => qc.invalidateQueries());
+    toast.info("We're importing your publications in the background. Feel free to explore Lattice Scout meanwhile.");
+    await qc.invalidateQueries({ queryKey: ["my-profile"] });
+    navigate({ to: "/profile" });
   }
 
   const others = d ? d.candidates.filter((c) => c.id !== d.suggested?.id) : [];
