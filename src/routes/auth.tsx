@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Logo } from "@/components/Logo";
 import { ConfidentialNotice } from "@/components/ConfidentialNotice";
+import { CandleQuote } from "@/components/CandleQuote";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -94,6 +95,7 @@ function AuthPage() {
         <Logo tag size="large" />
         <div className="max-w-md lg:my-12">
           <h1 className="font-serif text-2xl font-semibold leading-tight tracking-tight lg:text-3xl">Get out of the cage.</h1>
+          <div className="mx-auto mt-6 max-w-md"><CandleQuote /></div>
           <ul className="mx-auto mt-10 hidden max-w-xs space-y-5 text-left lg:block">
             {features.map((t) => (
               <li key={t} className="border-l-2 border-primary pl-4 font-medium">{t}</li>
