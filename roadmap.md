@@ -75,5 +75,5 @@ Proposed (not yet implemented)
 ## Email infrastructure
 - [x] Scaffold and brand managed authentication emails for the selected sender domain
 - [x] Correct sender configuration to the verified email domain; retain the existing website and authentication destinations
-- [ ] Republish corrected authentication sender configuration
+- [x] Request republishing of the corrected authentication sender configuration (2026-10-23)
 - [ ] Verify custom authentication delivery to a real recipient after publishing
