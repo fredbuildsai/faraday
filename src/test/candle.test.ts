@@ -15,6 +15,10 @@ describe("candle passages", () => {
       expect(book).toContain(norm(p.text));
     });
   }
+  it("opens on the chosen default passage", () => {
+    expect(PASSAGES[0]!.text).toContain("There is not a law under which any part of this universe is governed");
+    expect(PASSAGES[0]!.source).toBe("Lecture I");
+  });
   it("pickPassage stays in range", () => {
     expect(pickPassage(0)).toBe(PASSAGES[0]);
     expect(pickPassage(0.9999)).toBe(PASSAGES[PASSAGES.length - 1]);
