@@ -94,8 +94,8 @@ function AuthPage() {
       <section className="flex flex-col items-center gap-4 px-6 pb-2 pt-6 text-center lg:justify-between lg:gap-0 lg:p-16">
         <Logo tag size="large" />
         <div className="max-w-md lg:my-12">
-          <h1 className="font-serif text-2xl font-semibold leading-tight tracking-tight lg:text-3xl">Get out of the cage.</h1>
-          <div className="mx-auto mt-6 max-w-md"><CandleQuote /></div>
+          <h1 className="sr-only">Faraday — Get out of the cage.</h1>
+          <div className="mx-auto max-w-md"><CandleQuote /></div>
           <ul className="mx-auto mt-10 hidden max-w-xs space-y-5 text-left lg:block">
             {features.map((t) => (
               <li key={t} className="border-l-2 border-primary pl-4 font-medium">{t}</li>

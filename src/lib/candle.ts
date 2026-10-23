@@ -4,8 +4,9 @@
  * /books/chemical-history-of-a-candle.txt (Project Gutenberg eBook #14474);
  * src/test/candle.test.ts checks that each one still appears in that file.
  *
- * PASSAGES[0] is the default passage shown by CandleQuote (sign-in page and
- * the profile import banner). "Next passage" cycles through the rest.
+ * PASSAGES[0] is the fixed passage shown by CandleQuote (sign-in page and
+ * the profile import banner). It never rotates; the others are kept as a
+ * verified collection for future use.
  */
 export type Passage = { text: string; source: string };
 
@@ -14,15 +15,15 @@ export const BOOK_PATH = "/books/chemical-history-of-a-candle.txt";
 
 export const PASSAGES: Passage[] = [
   {
+    text: "We come here to be philosophers; and I hope you will always remember that whenever a result happens, especially if it be new, you should say, “What is the cause? Why does it occur?” and you will in the course of time find out the reason.",
+    source: "Lecture I",
+  },
+  {
     text: "There is not a law under which any part of this universe is governed which does not come into play, and is touched upon in these phenomena.",
     source: "Lecture I",
   },
   {
     text: "There is no better, there is no more open door by which you can enter into the study of natural philosophy, than by considering the physical phenomena of a candle.",
-    source: "Lecture I",
-  },
-  {
-    text: "We come here to be philosophers; and I hope you will always remember that whenever a result happens, especially if it be new, you should say, “What is the cause? Why does it occur?” and you will in the course of time find out the reason.",
     source: "Lecture I",
   },
   {
