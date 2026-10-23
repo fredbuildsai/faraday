@@ -3,6 +3,9 @@
  * Every passage is quoted verbatim from the bundled public-domain copy at
  * /books/chemical-history-of-a-candle.txt (Project Gutenberg eBook #14474);
  * src/test/candle.test.ts checks that each one still appears in that file.
+ *
+ * PASSAGES[0] is the default passage shown by CandleQuote (sign-in page and
+ * the profile import banner). "Next passage" cycles through the rest.
  */
 export type Passage = { text: string; source: string };
 
@@ -10,6 +13,10 @@ export const BOOK_TITLE = "The Chemical History of a Candle";
 export const BOOK_PATH = "/books/chemical-history-of-a-candle.txt";
 
 export const PASSAGES: Passage[] = [
+  {
+    text: "There is not a law under which any part of this universe is governed which does not come into play, and is touched upon in these phenomena.",
+    source: "Lecture I",
+  },
   {
     text: "There is no better, there is no more open door by which you can enter into the study of natural philosophy, than by considering the physical phenomena of a candle.",
     source: "Lecture I",
@@ -20,10 +27,6 @@ export const PASSAGES: Passage[] = [
   },
   {
     text: "The greatest mistakes and faults with regard to candles, as in many other things, often bring with them instruction which we should not receive if they had not occurred.",
-    source: "Lecture I",
-  },
-  {
-    text: "There is not a law under which any part of this universe is governed which does not come into play, and is touched upon in these phenomena.",
     source: "Lecture I",
   },
   {
