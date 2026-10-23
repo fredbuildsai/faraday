@@ -8,10 +8,10 @@ export const Route = createFileRoute("/auth-callback")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Confirming your account — Lattice Scout" },
-      { name: "description", content: "Finishing your Lattice Scout sign-up." },
-      { property: "og:title", content: "Confirming your account — Lattice Scout" },
-      { property: "og:description", content: "Finishing your Lattice Scout sign-up." },
+      { title: "Confirming your account — Faraday" },
+      { name: "description", content: "Finishing your Faraday sign-up." },
+      { property: "og:title", content: "Confirming your account — Faraday" },
+      { property: "og:description", content: "Finishing your Faraday sign-up." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

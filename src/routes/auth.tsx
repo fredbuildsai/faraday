@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Logo } from "@/components/Logo";
 import { ConfidentialNotice } from "@/components/ConfidentialNotice";
+import { CandleQuote } from "@/components/CandleQuote";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,10 +14,10 @@ import { isValidOrcid, normaliseOrcid } from "@/lib/orcid";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — Lattice Scout" },
-      { name: "description", content: "Sign in or create your Lattice Scout account with email or Google." },
-      { property: "og:title", content: "Sign in — Lattice Scout" },
-      { property: "og:description", content: "Connect. Innovate. Publish." },
+      { title: "Sign in — Faraday" },
+      { name: "description", content: "Sign in or create your Faraday account with email or Google." },
+      { property: "og:title", content: "Sign in — Faraday" },
+      { property: "og:description", content: "Get out of the cage." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -93,7 +94,8 @@ function AuthPage() {
       <section className="flex flex-col items-center gap-4 px-6 pb-2 pt-6 text-center lg:justify-between lg:gap-0 lg:p-16">
         <Logo tag size="large" />
         <div className="max-w-md lg:my-12">
-          <h1 className="font-serif text-2xl font-semibold leading-tight tracking-tight lg:text-3xl">Connect. Innovate. Publish.</h1>
+          <h1 className="font-serif text-2xl font-semibold leading-tight tracking-tight lg:text-3xl">Get out of the cage.</h1>
+          <div className="mx-auto mt-6 max-w-md"><CandleQuote /></div>
           <ul className="mx-auto mt-10 hidden max-w-xs space-y-5 text-left lg:block">
             {features.map((t) => (
               <li key={t} className="border-l-2 border-primary pl-4 font-medium">{t}</li>

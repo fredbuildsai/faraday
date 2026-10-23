@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthCallbackRouteImport } from './routes/auth-callback'
+import { Route as CandleRouteImport } from './routes/candle'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedConfirmRouteImport } from './routes/_authenticated/confirm'
 import { Route as AuthenticatedMatchesRouteImport } from './routes/_authenticated/matches'
@@ -41,6 +42,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/auth-callback',
   path: '/auth-callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CandleRoute = CandleRouteImport.update({
+  id: '/candle',
+  path: '/candle',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/auth-callback': typeof AuthCallbackRoute
+  '/candle': typeof CandleRoute
   '/reset-password': typeof ResetPasswordRoute
   '/confirm': typeof AuthenticatedConfirmRoute
   '/matches': typeof AuthenticatedMatchesRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/auth-callback': typeof AuthCallbackRoute
+  '/candle': typeof CandleRoute
   '/reset-password': typeof ResetPasswordRoute
   '/confirm': typeof AuthenticatedConfirmRoute
   '/matches': typeof AuthenticatedMatchesRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/auth-callback': typeof AuthCallbackRoute
+  '/candle': typeof CandleRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/confirm': typeof AuthenticatedConfirmRoute
   '/_authenticated/matches': typeof AuthenticatedMatchesRoute
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/auth-callback'
+    | '/candle'
     | '/reset-password'
     | '/confirm'
     | '/matches'
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/auth-callback'
+    | '/candle'
     | '/reset-password'
     | '/confirm'
     | '/matches'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/auth-callback'
+    | '/candle'
     | '/reset-password'
     | '/_authenticated/confirm'
     | '/_authenticated/matches'
@@ -198,6 +210,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
+  CandleRoute: typeof CandleRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicCronRefreshRoute: typeof ApiPublicCronRefreshRoute
 }
@@ -230,6 +243,13 @@ declare module '@tanstack/react-router' {
       path: '/auth-callback'
       fullPath: '/auth-callback'
       preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/candle': {
+      id: '/candle'
+      path: '/candle'
+      fullPath: '/candle'
+      preLoaderRoute: typeof CandleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -335,6 +355,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   AuthCallbackRoute: AuthCallbackRoute,
+  CandleRoute: CandleRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicCronRefreshRoute: ApiPublicCronRefreshRoute,
 }

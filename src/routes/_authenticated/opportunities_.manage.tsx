@@ -29,9 +29,9 @@ const savedQuery = queryOptions({
 export const Route = createFileRoute("/_authenticated/opportunities_/manage")({
   head: () => ({
     meta: [
-      { title: "Saved opportunities — Lattice Scout" },
+      { title: "Saved opportunities — Faraday" },
       { name: "description", content: "Your saved and dismissed research opportunities, with private notes." },
-      { property: "og:title", content: "Saved opportunities — Lattice Scout" },
+      { property: "og:title", content: "Saved opportunities — Faraday" },
       { property: "og:description", content: "Your saved and dismissed research opportunities, with private notes." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -5,6 +5,7 @@ import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, Loader2, Sparkles, X } from "lucide-react";
+import { CandleQuote } from "@/components/CandleQuote";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,10 +46,10 @@ export const Route = createFileRoute("/_authenticated/profile")({
   validateSearch: z.object({ skip: z.boolean().optional() }),
   head: () => ({
     meta: [
-      { title: "Your profile — Lattice Scout" },
-      { name: "description", content: "Your Lattice Scout research profile." },
-      { property: "og:title", content: "Your profile — Lattice Scout" },
-      { property: "og:description", content: "Your Lattice Scout research profile." },
+      { title: "Your profile — Faraday" },
+      { name: "description", content: "Your Faraday research profile." },
+      { property: "og:title", content: "Your profile — Faraday" },
+      { property: "og:description", content: "Your Faraday research profile." },
     ],
   }),
   loaderDeps: ({ search }) => ({ skip: search.skip }),
@@ -206,9 +207,10 @@ function ProfilePage() {
         {importing && (
           <div role="status" className="flex items-center gap-3 rounded-xl border border-primary/30 bg-accent px-5 py-4 text-sm text-accent-foreground">
             <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
-            <span>
-              Importing your publications from OpenAlex{data.works.length ? ` — ${data.works.length} so far` : ""}. This can take a few minutes; feel free to explore Lattice Scout meanwhile.
-            </span>
+            <div className="space-y-3">
+              <p>Importing your publications from OpenAlex{data.works.length ? ` — ${data.works.length} so far` : ""}. This can take a few minutes; feel free to explore Faraday meanwhile.</p>
+              <CandleQuote compact />
+            </div>
           </div>
         )}
         <div className="flex flex-wrap items-center gap-5 rounded-xl border bg-card p-6">

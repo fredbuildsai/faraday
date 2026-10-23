@@ -12,9 +12,9 @@ import { researchSettingsQuery, saveResearchSettings } from "@/lib/research-sett
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [
-    { title: "Research settings — Lattice Scout" },
+    { title: "Research settings — Faraday" },
     { name: "description", content: "Your preferences for collaborator selection and research searches." },
-    { property: "og:title", content: "Research settings — Lattice Scout" },
+    { property: "og:title", content: "Research settings — Faraday" },
     { property: "og:description", content: "Your preferences for collaborator selection and research searches." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },

@@ -11,7 +11,7 @@ export function swipeDecision(dx: number, threshold = SWIPE_THRESHOLD): SwipeDec
 }
 
 /**
- * A Lattice Scout member stays in the deck until the user has decided on them.
+ * A Faraday member stays in the deck until the user has decided on them.
  * Members dismissed earlier are proposed again (shown with a "previously dismissed" note),
  * except the ones passed during the current visit.
  */

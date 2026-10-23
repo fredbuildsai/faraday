@@ -11,9 +11,9 @@ import { STATUS_LABEL, type ProjectStatus } from "@/lib/projects";
 
 export const Route = createFileRoute("/_authenticated/projects/")({
   head: () => ({ meta: [
-    { title: "Shared opportunities — Lattice Scout" },
+    { title: "Shared opportunities — Faraday" },
     { name: "description", content: "Opportunities you develop together with other researchers, with invitations and updates." },
-    { property: "og:title", content: "Shared opportunities — Lattice Scout" },
+    { property: "og:title", content: "Shared opportunities — Faraday" },
     { property: "og:description", content: "Opportunities you develop together with other researchers, with invitations and updates." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
@@ -44,7 +44,7 @@ function ProjectsPage() {
   return (
     <main className="mx-auto max-w-5xl space-y-8 px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <div><h1 className="font-serif text-3xl">Shared opportunities</h1><p className="text-muted-foreground">Proposals you develop together with other Lattice Scout members.</p></div>
+        <div><h1 className="font-serif text-3xl">Shared opportunities</h1><p className="text-muted-foreground">Proposals you develop together with other Faraday members.</p></div>
         <NewProjectDialog trigger={<Button><Plus className="h-4 w-4" /> New opportunity</Button>} />
       </div>
 
