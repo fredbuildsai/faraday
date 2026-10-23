@@ -6,7 +6,7 @@ import { BOOK_TITLE, PASSAGES, pickPassage } from "@/lib/candle";
 export function CandleQuote({ compact = false }: { compact?: boolean }) {
   const [i, setI] = useState(0);
   useEffect(() => setI(PASSAGES.indexOf(pickPassage())), []);
-  const p = PASSAGES[i];
+  const p = PASSAGES[i] ?? PASSAGES[0]!;
   return (
     <figure className={`border-l-2 border-primary text-left ${compact ? "pl-3" : "pl-5"}`}>
       <blockquote className={`font-serif italic leading-relaxed ${compact ? "text-sm" : "text-lg"}`}>“{p.text}”</blockquote>

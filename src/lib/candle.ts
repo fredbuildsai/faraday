@@ -35,5 +35,5 @@ export const PASSAGES: Passage[] = [
 /** Picks a passage; `seed` makes the choice deterministic (tests, SSR). */
 export function pickPassage(seed: number = Math.random()): Passage {
   const i = Math.floor(Math.abs(seed) * PASSAGES.length) % PASSAGES.length;
-  return PASSAGES[i];
+  return PASSAGES[i] ?? PASSAGES[0]!;
 }
