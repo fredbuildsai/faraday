@@ -56,3 +56,9 @@ Proposed (not yet implemented)
 - [x] Saved → shared opportunity keeps notes, whitespace, evidence + closest papers, suggested researchers
 - [x] Password reset (Forgot password? + /reset-password)
 - [x] Google logo on "Continue with Google"
+
+## Onboarding emails (blocked: needs a sender domain set up in More → Emails)
+- [ ] Branded confirmation, reset (with 6-digit code) and other auth emails: logo + "Connect. Innovate. Publish." header
+- [ ] Welcome email after confirmation with banner screenshots of profile, matching, opportunities, shared workspace
+- [x] Confirmation links land on /auth-callback and sign the person in
+- [x] Reset page handles link codes, slow networks, and a typed code when scanners consumed the link
