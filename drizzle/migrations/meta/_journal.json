@@ -169,6 +169,13 @@
       "when": 1792709776804,
       "tag": "0023_mentions_include_invited",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792743399794,
+      "tag": "0024_profile_import_status",
+      "breakpoints": true
     }
   ]
 }

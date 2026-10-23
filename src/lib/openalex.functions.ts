@@ -74,7 +74,32 @@ export const importWorks = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { importWorksFor } = await import("@/lib/import-core.server");
-    return importWorksFor(context.userId, data.authorIds);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    try {
+      return await importWorksFor(context.userId, data.authorIds);
+    } catch (e) {
+      await supabaseAdmin.from("profiles").update({ import_status: "failed" }).eq("id", context.userId);
+      throw e;
+    }
+  });
+
+/** Save the chosen profiles and mark the import as running, so the user can leave the page. */
+export const startImport = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ authorIds: z.array(z.string().regex(/^A\d+$/)).min(1).max(10) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const ids = Array.from(new Set(data.authorIds));
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("profiles").update({
+      openalex_author_id: ids[0]!,
+      openalex_author_ids: ids,
+      import_status: "importing",
+      import_started_at: new Date().toISOString(),
+    }).eq("id", context.userId);
+    if (error) throw new Error("Could not start import");
+    return { ok: true };
   });
 
 export const saveResearchInterests = createServerFn({ method: "POST" })

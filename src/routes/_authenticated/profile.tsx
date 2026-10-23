@@ -4,7 +4,7 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, Sparkles, X } from "lucide-react";
+import { ChevronDown, Loader2, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,8 +60,19 @@ export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
 });
 
+/** Import counts as running for at most 10 minutes, so a lost request never leaves the banner up forever. */
+function isImporting(p: { import_status?: string | null; import_started_at?: string | null } | null | undefined) {
+  if (p?.import_status !== "importing" || !p.import_started_at) return false;
+  return Date.now() - new Date(p.import_started_at).getTime() < 10 * 60 * 1000;
+}
+
 function ProfilePage() {
-  const { data } = useSuspenseQuery(profileQuery);
+  const { data } = useSuspenseQuery({
+    ...profileQuery,
+    // While publications are imported in the background, check every few seconds.
+    refetchInterval: (q) => (isImporting(q.state.data?.profile) ? 4000 : false),
+  });
+  const importing = isImporting(data.profile);
   const qc = useQueryClient();
   const navigate = useNavigate();
   const refresh = useServerFn(importWorks);
@@ -192,6 +203,14 @@ function ProfilePage() {
     <div className="min-h-screen">
       <main className="mx-auto max-w-5xl space-y-6 px-6 py-10">
         <ConfidentialNotice />
+        {importing && (
+          <div role="status" className="flex items-center gap-3 rounded-xl border border-primary/30 bg-accent px-5 py-4 text-sm text-accent-foreground">
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
+            <span>
+              Importing your publications from OpenAlex{data.works.length ? ` — ${data.works.length} so far` : ""}. This can take a few minutes; feel free to explore Lattice Scout meanwhile.
+            </span>
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-5 rounded-xl border bg-card p-6">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary font-serif text-xl text-primary-foreground">{initials}</div>
           <div className="flex-1">
