@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
-const webhook = readFileSync(new URL('../routes/lovable/email/auth/webhook.ts', import.meta.url), 'utf8')
+const webhook = readFileSync('src/routes/lovable/email/auth/webhook.ts', 'utf8')
 const configured = (name: string) => webhook.match(new RegExp(`const ${name} = "([^"]+)"`))?.[1]
 
 describe('authentication email domain configuration', () => {
