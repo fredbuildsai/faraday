@@ -66,7 +66,7 @@ Proposed (not yet implemented)
 ## Faraday rebrand
 - [x] Rename the app Lattice Scout → Faraday, tagline "Get out of the cage."
 - [x] Bundle the full text of "The Chemical History of a Candle" (public domain) and a reader page at /candle
-- [x] Verbatim passages on the sign-in page (rotating, "Next passage") and during background profile import
+- [x] Verbatim passages on the sign-in page and during background profile import; always opens on the "There is not a law…" passage (Lecture I), "Next passage" cycles the rest
 - [x] Document the rebrand and passage rules (AGENTS.md, memory)
 - [ ] Optional: new logo mark (current lattice mark kept), favicon, branded emails once a sender domain exists
 - [ ] Rename the GitHub repository to Faraday (user does it on GitHub; blocked: no repo access for me)
