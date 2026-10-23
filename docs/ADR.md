@@ -17,7 +17,7 @@ Business values (weights, limits) are defaults; users can change several in Sett
 ## ADR-003 Open registration and authentication
 - **Decision:** Anyone can register with email/password or Google; no invite list. Email confirmation is kept. Confirmation links land on `/auth-callback` (handles PKCE code and hash tokens, waits for session hydration) to avoid the redirect race that stripped tokens.
 - **Password reset:** "Forgot password?" sends a link to public `/reset-password`, which exchanges codes explicitly, polls up to 10 s, and offers a 6-digit code fallback because university mail scanners consume single-use links.
-- **Emails:** Sent from the default mailer until a sender domain is configured; branded confirmation + welcome email (logo, tagline, feature banners) are drafted and blocked on the domain.
+- **Emails:** Custom authentication emails are scaffolded with Faraday branding; activate after DNS verification and publishing. The separate feature welcome email remains a follow-up task.
 
 ## ADR-004 Profile from OpenAlex
 - **Decision:** After sign-in, the user selects one or more OpenAlex author profiles; data from all selected profiles is combined (not replaced), capped at 2,000 works. Import runs in the background (`profiles.import_status`, `import_started_at`); the user lands on the profile immediately with a progress banner (polling every 4 s, stale after 10 min).
@@ -85,3 +85,10 @@ Primary colour (buttons, links, logo, icons) is French flag blue #002395 (`--pri
 
 ## ADR: Logo lockup proportions
 The mark is sized in `em` against the wordmark's font size (`h-[0.97em]`), so it is exactly the height of the "Faraday" letters (cap top to descender) instead of the fixed 77px/32px boxes it used before; "GET OUT OF THE CAGE" is centred under the whole lockup. Why: the mark read as oversized next to the word, and the lockup must stay proportional at every size (large on /auth, small in `AppHeader`).
+
+## ADR-016 Managed authentication email sending (2026-10-23)
+- **Decision:** Use Lovable managed sending through the scaffolded `createAuthEmailHandler`, retaining all six actions and SDK verification. No email queue, cron, or email database tables.
+- Sender domain: `notifynotify.faraday.frederick-chesneau.com` (as selected by the owner); DNS verification is pending. Display sender: Faraday, `noreply@faraday.frederick-chesneau.com`.
+- Templates share the Faraday logo/tagline, French-blue buttons and white Body background. Recovery also includes the supplied OTP for the existing fallback form.
+- Entities is pinned to 4.5.0 and Vite aliases its deep imports for compatible email rendering. Existing middleware already limits CSRF to server functions, so email server routes pass untouched.
+- **Consequences:** Publish the new routes and complete domain verification before testing custom delivery. Authentication recovery URL semantics remain owned by the SDK. A branded feature welcome email is separate and not included in this infrastructure setup.

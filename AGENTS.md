@@ -9,12 +9,12 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Pure business logic (matching maths, ORCID checks) lives in `src/lib/*.ts` with Vitest tests in `src/test/`; why: deterministic rules must stay testable without the backend.
+- Pure rules live in `src/lib/*.ts`, tested with Vitest in `src/test/`; why: backend-independent verification.
 - `src/lib/matching.ts` is the user's original reference implementation (helpers + legacy c2 formula); live scoring is `src/lib/match-score.ts` (topic gate, weighted topic+activity, methods descriptive only) with weights from `profiles.match_weights` falling back to `DEFAULT_WEIGHTS`; why: weighting must become user-selectable.
 - Signed-in pages live under `src/routes/_authenticated/`; `/` redirects to `/auth` or `/profile`.
-- AI provider/model choice lives in `src/lib/ai-config.ts` (code defaults, env overrides `AI_PROVIDER`, `<PROVIDER>_MODEL`); why: model names are not secret, only keys go in Secrets.
+- AI defaults live in `src/lib/ai-config.ts`, overridden by `AI_PROVIDER`/`<PROVIDER>_MODEL`; why: only keys belong in Secrets.
 - Test data lives in `scripts/test-seed/` (seed.ts + rollback.ts, accounts tagged `user_metadata.seed`); why: test people must be removable cleanly with all linked rows.
-- Signed-in navigation is one `AppHeader` (logo → /profile, burger drawer with grouped items) rendered by `src/routes/_authenticated/route.tsx`; why: pages must not duplicate their own headers or nav.
+- One `AppHeader` in `src/routes/_authenticated/route.tsx` owns signed-in navigation (logo → /profile, grouped burger drawer); why: no duplicate page headers.
 - Open-access status is stored per work (`works.is_oa`, from OpenAlex `open_access.is_oa`) and shown via `OaBadge` only when true; why: one source of truth for every paper list.
 - Profile analysis runs in batches (`CHUNK_SIZE` works each): each batch is validated against its own titles, findings merged with `mergeClaims`, each successful batch result is saved and reused on retry while its input is unchanged, then one AI synthesis over compact findings with a deterministic-merge fallback; saved only if `enoughChunks`. Why: large publication lists time out or exceed provider limits in one request.
 
@@ -31,5 +31,7 @@
 - Password reset: `/auth` "Forgot password?" sends a link to the public `/reset-password` page, which sets the new password from the recovery session. Why: recovery links must land on a page that asks for a new password.
 - Brand is "Faraday" (tagline "Get out of the cage."); the name lives in `Logo.tsx`, route `head()` titles and copy. Why: one consistent identity across pages, exports and emails.
 - Faraday's "The Chemical History of a Candle" is bundled in full at `public/books/chemical-history-of-a-candle.txt` (Project Gutenberg #14474, public domain), readable at `/candle`; curated passages live in `src/lib/candle.ts`, shown by `CandleQuote`, and `src/test/candle.test.ts` checks every passage is verbatim in the bundled text. Why: no runtime fetch from outside the app, and no misquotes.
-- Architecture decisions are recorded in `docs/ADR.md`; add or supersede a record there when a decision changes. Why: one traceable history of decisions.
+- Record or supersede architecture decisions in `docs/ADR.md`; why: traceable history.
 - Brand icons are rendered from `public/favicon.svg` (ico, apple-touch 180px square, 192/512 PNGs + `site.webmanifest`) and linked in `__root.tsx`; regenerate them all when the logo changes. Why: tab, iOS home screen and in-app logo must match.
+
+- Authentication emails use the scaffolded managed handler, all six templates and a shared email brand header; no local queue or custom signature verifier. Why: reliable delivery and compatible authentication callbacks.

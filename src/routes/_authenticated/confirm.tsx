@@ -17,6 +17,8 @@ export const Route = createFileRoute("/_authenticated/confirm")({
       { name: "description", content: "Confirm your OpenAlex author profile to import your publications." },
       { property: "og:title", content: "Is this you? — Faraday" },
       { property: "og:description", content: "Confirm your author profile." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: ConfirmPage,
