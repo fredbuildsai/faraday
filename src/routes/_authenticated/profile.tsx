@@ -60,8 +60,19 @@ export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
 });
 
+/** Import counts as running for at most 10 minutes, so a lost request never leaves the banner up forever. */
+function isImporting(p: { import_status?: string | null; import_started_at?: string | null } | null | undefined) {
+  if (p?.import_status !== "importing" || !p.import_started_at) return false;
+  return Date.now() - new Date(p.import_started_at).getTime() < 10 * 60 * 1000;
+}
+
 function ProfilePage() {
-  const { data } = useSuspenseQuery(profileQuery);
+  const { data } = useSuspenseQuery({
+    ...profileQuery,
+    // While publications are imported in the background, check every few seconds.
+    refetchInterval: (q) => (isImporting(q.state.data?.profile) ? 4000 : false),
+  });
+  const importing = isImporting(data.profile);
   const qc = useQueryClient();
   const navigate = useNavigate();
   const refresh = useServerFn(importWorks);
