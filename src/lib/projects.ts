@@ -50,7 +50,7 @@ export function can(member: { role: MemberRole; state: MemberState } | null | un
   return member.role === "owner";
 }
 
-/** Only the caller's Lattice Scout matches can be invited; nobody twice, never yourself. */
+/** Only the caller's Faraday matches can be invited; nobody twice, never yourself. */
 export function invitable(requested: string[], allowedMatchIds: string[], existingMemberIds: string[], self: string) {
   const allowed = new Set(allowedMatchIds);
   const existing = new Set(existingMemberIds);

@@ -27,9 +27,9 @@ import { getOpportunityPeople } from "@/lib/opportunities.functions";
 
 export const Route = createFileRoute("/_authenticated/projects/$id")({
   head: () => ({ meta: [
-    { title: "Shared opportunity — Lattice Scout" },
+    { title: "Shared opportunity — Faraday" },
     { name: "description", content: "Work on a research proposal together: sections, evidence papers, comments, tasks and history." },
-    { property: "og:title", content: "Shared opportunity — Lattice Scout" },
+    { property: "og:title", content: "Shared opportunity — Faraday" },
     { property: "og:description", content: "Work on a research proposal together: sections, evidence papers, comments, tasks and history." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
@@ -147,7 +147,7 @@ function Details({ data, id, editable, onSaved }: { data: Data; id: string; edit
     <div className="space-y-2">
       <h1 className="font-serif text-3xl">{p.title}</h1>
       <p className="text-muted-foreground">{p.description}</p>
-      {!!suggested.length && <p className="text-sm"><span className="font-medium">Suggested people outside Lattice Scout: </span>{suggested.map((s, i) => <span key={s.id}>{i ? ", " : ""}<OpenAlexDialog authorId={s.id} name={s.name} trigger={<button type="button" className="hover:underline">{s.name}</button>} /></span>)}</p>}
+      {!!suggested.length && <p className="text-sm"><span className="font-medium">Suggested people outside Faraday: </span>{suggested.map((s, i) => <span key={s.id}>{i ? ", " : ""}<OpenAlexDialog authorId={s.id} name={s.name} trigger={<button type="button" className="hover:underline">{s.name}</button>} /></span>)}</p>}
       {editable && <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>Edit title and description</Button>}
     </div>
   );
@@ -348,7 +348,7 @@ function People({ data, id, me, member, onSaved }: { data: Data; id: string; me:
 
       {can(member, "invite") && (
         <div className="space-y-2">
-          <p className="font-medium">Invite more Lattice Scout matches</p>
+          <p className="font-medium">Invite more Faraday matches</p>
           {candidates.length ? <>
             <div className="flex flex-wrap gap-4 text-sm">{candidates.map((c) => <label key={c.id} className="flex items-center gap-2"><Checkbox checked={pick.has(c.id)} onCheckedChange={(v) => setPick((s) => { const n = new Set(s); v ? n.add(c.id) : n.delete(c.id); return n; })} />{c.name}</label>)}</div>
             <Button size="sm" onClick={sendInvites} disabled={!pick.size}><UserPlus className="h-4 w-4" /> Send invitations</Button>

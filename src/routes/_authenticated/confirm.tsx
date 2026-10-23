@@ -13,9 +13,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 export const Route = createFileRoute("/_authenticated/confirm")({
   head: () => ({
     meta: [
-      { title: "Is this you? — Lattice Scout" },
+      { title: "Is this you? — Faraday" },
       { name: "description", content: "Confirm your OpenAlex author profile to import your publications." },
-      { property: "og:title", content: "Is this you? — Lattice Scout" },
+      { property: "og:title", content: "Is this you? — Faraday" },
       { property: "og:description", content: "Confirm your author profile." },
     ],
   }),
@@ -60,7 +60,7 @@ function ConfirmPage() {
       })
       .catch(() => toast.error("Importing your publications failed. Use “Refresh from OpenAlex” on your profile to try again."))
       .finally(() => qc.invalidateQueries());
-    toast.info("We're importing your publications in the background. Feel free to explore Lattice Scout meanwhile.");
+    toast.info("We're importing your publications in the background. Feel free to explore Faraday meanwhile.");
     await qc.invalidateQueries({ queryKey: ["my-profile"] });
     navigate({ to: "/profile" });
   }

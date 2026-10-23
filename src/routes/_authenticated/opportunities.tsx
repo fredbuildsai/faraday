@@ -47,9 +47,9 @@ const matchesQuery = queryOptions({
 export const Route = createFileRoute("/_authenticated/opportunities")({
   head: () => ({
     meta: [
-      { title: "Research opportunities — Lattice Scout" },
+      { title: "Research opportunities — Faraday" },
       { name: "description", content: "Research gaps near your work, each backed by published papers and a whitespace check." },
-      { property: "og:title", content: "Research opportunities — Lattice Scout" },
+      { property: "og:title", content: "Research opportunities — Faraday" },
       { property: "og:description", content: "Research gaps near your work, each backed by published papers and a whitespace check." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

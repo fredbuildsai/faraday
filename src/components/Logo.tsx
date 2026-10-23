@@ -32,10 +32,10 @@ export function Logo({ tag = false, size = "default" }: { tag?: boolean; size?: 
         </g>
       </svg>
       <div className="leading-tight">
-        <div className={`font-serif font-semibold tracking-tight ${large ? "text-[38px]" : "text-lg"}`}>Lattice Scout</div>
+        <div className={`font-serif font-semibold tracking-tight ${large ? "text-[38px]" : "text-lg"}`}>Faraday</div>
         {tag && (
           <div className={`font-mono tracking-[0.18em] text-muted-foreground ${large ? "text-xs" : "text-[10px]"}`}>
-            BY LATTICE PRESS
+            GET OUT OF THE CAGE
           </div>
         )}
       </div>

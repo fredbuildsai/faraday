@@ -71,7 +71,7 @@ export function NewProjectDialog({ trigger, initial }: { trigger: ReactNode; ini
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl">New shared opportunity</DialogTitle>
-          <DialogDescription>Invite Lattice Scout members to work on it with you. Only people who accept can see it.</DialogDescription>
+          <DialogDescription>Invite Faraday members to work on it with you. Only people who accept can see it.</DialogDescription>
         </DialogHeader>
         <div className="space-y-5 text-sm">
           <div className="space-y-1.5"><Label htmlFor="np-title">Title</Label><Input id="np-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="A specific research question" /></div>
@@ -85,14 +85,14 @@ export function NewProjectDialog({ trigger, initial }: { trigger: ReactNode; ini
           )}
 
           <div className="space-y-2">
-            <p className="font-medium">Invite from Lattice Scout</p>
+            <p className="font-medium">Invite from Faraday</p>
             {people.isLoading ? <p className="text-muted-foreground">Loading…</p> : matches.length ? (
               <div className="flex flex-wrap gap-4">{matches.map((m) => <label key={m.id} className="flex items-center gap-2"><Checkbox checked={members.has(m.id)} onCheckedChange={(v) => setMembers((s) => toggle(s, m.id, !!v))} />{m.name}</label>)}</div>
-            ) : <p className="text-muted-foreground">No Lattice Scout matches yet.</p>}
+            ) : <p className="text-muted-foreground">No Faraday matches yet.</p>}
           </div>
           {!!outside.length && (
             <div className="space-y-2">
-              <p className="font-medium">Suggested people outside Lattice Scout <span className="font-normal text-muted-foreground">(listed only, they can’t edit)</span></p>
+              <p className="font-medium">Suggested people outside Faraday <span className="font-normal text-muted-foreground">(listed only, they can’t edit)</span></p>
               <div className="flex flex-wrap gap-4">{outside.map((m) => <label key={m.id} className="flex items-center gap-2"><Checkbox checked={suggested.has(m.id)} onCheckedChange={(v) => setSuggested((s) => toggle(s, m.id, !!v))} />{m.name}</label>)}</div>
             </div>
           )}

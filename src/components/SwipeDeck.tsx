@@ -25,7 +25,7 @@ export type ScientistCard = {
   directions: string[];
   openalexId?: string | null;
   openalexIds?: string[];
-  /** True when this researcher is a Lattice Scout member. */
+  /** True when this researcher is a Faraday member. */
   member?: boolean;
   /** True when the user dismissed this member before; they are proposed again with a note. */
   dismissed?: boolean;
@@ -122,8 +122,8 @@ function CardBody({ c }: { c: ScientistCard }) {
         <div className="min-w-0 flex-1">
           {c.member && (
             <div className="mb-2 flex flex-wrap items-center gap-1.5">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary" title="On Lattice Scout">
-                <LogoMark className="h-4 w-4" /> Lattice Scout member
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary" title="On Faraday">
+                <LogoMark className="h-4 w-4" /> Faraday member
               </span>
               {c.dismissed && (
                 <span className="rounded-full border border-dashed bg-muted px-2.5 py-1 text-xs text-muted-foreground">Previously dismissed</span>

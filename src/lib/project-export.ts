@@ -24,7 +24,7 @@ async function toDocx(p: ExportInput) {
       }
     });
   }
-  return Packer.toBlob(new Document({ creator: "Lattice Scout", title: p.title, sections: [{ children }] }));
+  return Packer.toBlob(new Document({ creator: "Faraday", title: p.title, sections: [{ children }] }));
 }
 
 export async function exportProposal(p: ExportInput, format: ExportFormat) {

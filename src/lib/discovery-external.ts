@@ -1,4 +1,4 @@
-// Wider OpenAlex search: fills the discovery batch with researchers not on Lattice Scout.
+// Wider OpenAlex search: fills the discovery batch with researchers not on Faraday.
 import { scoreCollaboration, type MatchWeights } from "@/lib/match-score";
 import type { Profile } from "@/lib/matching";
 import { shortId } from "@/lib/openalex-math";

@@ -84,9 +84,9 @@ type Tab = (typeof TABS)[number]["key"];
 export const Route = createFileRoute("/_authenticated/matches")({
   head: () => ({
     meta: [
-      { title: "Your matches — Lattice Scout" },
+      { title: "Your matches — Faraday" },
       { name: "description", content: "Researchers whose topics overlap yours and whose methods complement yours." },
-      { property: "og:title", content: "Your matches — Lattice Scout" },
+      { property: "og:title", content: "Your matches — Faraday" },
       { property: "og:description", content: "Researchers whose topics overlap yours and whose methods complement yours." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -136,7 +136,7 @@ function MatchesPage() {
     };
   }).concat(external.filter((e) => e.state === "active").map((e) => ({
     id: EXT + e.id, name: e.name, institution: e.institution, score: e.score, t: e.t,
-    layer: `Not on Lattice Scout · ${e.layer === "second_degree" ? "In your network" : "Beyond your network · shared focus"}`,
+    layer: `Not on Faraday · ${e.layer === "second_degree" ? "In your network" : "Beyond your network · shared focus"}`,
     connection: e.layer === "second_degree" ? e.vias ?? [] : [],
     sharedTopics: e.shared_topics, interests: null, hIndex: e.h_index, citations: Number(e.citations), worksCount: e.works_count, recentWorks: e.recent_works ?? 0, openalexId: e.openalex_id,
     methods: [], directions: [],
@@ -153,7 +153,7 @@ function MatchesPage() {
     if (id.startsWith(EXT)) {
       try {
         await setExternal(id.slice(EXT.length), d === "like" ? "saved" : "dismissed");
-        if (d === "like") toast.success("Saved. They're not on Lattice Scout yet, so find them under Saved.");
+        if (d === "like") toast.success("Saved. They're not on Faraday yet, so find them under Saved.");
         setLastDecided(id);
       } catch { toast.error("Could not save your choice. Please try again."); }
       return;
@@ -306,7 +306,7 @@ function MatchesPage() {
             defaultOpen={i === 0}
             title={m.other_name || "A researcher"}
             subtitle={m.other_institution || "Institution not given"}
-            aside={<>{stateOf(m.id) === "saved" && <BookmarkCheck className="h-4 w-4 text-primary" aria-label="Saved" />}<span className="inline-flex items-center gap-1 rounded-full border bg-background px-2 py-0.5 text-xs font-medium" title="On Lattice Scout"><LogoMark className="h-3.5 w-3.5" /> Lattice Scout</span><Thumbs type="match" id={m.id} value={fb[`match:${m.id}`] ?? 0} /><span className="rounded-full bg-accent px-3 py-1 font-mono text-sm text-accent-foreground">{Math.round(m.score * 100)}%</span></>}
+            aside={<>{stateOf(m.id) === "saved" && <BookmarkCheck className="h-4 w-4 text-primary" aria-label="Saved" />}<span className="inline-flex items-center gap-1 rounded-full border bg-background px-2 py-0.5 text-xs font-medium" title="On Faraday"><LogoMark className="h-3.5 w-3.5" /> Faraday</span><Thumbs type="match" id={m.id} value={fb[`match:${m.id}`] ?? 0} /><span className="rounded-full bg-accent px-3 py-1 font-mono text-sm text-accent-foreground">{Math.round(m.score * 100)}%</span></>}
           >
            <div className="space-y-4">
             {m.shared_topics.length > 0 && (
@@ -389,7 +389,7 @@ function MatchesPage() {
 
         {(tab === "saved" || tab === "dismissed") && external.some((e) => e.state === tab) && (
           <div className="space-y-3">
-            <h2 className="font-serif text-xl">Not on Lattice Scout yet</h2>
+            <h2 className="font-serif text-xl">Not on Faraday yet</h2>
             <p className="text-sm text-muted-foreground">Found in the wider OpenAlex network. They can't see your interest until they join.</p>
             {external.filter((e) => e.state === tab).map((e) => (
               <Section key={e.id} title={e.name} subtitle={e.institution || "Institution not given"}
