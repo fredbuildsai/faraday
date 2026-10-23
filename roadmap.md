@@ -69,3 +69,4 @@ Proposed (not yet implemented)
 - [x] Verbatim passages on the sign-in page (rotating, "Next passage") and during background profile import
 - [x] Document the rebrand and passage rules (AGENTS.md, memory)
 - [ ] Optional: new logo mark (current lattice mark kept), favicon, branded emails once a sender domain exists
+- [ ] Rename the GitHub repository to Faraday (user does it on GitHub; blocked: no repo access for me)
