@@ -71,3 +71,7 @@ Proposed (not yet implemented)
 - [ ] Optional: new logo mark (current lattice mark kept), favicon, branded emails once a sender domain exists
 - [ ] Rename the GitHub repository to Faraday (user does it on GitHub; blocked: no repo access for me)
 - [x] Faraday tab icon + iOS home-screen icon, logo centre dot French red (#EF4135); documented in docs/ADR.md
+
+## Email infrastructure
+- [x] Scaffold and brand managed authentication emails for the selected sender domain
+- [ ] Activate and verify custom authentication delivery — waiting on domain DNS verification and publishing

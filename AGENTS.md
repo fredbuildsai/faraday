@@ -33,3 +33,5 @@
 - Faraday's "The Chemical History of a Candle" is bundled in full at `public/books/chemical-history-of-a-candle.txt` (Project Gutenberg #14474, public domain), readable at `/candle`; curated passages live in `src/lib/candle.ts`, shown by `CandleQuote`, and `src/test/candle.test.ts` checks every passage is verbatim in the bundled text. Why: no runtime fetch from outside the app, and no misquotes.
 - Architecture decisions are recorded in `docs/ADR.md`; add or supersede a record there when a decision changes. Why: one traceable history of decisions.
 - Brand icons are rendered from `public/favicon.svg` (ico, apple-touch 180px square, 192/512 PNGs + `site.webmanifest`) and linked in `__root.tsx`; regenerate them all when the logo changes. Why: tab, iOS home screen and in-app logo must match.
+
+- Authentication emails use the scaffolded managed handler, all six templates and a shared email brand header; no local queue or custom signature verifier. Why: reliable delivery and compatible authentication callbacks.

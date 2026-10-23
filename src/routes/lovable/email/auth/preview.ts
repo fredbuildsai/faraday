@@ -40,6 +40,7 @@ const SAMPLE_DATA: Record<string, object> = {
     confirmationUrl: SAMPLE_PROJECT_URL,
   },
   recovery: {
+    token: '123456',
     siteName: SITE_NAME,
     confirmationUrl: SAMPLE_PROJECT_URL,
   },
