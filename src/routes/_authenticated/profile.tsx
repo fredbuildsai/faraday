@@ -50,6 +50,8 @@ export const Route = createFileRoute("/_authenticated/profile")({
       { name: "description", content: "Your Faraday research profile." },
       { property: "og:title", content: "Your profile — Faraday" },
       { property: "og:description", content: "Your Faraday research profile." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   loaderDeps: ({ search }) => ({ skip: search.skip }),
