@@ -88,7 +88,7 @@ The mark is sized in `em` against the wordmark's font size (`h-[0.97em]`), so it
 
 ## ADR-016 Managed authentication email sending (2026-10-23)
 - **Decision:** Use Lovable managed sending through the scaffolded `createAuthEmailHandler`, retaining all six actions and SDK verification. No email queue, cron, or email database tables.
-- Sender domain: `notifynotify.faraday.frederick-chesneau.com` (as selected by the owner); DNS verification is pending. Display sender: Faraday, `noreply@faraday.frederick-chesneau.com`.
+- Sender domain: `notify.faradayapp.frederick-chesneau.com` (corrected by the owner; verified on 2026-10-23). Display sender: Faraday, `noreply@faradayapp.frederick-chesneau.com`. Supersedes the previous `notifynotify.faraday.frederick-chesneau.com` configuration. Website and authentication destinations remain on `faraday.frederick-chesneau.com`.
 - Templates share the Faraday logo/tagline, French-blue buttons and white Body background. Recovery also includes the supplied OTP for the existing fallback form.
 - Entities is pinned to 4.5.0 and Vite aliases its deep imports for compatible email rendering. Existing middleware already limits CSRF to server functions, so email server routes pass untouched.
-- **Consequences:** Publish the new routes and complete domain verification before testing custom delivery. Authentication recovery URL semantics remain owned by the SDK. A branded feature welcome email is separate and not included in this infrastructure setup.
+- **Consequences:** Republish the corrected sender configuration before testing custom delivery. Authentication recovery URL semantics remain owned by the SDK. A branded feature welcome email is separate and not included in this infrastructure setup.

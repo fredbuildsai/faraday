@@ -10,9 +10,9 @@ import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
 
 // Configuration
 const SITE_NAME = "Faraday"
-const SENDER_DOMAIN = "notifynotify.faraday.frederick-chesneau.com"
+const SENDER_DOMAIN = "notify.faradayapp.frederick-chesneau.com"
 const ROOT_DOMAIN = "faraday.frederick-chesneau.com"
-const FROM_DOMAIN = "faraday.frederick-chesneau.com"
+const FROM_DOMAIN = "faradayapp.frederick-chesneau.com"
 const SITE_URL = `https://${ROOT_DOMAIN}`
 
 // The SDK handler owns verification, dispatch, and retry semantics; this file
