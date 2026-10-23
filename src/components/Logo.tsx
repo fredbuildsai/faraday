@@ -9,7 +9,7 @@ export function LogoMark({ className = "h-4 w-4" }: { className?: string }) {
       <g className="fill-primary-foreground">
         <circle cx="9" cy="9" r="2" /><circle cx="23" cy="9" r="2" />
         <circle cx="9" cy="23" r="2" /><circle cx="23" cy="23" r="2" />
-        <circle cx="16" cy="16" r="2.4" />
+        </g><circle cx="16" cy="16" r="2.4" fill="#EF4135" /><g>
       </g>
     </svg>
   );
@@ -28,7 +28,7 @@ export function Logo({ tag = false, size = "default" }: { tag?: boolean; size?: 
         <g className="fill-primary-foreground">
           <circle cx="9" cy="9" r="2" /><circle cx="23" cy="9" r="2" />
           <circle cx="9" cy="23" r="2" /><circle cx="23" cy="23" r="2" />
-          <circle cx="16" cy="16" r="2.4" />
+          </g><circle cx="16" cy="16" r="2.4" fill="#EF4135" /><g>
         </g>
       </svg>
       <div className="leading-tight">
