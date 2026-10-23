@@ -82,3 +82,6 @@ Logo mark = royal-blue square, white lattice, French-red (#EF4135) centre dot. `
 
 ## ADR: French flag blue
 Primary colour (buttons, links, logo, icons) is French flag blue #002395 (`--primary`, oklch 0.338 0.186 263.7), with white lattice and French red centre dot — bleu, blanc, rouge. Supersedes the earlier royal blue.
+
+## ADR: Logo lockup proportions
+The mark is sized in `em` against the wordmark's font size (`h-[0.97em]`), so it is exactly the height of the "Faraday" letters (cap top to descender) instead of the fixed 77px/32px boxes it used before; "GET OUT OF THE CAGE" is centred under the whole lockup. Why: the mark read as oversized next to the word, and the lockup must stay proportional at every size (large on /auth, small in `AppHeader`).
