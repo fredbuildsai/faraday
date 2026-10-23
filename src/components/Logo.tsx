@@ -29,7 +29,7 @@ export function Logo({ tag = false, size = "default" }: { tag?: boolean; size?: 
           large ? "gap-3 text-[38px]" : "gap-2 text-lg"
         }`}
       >
-        <svg viewBox="0 0 32 32" className="h-[0.86em] w-[0.86em]" aria-hidden>
+        <svg viewBox="0 0 32 32" className="h-[0.97em] w-[0.97em]" aria-hidden>
           <rect width="32" height="32" rx="7" className="fill-primary" />
           <g className="stroke-primary-foreground" strokeWidth="1.6" fill="none">
             <path d="M9 9h14v14H9zM16 9v14M9 16h14" />
