@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS import_status text, ADD COLUMN IF NOT EXISTS import_started_at timestamptz;

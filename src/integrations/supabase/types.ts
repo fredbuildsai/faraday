@@ -507,6 +507,8 @@ export type Database = {
           custom_topics: string[]
           first_name: string
           id: string
+          import_started_at: string | null
+          import_status: string | null
           institution: string | null
           last_imported_at: string | null
           last_name: string
@@ -527,6 +529,8 @@ export type Database = {
           custom_topics?: string[]
           first_name?: string
           id: string
+          import_started_at?: string | null
+          import_status?: string | null
           institution?: string | null
           last_imported_at?: string | null
           last_name?: string
@@ -547,6 +551,8 @@ export type Database = {
           custom_topics?: string[]
           first_name?: string
           id?: string
+          import_started_at?: string | null
+          import_status?: string | null
           institution?: string | null
           last_imported_at?: string | null
           last_name?: string
