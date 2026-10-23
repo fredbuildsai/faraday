@@ -1,11 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { BOOK_TITLE, PASSAGES, pickPassage } from "@/lib/candle";
+import { useState } from "react";
+import { BOOK_TITLE, PASSAGES } from "@/lib/candle";
 
-/** A Faraday passage; picks a random one after hydration (first render is stable for SSR). */
+/**
+ * A Faraday passage. Always opens on PASSAGES[0] — the default passage — and
+ * "Next passage" cycles through the rest.
+ */
 export function CandleQuote({ compact = false }: { compact?: boolean }) {
   const [i, setI] = useState(0);
-  useEffect(() => setI(PASSAGES.indexOf(pickPassage())), []);
   const p = PASSAGES[i] ?? PASSAGES[0]!;
   return (
     <figure className={`border-l-2 border-primary text-left ${compact ? "pl-3" : "pl-5"}`}>
