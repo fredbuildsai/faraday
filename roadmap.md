@@ -62,3 +62,10 @@ Proposed (not yet implemented)
 - [ ] Welcome email after confirmation with banner screenshots of profile, matching, opportunities, shared workspace
 - [x] Confirmation links land on /auth-callback and sign the person in
 - [x] Reset page handles link codes, slow networks, and a typed code when scanners consumed the link
+
+## Faraday rebrand
+- [x] Rename the app Lattice Scout → Faraday, tagline "Get out of the cage."
+- [x] Bundle the full text of "The Chemical History of a Candle" (public domain) and a reader page at /candle
+- [x] Verbatim passages on the sign-in page (rotating, "Next passage") and during background profile import
+- [x] Document the rebrand and passage rules (AGENTS.md, memory)
+- [ ] Optional: new logo mark (current lattice mark kept), favicon, branded emails once a sender domain exists
