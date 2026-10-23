@@ -70,3 +70,4 @@ Proposed (not yet implemented)
 - [x] Document the rebrand and passage rules (AGENTS.md, memory)
 - [ ] Optional: new logo mark (current lattice mark kept), favicon, branded emails once a sender domain exists
 - [ ] Rename the GitHub repository to Faraday (user does it on GitHub; blocked: no repo access for me)
+- [x] Faraday tab icon + iOS home-screen icon, logo centre dot French red (#EF4135); documented in docs/ADR.md

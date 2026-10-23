@@ -76,3 +76,6 @@ Business values (weights, limits) are defaults; users can change several in Sett
 
 ## ADR-015 Hosting and domains
 - Preview URLs are restricted to the editor session ("Zugriff verweigert" outside it); email links must target the published app. Custom domain `latticescout.frederick-chesneau.com` is primary; the Lovable subdomain can be renamed in Publish settings.
+
+## ADR: Brand icons
+Logo mark = royal-blue square, white lattice, French-red (#EF4135) centre dot. `public/favicon.svg` is the source; `favicon.ico`, `apple-touch-icon.png` (180, square — iOS masks corners), `icon-192/512.png` are rendered from it and linked with `site.webmanifest` in `__root.tsx`. Why: tab and iOS home-screen show the Faraday brand.
