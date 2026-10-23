@@ -79,3 +79,6 @@ Business values (weights, limits) are defaults; users can change several in Sett
 
 ## ADR: Brand icons
 Logo mark = royal-blue square, white lattice, French-red (#EF4135) centre dot. `public/favicon.svg` is the source; `favicon.ico`, `apple-touch-icon.png` (180, square — iOS masks corners), `icon-192/512.png` are rendered from it and linked with `site.webmanifest` in `__root.tsx`. Why: tab and iOS home-screen show the Faraday brand.
+
+## ADR: French flag blue
+Primary colour (buttons, links, logo, icons) is French flag blue #002395 (`--primary`, oklch 0.338 0.186 263.7), with white lattice and French red centre dot — bleu, blanc, rouge. Supersedes the earlier royal blue.
