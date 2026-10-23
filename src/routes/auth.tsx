@@ -71,7 +71,7 @@ function AuthPage() {
           email: f.email,
           password: f.password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: `${window.location.origin}/auth-callback`,
             data: {
               first_name: f.first.trim(),
               last_name: f.last.trim(),
