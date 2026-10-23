@@ -32,3 +32,4 @@
 - Brand is "Faraday" (tagline "Get out of the cage."); the name lives in `Logo.tsx`, route `head()` titles and copy. Why: one consistent identity across pages, exports and emails.
 - Faraday's "The Chemical History of a Candle" is bundled in full at `public/books/chemical-history-of-a-candle.txt` (Project Gutenberg #14474, public domain), readable at `/candle`; curated passages live in `src/lib/candle.ts`, shown by `CandleQuote`, and `src/test/candle.test.ts` checks every passage is verbatim in the bundled text. Why: no runtime fetch from outside the app, and no misquotes.
 - Architecture decisions are recorded in `docs/ADR.md`; add or supersede a record there when a decision changes. Why: one traceable history of decisions.
+- Brand icons are rendered from `public/favicon.svg` (ico, apple-touch 180px square, 192/512 PNGs + `site.webmanifest`) and linked in `__root.tsx`; regenerate them all when the logo changes. Why: tab, iOS home screen and in-app logo must match.
