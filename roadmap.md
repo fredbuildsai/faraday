@@ -74,4 +74,6 @@ Proposed (not yet implemented)
 
 ## Email infrastructure
 - [x] Scaffold and brand managed authentication emails for the selected sender domain
-- [ ] Activate and verify custom authentication delivery — waiting on domain DNS verification and publishing
+- [x] Correct sender configuration to the verified email domain; retain the existing website and authentication destinations
+- [ ] Republish corrected authentication sender configuration
+- [ ] Verify custom authentication delivery to a real recipient after publishing
