@@ -67,7 +67,7 @@ export const searchMemberPapers = createServerFn({ method: "POST" })
     if (data.projectId) {
       const { data: ok } = await context.supabase.rpc("is_project_member", { _project: data.projectId, _user: uid });
       if (!ok) throw new Error("Not allowed.");
-      const { data: m } = await supabaseAdmin.from("project_members").select("user_id").eq("project_id", data.projectId).eq("state", "active");
+      const { data: m } = await supabaseAdmin.from("project_members").select("user_id").eq("project_id", data.projectId).eq("state", "accepted");
       owners = [...new Set([uid, ...(m ?? []).map((x) => x.user_id)])];
     } else {
       const allowed = new Set(await myMatchIds(context.supabase));
